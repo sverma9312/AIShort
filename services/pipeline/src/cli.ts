@@ -7,7 +7,7 @@
  * Options: --mode dry|live  --llm offline|real  --out <dir>  --state <file>  --sources <file>
  *          --report <file> (JSON run report)  --verbose
  */
-import { readFile, writeFile } from 'node:fs/promises';
+import { appendFile, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -21,6 +21,7 @@ import { ProviderChain } from './llm/chain';
 import { HeuristicClassifier, LlmClassifier, type Classifier } from './llm/classify';
 import { createProviders } from './llm/factory';
 import { ExtractiveSummarizer, LlmSummarizer, type Summarizer } from './llm/summarize';
+import { alertsFor, sendDiscordAlert, stepSummary } from './ops/alerts';
 import { buildSite, writeSite } from './publish/buildSite';
 import { formatReport } from './report';
 import { runPipeline } from './run';
@@ -158,6 +159,24 @@ async function main(): Promise<number> {
   process.stdout.write(
     `${formatReport(report, chain?.stats())}\n\nWrote ${files.size} files to ${outDir}\n`,
   );
+  const alerts = alertsFor(report);
+  for (const alert of alerts) log.warn(`ALERT ${alert}`);
+  if (process.env['GITHUB_STEP_SUMMARY']) {
+    await appendFile(
+      process.env['GITHUB_STEP_SUMMARY'],
+      stepSummary(formatReport(report, chain?.stats()), alerts),
+    );
+  }
+  if (env.DISCORD_WEBHOOK_URL && alerts.length) {
+    const {
+      GITHUB_SERVER_URL: server,
+      GITHUB_REPOSITORY: repo,
+      GITHUB_RUN_ID: runId,
+    } = process.env;
+    const runUrl = server && repo && runId ? `${server}/${repo}/actions/runs/${runId}` : undefined;
+    if (!(await sendDiscordAlert(env.DISCORD_WEBHOOK_URL, alerts, runUrl)))
+      log.warn('Discord alert could not be sent');
+  }
   const allSourcesFailed =
     report.sources.length > 0 && report.sources.every((s) => s.status === 'error');
   return allSourcesFailed ? 1 : 0;

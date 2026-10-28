@@ -75,7 +75,14 @@ export interface NewCard {
 
 export interface RunReport {
   startedAt: string;
-  sources: { id: string; status: SourceFetchResult['status']; items: number; error?: string }[];
+  sources: {
+    id: string;
+    status: SourceFetchResult['status'];
+    items: number;
+    error?: string;
+    /** Failures in a row including this run (errors only). */
+    consecutiveFailures?: number;
+  }[];
   /** How many items reached each stage. */
   counts: {
     fetched: number;
@@ -178,11 +185,18 @@ export async function runPipeline(
     const source = sourceById.get(result.sourceId)!;
     if (result.status === 'error') {
       log.warn('source failed', { source: result.sourceId, error: result.error });
-      report.sources.push({ id: result.sourceId, status: 'error', items: 0, error: result.error });
+      const consecutiveFailures = (previous?.consecutiveFailures ?? 0) + 1;
+      report.sources.push({
+        id: result.sourceId,
+        status: 'error',
+        items: 0,
+        error: result.error,
+        consecutiveFailures,
+      });
       await store.saveSourceState(result.sourceId, {
         ...previous,
         lastError: result.error,
-        consecutiveFailures: (previous?.consecutiveFailures ?? 0) + 1,
+        consecutiveFailures,
       });
       continue;
     }

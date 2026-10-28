@@ -30,6 +30,9 @@ const EnvSchema = z.object({
   SUPABASE_URL: optional,
   SUPABASE_SERVICE_ROLE_KEY: optional,
 
+  /** Discord webhook for pipeline alerts (optional). */
+  DISCORD_WEBHOOK_URL: optional,
+
   /** Comma-separated feed base URLs published in meta.json (primary first). */
   FEED_BASE_URLS: withDefault('https://example.github.io/AIShort'),
   /** Shown in our User-Agent so site owners can reach us. */
