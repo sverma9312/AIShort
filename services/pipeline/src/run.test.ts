@@ -12,7 +12,10 @@ import { runPipeline, type PipelineDeps } from './run';
 import { parseSources } from './sources/config';
 import { createFixtureFetch, type FixtureRoute } from './sources/fixtureFetch';
 import { HttpClient } from './sources/http';
+import type { Store } from './store/types';
 import { MemoryStore } from './store/memoryStore';
+import { createTestDatabase } from './store/pglite';
+import { SupabaseStore } from './store/supabaseStore';
 import { FIXTURES_DIR, HTTP_FIXTURES_DIR } from './testing';
 
 const manifest = JSON.parse(readFileSync(join(HTTP_FIXTURES_DIR, 'manifest.json'), 'utf8')) as {
@@ -33,7 +36,7 @@ async function seededStore(): Promise<MemoryStore> {
   return store;
 }
 
-function deps(store: MemoryStore, overrides: Partial<PipelineDeps> = {}): PipelineDeps {
+function deps(store: Store, overrides: Partial<PipelineDeps> = {}): PipelineDeps {
   const http = new HttpClient({
     userAgent: 'AIShortBot/test',
     fetch: createFixtureFetch(manifest.routes, HTTP_FIXTURES_DIR),
@@ -216,4 +219,27 @@ describe('runPipeline (dry-run fixtures)', () => {
     });
     expect(cards.filter((c) => c.headline.includes('Nova-2'))).toHaveLength(1);
   });
+});
+
+describe('runPipeline with SupabaseStore (PGlite)', () => {
+  it('produces the same cards as the in-memory store and stays idempotent', async () => {
+    const { client } = await createTestDatabase();
+    try {
+      const store = new SupabaseStore(client);
+      await store.saveSourceState('example-robotics', {
+        lastOkAt: '2026-10-28T09:30:00.000Z',
+        consecutiveFailures: 0,
+      });
+
+      const first = await runPipeline(deps(store));
+      expect(first.newCards).toHaveLength(5);
+      expect(first.outcomes).toMatchObject({ 'same-url': 1, 'same-story': 1 });
+      expect((await runPipeline(deps(store))).newCards).toEqual([]);
+
+      const cards = await store.listVisibleCards('2026-10-01T00:00:00.000Z');
+      expect(cards.find((c) => c.headline.includes('Nova-2'))?.sourceName).toBe('Example AI Lab');
+    } finally {
+      await client.end();
+    }
+  }, 60_000);
 });

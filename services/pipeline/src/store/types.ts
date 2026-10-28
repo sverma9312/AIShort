@@ -75,4 +75,11 @@ export interface Store {
   saveCard(card: CardRecord): Promise<void>;
   /** Visible (not hidden) cards published at or after `since`, newest first. */
   listVisibleCards(since: string): Promise<CardRecord[]>;
+
+  /** Small JSON values the pipeline keeps between runs (e.g. when an alert was last sent). */
+  getMeta<T>(key: string): Promise<T | undefined>;
+  setMeta(key: string, value: unknown): Promise<void>;
+
+  /** Deletes bookkeeping for articles fetched before `before` that never became cards. */
+  prune(before: string): Promise<number>;
 }

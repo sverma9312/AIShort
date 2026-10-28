@@ -12,6 +12,7 @@ import type {
 
 interface Snapshot {
   version: 1;
+  meta?: Record<string, unknown>;
   sources: Record<string, SourceState>;
   articles: Record<string, ArticleRecord>;
   clusters: Record<string, ClusterRecord>;
@@ -27,6 +28,7 @@ export class MemoryStore implements Store {
   private articles = new Map<string, ArticleRecord>();
   private clusters = new Map<string, ClusterRecord>();
   private cards = new Map<string, CardRecord>(); // keyed by clusterId
+  private meta = new Map<string, unknown>();
 
   static async load(path: string): Promise<MemoryStore> {
     const store = new MemoryStore();
@@ -43,6 +45,7 @@ export class MemoryStore implements Store {
     store.articles = new Map(Object.entries(snapshot.articles));
     store.clusters = new Map(Object.entries(snapshot.clusters));
     store.cards = new Map(Object.entries(snapshot.cards));
+    store.meta = new Map(Object.entries(snapshot.meta ?? {}));
     return store;
   }
 
@@ -50,6 +53,7 @@ export class MemoryStore implements Store {
   async save(path: string): Promise<void> {
     const snapshot: Snapshot = {
       version: 1,
+      meta: Object.fromEntries(this.meta),
       sources: Object.fromEntries(this.sources),
       articles: Object.fromEntries(this.articles),
       clusters: Object.fromEntries(this.clusters),
@@ -98,7 +102,9 @@ export class MemoryStore implements Store {
   }
 
   saveCluster(cluster: ClusterRecord): Promise<void> {
-    this.clusters.set(cluster.id, { ...cluster, titles: [...cluster.titles] });
+    // Titles come from the cluster's articles (as in SQL); saving a cluster never drops them.
+    const titles = new Set([...(this.clusters.get(cluster.id)?.titles ?? []), ...cluster.titles]);
+    this.clusters.set(cluster.id, { ...cluster, titles: [...titles] });
     return Promise.resolve();
   }
 
@@ -125,6 +131,30 @@ export class MemoryStore implements Store {
         )
         .map((card) => ({ ...card })),
     );
+  }
+
+  getMeta<T>(key: string): Promise<T | undefined> {
+    return Promise.resolve(structuredClone(this.meta.get(key)) as T | undefined);
+  }
+
+  setMeta(key: string, value: unknown): Promise<void> {
+    this.meta.set(key, structuredClone(value));
+    return Promise.resolve();
+  }
+
+  prune(before: string): Promise<number> {
+    const carded = new Set([...this.cards.values()].map((c) => c.clusterId));
+    let removed = 0;
+    for (const [hash, article] of this.articles) {
+      if (article.fetchedAt < before && !(article.clusterId && carded.has(article.clusterId))) {
+        this.articles.delete(hash);
+        removed++;
+      }
+    }
+    for (const [id, cluster] of this.clusters) {
+      if (cluster.firstSeenAt < before && !carded.has(id)) this.clusters.delete(id);
+    }
+    return Promise.resolve(removed);
   }
 
   /** Test/editor helper: everything recorded for one article. */
