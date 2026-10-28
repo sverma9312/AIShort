@@ -1,0 +1,5 @@
+pnpm-lock.yaml
+docs/architecture/*.drawio
+coverage/
+dist/
+out/

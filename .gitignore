@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build / test output
+dist/
+out/
+coverage/
+*.tsbuildinfo
+
+# Environment — never commit secrets (.env.example is the template)
+.env
+.env.*
+!.env.example
+
+# Expo / React Native
+.expo/
+web-build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Logs & OS
+*.log
+.DS_Store
+Thumbs.db
