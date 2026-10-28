@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-28T09:30:00Z",
+  "cards": [
+    {
+      "id": "c_8f3a91d2",
+      "headline": "Example lab releases a faster open-weight reasoning model",
+      "summary": "Example Lab released an open-weight reasoning model that it says matches larger models on math and coding benchmarks while running twice as fast. The weights are available under a permissive license, and the company published a technical report describing its training data and evaluation methods.",
+      "category": "models",
+      "importance": 8,
+      "sourceName": "Example Lab Blog",
+      "sourceUrl": "https://example.com/blog/reasoning-model",
+      "imageUrl": "https://example.com/images/reasoning-model.png",
+      "publishedAt": "2026-10-28T08:12:00Z"
+    },
+    {
+      "id": "c_41be07aa",
+      "headline": "Regulators publish draft rules for AI model transparency",
+      "summary": "A draft framework would require developers of large AI models to disclose training data sources and safety test results before release. Public comments are open for sixty days.",
+      "category": "policy",
+      "importance": 6,
+      "sourceName": "Example News",
+      "sourceUrl": "https://news.example.org/ai-transparency-rules",
+      "imageUrl": null,
+      "publishedAt": "2026-10-28T06:45:00Z"
+    }
+  ]
+}
