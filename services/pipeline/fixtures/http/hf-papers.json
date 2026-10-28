@@ -1,0 +1,26 @@
+[
+  {
+    "paper": {
+      "id": "2610.00001",
+      "title": "Sparse Mixture Routing for Efficient Language Models",
+      "summary": "We present Sparse Mixture Routing (SMR), a method for training mixture-of-experts language models that routes each token to a small subset of experts using a learned sparse gate. Across seven benchmarks, SMR matches dense models of the same quality while using 40 percent less compute during training and 55 percent less memory at inference time. We show that the gains hold from 1 billion to 30 billion parameters, analyse failure modes where routing collapses onto a few experts, and propose a simple load-balancing loss that prevents collapse. Code and model checkpoints are released under an open license to support further research on efficient language models.",
+      "upvotes": 42,
+      "publishedAt": "2026-10-26T00:00:00.000Z"
+    },
+    "publishedAt": "2026-10-27T20:00:00.000Z",
+    "title": "Sparse Mixture Routing for Efficient Language Models",
+    "thumbnail": "https://cdn.example.com/thumbs/2610.00001.png"
+  },
+  {
+    "paper": {
+      "id": "2610.00002",
+      "title": "A Survey of Survey Papers",
+      "summary": "We survey surveys.",
+      "upvotes": 3,
+      "publishedAt": "2026-10-26T00:00:00.000Z"
+    },
+    "publishedAt": "2026-10-27T21:00:00.000Z",
+    "title": "A Survey of Survey Papers",
+    "thumbnail": null
+  }
+]

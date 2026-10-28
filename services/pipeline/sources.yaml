@@ -1,0 +1,145 @@
+# News sources for the pipeline.
+#
+# weight      1–10 authority. When outlets cover the same story, the highest-weight source
+#             becomes the card's link (primary sources > press > aggregators).
+# aiFocused   true if the source only publishes AI content (skips the AI keyword filter).
+# minPoints   minimum community score (HN points / HF upvotes).
+# html        for labs without a feed: links matching linkPattern on the listing page, newest
+#             first, capped at maxItems. Article dates come from the article page itself.
+
+sources:
+  # --- AI labs (primary sources) ---
+  - id: openai
+    name: OpenAI
+    kind: rss
+    url: https://openai.com/news/rss.xml
+    weight: 10
+    aiFocused: true
+
+  - id: google-deepmind
+    name: Google DeepMind
+    kind: rss
+    url: https://deepmind.google/blog/rss.xml
+    weight: 10
+    aiFocused: true
+
+  - id: anthropic
+    name: Anthropic
+    kind: html
+    url: https://www.anthropic.com/news
+    linkPattern: '^/news/[a-z0-9-]+/?$'
+    exclude: ['/news/announcements']
+    maxItems: 15
+    weight: 10
+    aiFocused: true
+
+  - id: meta-ai
+    name: Meta AI
+    kind: html
+    url: https://ai.meta.com/blog/
+    linkPattern: '^/blog/[a-z0-9-]+/?$'
+    maxItems: 10
+    weight: 10
+    aiFocused: true
+
+  - id: mistral
+    name: Mistral AI
+    kind: rss
+    url: https://mistral.ai/news/rss
+    weight: 10
+    aiFocused: true
+
+  - id: google-ai
+    name: Google AI Blog
+    kind: rss
+    url: https://blog.google/technology/ai/rss/
+    weight: 9
+    aiFocused: true
+
+  - id: google-research
+    name: Google Research
+    kind: rss
+    url: https://research.google/blog/rss/
+    weight: 9
+    aiFocused: true
+    categoryHint: research
+
+  - id: microsoft-research
+    name: Microsoft Research
+    kind: rss
+    url: https://www.microsoft.com/en-us/research/feed/
+    weight: 9
+    categoryHint: research
+
+  - id: nvidia
+    name: NVIDIA Blog
+    kind: rss
+    url: https://blogs.nvidia.com/feed/
+    weight: 8
+
+  - id: hugging-face-blog
+    name: Hugging Face
+    kind: rss
+    url: https://huggingface.co/blog/feed.xml
+    weight: 8
+    aiFocused: true
+
+  # --- Tech press (AI sections) ---
+  - id: techcrunch-ai
+    name: TechCrunch
+    kind: rss
+    url: https://techcrunch.com/category/artificial-intelligence/feed/
+    weight: 6
+    aiFocused: true
+
+  - id: the-verge-ai
+    name: The Verge
+    kind: rss
+    url: https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
+    weight: 6
+    aiFocused: true
+
+  - id: ars-technica-ai
+    name: Ars Technica
+    kind: rss
+    url: https://arstechnica.com/ai/feed/
+    weight: 6
+    aiFocused: true
+
+  - id: mit-tech-review-ai
+    name: MIT Technology Review
+    kind: rss
+    url: https://www.technologyreview.com/topic/artificial-intelligence/feed
+    weight: 7
+    aiFocused: true
+
+  - id: wired-ai
+    name: WIRED
+    kind: rss
+    url: https://www.wired.com/feed/tag/ai/latest/rss
+    weight: 6
+    aiFocused: true
+
+  # Returned HTTP 429 to our client when checked (Oct 2026); re-enable once it responds.
+  - id: venturebeat-ai
+    name: VentureBeat
+    kind: rss
+    url: https://venturebeat.com/category/ai/feed/
+    weight: 5
+    aiFocused: true
+    enabled: false
+
+  # --- Community signal ---
+  - id: hacker-news
+    name: Hacker News
+    kind: hn
+    weight: 4
+    minPoints: 100
+
+  - id: hf-daily-papers
+    name: Hugging Face Papers
+    kind: hf-papers
+    weight: 5
+    aiFocused: true
+    minPoints: 10
+    categoryHint: research

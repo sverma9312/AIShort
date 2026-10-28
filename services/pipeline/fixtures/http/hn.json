@@ -1,0 +1,34 @@
+{
+  "hits": [
+    {
+      "objectID": "1001",
+      "title": "Example AI Lab introduces Nova-2, an open-weight reasoning model",
+      "url": "https://lab.example.com/news/nova-2?ref=hn",
+      "points": 450,
+      "created_at": "2026-10-28T08:20:00Z"
+    },
+    {
+      "objectID": "1002",
+      "title": "Show HN: A tiny vector database for LLM apps in 500 lines of Rust",
+      "url": "https://code.example.com/tinyvec",
+      "points": 150,
+      "created_at": "2026-10-28T05:00:00Z"
+    },
+    {
+      "objectID": "1003",
+      "title": "Ask HN: How do you evaluate LLM outputs?",
+      "url": null,
+      "points": 300,
+      "created_at": "2026-10-28T04:00:00Z"
+    },
+    {
+      "objectID": "1004",
+      "title": "A new AI chatbot benchmark nobody asked for",
+      "url": "https://blog.example.net/benchmark",
+      "points": 20,
+      "created_at": "2026-10-28T03:00:00Z"
+    }
+  ],
+  "nbHits": 4,
+  "page": 0
+}

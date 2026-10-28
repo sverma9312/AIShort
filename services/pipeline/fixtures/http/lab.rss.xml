@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>Example AI Lab News</title>
+    <link>https://lab.example.com/news</link>
+    <item>
+      <title>Example AI Lab introduces Nova-2, an open-weight reasoning model</title>
+      <link>https://lab.example.com/news/nova-2</link>
+      <guid isPermaLink="false">nova-2</guid>
+      <description><![CDATA[<p>Nova-2 is our most capable <strong>open-weight</strong> model yet.</p>]]></description>
+      <pubDate>Wed, 28 Oct 2026 08:00:00 GMT</pubDate>
+      <media:content url="https://lab.example.com/images/nova-2.png" medium="image" />
+    </item>
+    <item>
+      <title>Our approach to model safety evaluations</title>
+      <link>https://lab.example.com/news/safety-evals</link>
+      <description>How we test models before release &amp; what we publish.</description>
+      <pubDate>Tue, 27 Oct 2026 15:00:00 GMT</pubDate>
+      <enclosure url="https://lab.example.com/images/safety.jpg" type="image/jpeg" length="1000" />
+    </item>
+    <item>
+      <title>Example AI Lab: our year in review</title>
+      <link>https://lab.example.com/news/year-in-review</link>
+      <pubDate>Tue, 01 Sep 2026 12:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>An item without a link is skipped</title>
+      <guid isPermaLink="false">no-link</guid>
+    </item>
+  </channel>
+</rss>

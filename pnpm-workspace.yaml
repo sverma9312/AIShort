@@ -3,6 +3,10 @@ packages:
   - services/*
   - packages/*
 
+# Dependencies allowed to run install scripts (pnpm blocks all others).
+allowBuilds:
+  esbuild: true # used by tsx
+
 # Single source of truth for shared dependency versions.
 # Packages reference these with "catalog:" instead of a version range.
 catalog:
@@ -12,6 +16,7 @@ catalog:
   eslint-config-prettier: ^10.1.8
   globals: ^17.13.0
   prettier: ^3.9.10
+  tsx: ^4.23.15
   # Held at 6.0.x: typescript-eslint supports TypeScript < 6.1.
   typescript: ~6.0.3
   typescript-eslint: ^8.72.1
