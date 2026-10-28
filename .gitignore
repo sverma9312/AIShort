@@ -7,6 +7,10 @@ out/
 coverage/
 *.tsbuildinfo
 
+# Pipeline local state and private eval samples
+.state/
+services/pipeline/eval/articles/local/
+
 # Environment — never commit secrets (.env.example is the template)
 .env
 .env.*

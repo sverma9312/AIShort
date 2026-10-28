@@ -7,7 +7,8 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "eval": "tsx eval/run.ts"
   },
   "dependencies": {
     "@aishort/shared": "workspace:*",

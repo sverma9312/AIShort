@@ -1,0 +1,6 @@
+{
+  "id": "model-launch",
+  "title": "Example AI Lab introduces Nova-2, an open-weight reasoning model",
+  "sourceName": "Example AI Lab",
+  "text": "Today Example AI Lab is releasing Nova-2, an open-weight reasoning model with 70 billion parameters. Nova-2 scores 82 percent on the ExampleMath benchmark, up from 64 percent for the original Nova, and it answers twice as fast on the same hardware. The weights are available under the Apache 2.0 license, and developers can download them from the Example Model Hub starting today. We trained Nova-2 on a mix of public web data, licensed books and synthetic reasoning problems. A technical report describes the training data, evaluation methods and known limitations, including weaker performance on languages other than English. Before release, independent testers evaluated Nova-2 for misuse risks, including cyberattacks and biological threats. We describe their findings in a separate safety card, and we will update it as researchers report new issues."
+}

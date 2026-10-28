@@ -1,0 +1,6 @@
+{
+  "id": "policy-draft",
+  "title": "Regulators publish draft rules for AI model transparency",
+  "sourceName": "Example Policy Wire",
+  "text": "The Example Digital Authority on Tuesday published draft rules that would require developers of large AI models to disclose the main sources of their training data and the results of safety tests before releasing a model to the public. The rules would apply to models trained with more than 10 to the power of 25 operations, a threshold the authority says currently covers fewer than 20 companies. Developers would have to publish a summary of their safety testing at least 30 days before launch and report serious incidents within 72 hours. Companies that break the rules could be fined up to 3 percent of their global annual revenue. Industry groups said the reporting deadlines were too short, while consumer advocates said the rules did not go far enough on copyright. Public comments are open for 60 days, and the authority expects to finalize the rules next spring."
+}
