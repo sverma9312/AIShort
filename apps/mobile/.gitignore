@@ -1,0 +1,13 @@
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts.bak
+
+# Native projects are generated (Continuous Native Generation): never commit them
+/ios
+/android
+
+# Local env
+.env*.local
+.env
