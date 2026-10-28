@@ -1,0 +1,28 @@
+body {
+  font-family:
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    sans-serif;
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  line-height: 1.6;
+  color: #1f2328;
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #0d1117;
+    color: #e6edf3;
+  }
+  a {
+    color: #58a6ff;
+  }
+}
+h1 {
+  font-size: 1.8rem;
+}
+small {
+  color: #8b949e;
+}
