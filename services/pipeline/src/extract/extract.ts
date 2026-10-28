@@ -5,7 +5,7 @@ import { toIsoUtc } from '../lib/time';
 import { toWebUrl } from '../lib/url';
 
 export interface ExtractedArticle {
-  /** Main article text, whitespace-collapsed and truncated; empty if none was found. */
+  /** Main article text, one paragraph per line pair ("\n\n"), truncated; empty if none found. */
   text: string;
   title?: string;
   imageUrl?: string;
@@ -57,10 +57,18 @@ export function extractArticle(
     ),
   );
 
+  // Readability keeps boilerplate that sits next to short articles, so remove it first.
+  for (const element of document.querySelectorAll(BOILERPLATE_SELECTOR)) element.remove();
+  for (const element of document.querySelectorAll('[class], [id]')) {
+    const label = `${element.getAttribute('class') ?? ''} ${element.getAttribute('id') ?? ''}`;
+    if (BOILERPLATE_LABEL.test(label) && element.tagName !== 'BODY' && element.tagName !== 'HTML')
+      element.remove();
+  }
+
   let text = '';
   try {
     const article = new Readability(document).parse();
-    text = collapseWhitespace(article?.textContent ?? '');
+    text = article?.content ? paragraphsOf(article.content) : '';
   } catch {
     // Unparseable page: fall through with metadata only.
   }
@@ -71,6 +79,26 @@ export function extractArticle(
     ...(imageUrl ? { imageUrl } : {}),
     ...(publishedAt ? { publishedAt } : {}),
   };
+}
+
+const BOILERPLATE_SELECTOR =
+  'script, style, noscript, iframe, form, nav, header, footer, aside, [role="navigation"], [role="banner"], [role="contentinfo"], [aria-modal="true"]';
+const BOILERPLATE_LABEL =
+  /\b(cookie|consent|gdpr|newsletter|subscribe|signup|paywall|modal|popup|banner|share|social|related|comments?|advert|promo)\w*/i;
+/** "Jane Doe is a senior reporter covering…" — author boxes often have no semantic markup. */
+const AUTHOR_BIO =
+  /^[\p{Lu}][\p{L}.'’-]+(?: [\p{Lu}][\p{L}.'’-]+){0,3} is an? (?:[\p{L}-]+ ){0,4}(?:writer|reporter|editor|journalist|correspondent|columnist|contributor|analyst)\b/u;
+const BLOCKS = 'p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, figcaption, td';
+
+/** Converts Readability's article HTML to text with one blank line between blocks. */
+function paragraphsOf(html: string): string {
+  const { document } = parseHTML(`<!doctype html><html><body>${html}</body></html>`);
+  const blocks = [...document.querySelectorAll(BLOCKS)]
+    // Skip containers whose text is already covered by a nested block (e.g. <li><p>…</p></li>).
+    .filter((el) => !el.querySelector(BLOCKS))
+    .map((el) => collapseWhitespace(el.textContent ?? ''))
+    .filter((block) => block && !AUTHOR_BIO.test(block));
+  return blocks.length ? blocks.join('\n\n') : collapseWhitespace(document.body.textContent ?? '');
 }
 
 interface JsonLdArticle {

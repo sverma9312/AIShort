@@ -7,11 +7,65 @@ import { extractArticle } from './extract';
 const fixture = (name: string) => readFileSync(join(HTTP_FIXTURES_DIR, name), 'utf8');
 
 describe('extractArticle', () => {
-  it('extracts article text without navigation, cookie banners or footers', () => {
+  it.each([
+    'nova-2.html',
+    'safety-evals.html',
+    'acme-robotics.html',
+    'robot-hand.html',
+    'old-post.html',
+  ])('extracts %s without navigation, cookie banners or footers', (name) => {
+    const { text } = extractArticle(fixture(name), 'https://lab.example.com/news/x');
+    expect(text.length).toBeGreaterThan(200);
+    expect(text).not.toMatch(/cookies|All rights reserved|Careers|Privacy · Terms/);
+  });
+
+  it('keeps paragraphs separate', () => {
     const { text } = extractArticle(fixture('nova-2.html'), 'https://lab.example.com/news/nova-2');
-    expect(text).toContain('open-weight reasoning model with 70 billion parameters');
-    expect(text).toContain('82 percent on the ExampleMath benchmark');
-    expect(text).not.toMatch(/cookies|All rights reserved|Careers/);
+    expect(text).toContain(
+      'open-weight reasoning model with 70 billion parameters.\n\nNova-2 scores 82 percent',
+    );
+    expect(text).not.toMatch(/Nova-2 Today/);
+  });
+
+  it('drops author bio paragraphs', () => {
+    const body = Array.from(
+      { length: 4 },
+      (_, i) =>
+        `<p>Paragraph ${i} about a new AI model with enough words to count as article text for extraction.</p>`,
+    ).join('');
+    const bio = '<p>Jane Doe-Smith is a senior news writer who covers AI and consumer tech.</p>';
+    const { text } = extractArticle(
+      `<html><body><article>${bio}${body}</article></body></html>`,
+      'https://a.example.com/x',
+    );
+    expect(text).not.toContain('Jane Doe-Smith');
+    expect(text).toContain('Paragraph 0');
+  });
+
+  it('keeps sentences that merely mention a writer', () => {
+    const body = Array.from(
+      { length: 4 },
+      (_, i) =>
+        `<p>Paragraph ${i} about a new AI model with enough words to count as article text for extraction.</p>`,
+    ).join('');
+    const prose = '<p>The model is a better writer than its predecessor, the company said.</p>';
+    const { text } = extractArticle(
+      `<html><body><article>${prose}${body}</article></body></html>`,
+      'https://a.example.com/x',
+    );
+    expect(text).toContain('better writer');
+  });
+
+  it('removes consent and newsletter blocks by class or id', () => {
+    const body = Array.from(
+      { length: 4 },
+      (_, i) =>
+        `<p>Paragraph ${i} about a new AI model with enough words to count as article text for extraction.</p>`,
+    ).join('');
+    const html = `<html><body><div id="gdpr-consent">Accept tracking?</div><article>${body}<div class="newsletter-signup">Sign up now</div></article></body></html>`;
+    const { text } = extractArticle(html, 'https://a.example.com/x');
+    expect(text).toContain('Paragraph 3');
+    expect(text).not.toMatch(/Accept tracking|Sign up now/);
   });
 
   it('reads Open Graph metadata and resolves relative image URLs', () => {

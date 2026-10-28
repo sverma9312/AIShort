@@ -78,7 +78,11 @@ export class HeuristicClassifier implements Classifier {
             item.id,
             {
               isAiNews: Boolean(item.categoryHint) || isAiRelated(text),
-              category: item.categoryHint ?? guessCategory(text),
+              category:
+                item.categoryHint ??
+                guessCategory(item.title) ??
+                guessCategory(item.excerpt) ??
+                'products',
               importance: Math.min(10, 5 + (launch ? 2 : 0)),
             },
           ];
@@ -88,13 +92,13 @@ export class HeuristicClassifier implements Classifier {
   }
 }
 
-function guessCategory(text: string): Category {
-  if (/\b(raises?|funding|acquir|valuation|series [a-f]|ipo|earnings)\b/i.test(text))
+function guessCategory(text: string): Category | undefined {
+  if (/\b(raises?|funding|acquir\w*|valuation|series [a-f]|ipo|earnings)\b/i.test(text))
     return 'business';
-  if (/\b(law|regulat|policy|safety|ethic|lawsuit|copyright|government)\b/i.test(text))
+  if (/\b(laws?|regulat\w*|policy|safety|ethic\w*|lawsuits?|copyright|government)\b/i.test(text))
     return 'policy';
   if (/\b(paper|study|researchers?|benchmark|arxiv)\b/i.test(text)) return 'research';
-  if (/\b(open[- ](weight|source))\b/i.test(text)) return 'open-source';
+  if (/\bopen[- ](weights?|source)\b/i.test(text)) return 'open-source';
   if (/\bmodels?\b/i.test(text)) return 'models';
-  return 'products';
+  return undefined;
 }

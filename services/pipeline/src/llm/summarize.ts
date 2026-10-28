@@ -61,8 +61,13 @@ export class ExtractiveSummarizer implements Summarizer {
   summarize(input: SummarizeInput): Promise<SummarizeResult> {
     const headline = tidyHeadline(input.title.split(/\s+/).slice(0, HEADLINE_MAX_WORDS).join(' '));
     let summary = '';
-    // Split only where punctuation is followed by whitespace, so "2.0" or "U.S." stay intact.
-    for (const sentence of input.text.split(/(?<=[.!?])\s+/u)) {
+    // Paragraphs without final punctuation are headings; skip them. Split sentences only where
+    // punctuation is followed by whitespace, so "2.0" or "U.S." stay intact.
+    const prose = input.text
+      .split(/\n{2,}/)
+      .filter((paragraph) => /[.!?]["”')]?$/.test(paragraph.trim()))
+      .join(' ');
+    for (const sentence of prose.split(/(?<=[.!?])\s+/u)) {
       const next = `${summary} ${sentence.trim()}`.trim();
       if (countWords(next) > SUMMARY_MAX_WORDS) break;
       summary = next;

@@ -23,6 +23,7 @@ const AI_TERMS = new RegExp(
       'diffusion models?',
       'reinforcement learning',
       'computer vision',
+      'robot(s|ics)?',
       'speech recognition',
       'text-to-(image|video|speech)',
       'open-weights?',

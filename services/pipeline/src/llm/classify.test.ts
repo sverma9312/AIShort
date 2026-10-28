@@ -84,4 +84,18 @@ describe('HeuristicClassifier', () => {
     expect(result.get('b')).toMatchObject({ isAiNews: true, category: 'models', importance: 7 });
     expect(result.get('c')?.isAiNews).toBe(false);
   });
+
+  it('guesses the category from the title before the body', async () => {
+    const result = await new HeuristicClassifier().classify([
+      {
+        id: 'a',
+        title: 'Lab introduces a new language model',
+        excerpt: 'It passed our safety tests.',
+        sourceName: 'Lab',
+      },
+      { id: 'b', title: 'Big Co acquires an AI startup', excerpt: '', sourceName: 'News' },
+      { id: 'c', title: 'New AI regulations take effect', excerpt: '', sourceName: 'News' },
+    ]);
+    expect([...result.values()].map((c) => c.category)).toEqual(['models', 'business', 'policy']);
+  });
 });
