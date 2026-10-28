@@ -47,3 +47,17 @@ This repository and its **GitHub Actions logs are public**.
 - [ ] No new env variables without a matching `.env.example` entry
 - [ ] Docs / architecture diagram updated if the design changed
 - [ ] App changes checked on a real device or emulator
+
+## Repository settings (one-time, maintainers)
+
+These live in GitHub, not in files, so they are applied manually after the first CI run on
+`main` (GitHub only offers status checks it has seen):
+
+1. **Settings → Branches → Add branch ruleset** for `main`:
+   - Require a pull request before merging
+   - Require status checks to pass: `Format, lint, typecheck, test` and `Secret scan (gitleaks)`
+   - Block force pushes
+2. **Settings → General → Pull Requests:** allow squash merging only; enable "Automatically
+   delete head branches".
+3. **Settings → Code security:** enable Dependabot alerts, security updates and secret scanning
+   with push protection (free for public repositories).
