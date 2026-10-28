@@ -4,8 +4,11 @@
  *   pnpm pipeline:dry    offline: fixture sources, fixed clock, offline classifier/summarizer
  *   pnpm pipeline:live   real sources and LLM providers (.env), state kept in .state/
  *
- * Options: --mode dry|live  --llm offline|real  --out <dir>  --state <file>  --sources <file>
- *          --report <file> (JSON run report)  --verbose
+ * Options: --mode dry|live  --llm offline|real  --store memory|supabase  --out <dir>
+ *          --state <file>  --sources <file>  --web <dir>  --report <file> (JSON)  --verbose
+ *
+ * State: dry runs start empty; live runs use Supabase when DATABASE_URL is set, otherwise
+ * .state/store.json. In CI, live runs require DATABASE_URL.
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
@@ -22,15 +25,24 @@ import { HeuristicClassifier, LlmClassifier, type Classifier } from './llm/class
 import { createProviders } from './llm/factory';
 import { ExtractiveSummarizer, LlmSummarizer, type Summarizer } from './llm/summarize';
 import { buildSite, writeSite } from './publish/buildSite';
+import { copyStaticSite } from './publish/staticSite';
 import { formatReport } from './report';
 import { runPipeline } from './run';
 import { loadSources } from './sources/config';
 import { createFixtureFetch } from './sources/fixtureFetch';
 import { HttpClient } from './sources/http';
+import { hoursBefore } from './lib/time';
+import { chooseStore } from './store/choose';
 import { MemoryStore } from './store/memoryStore';
+import { createPostgresClient } from './store/sql';
+import { SupabaseStore } from './store/supabaseStore';
+import type { Store } from './store/types';
 
 const PACKAGE_DIR = fileURLToPath(new URL('..', import.meta.url));
 const FIXTURES_DIR = join(PACKAGE_DIR, 'fixtures');
+const WEB_DIR = join(PACKAGE_DIR, '..', '..', 'web');
+/** Bookkeeping for articles that never became cards is kept this long. */
+const RETENTION_DAYS = 30;
 
 const ManifestSchema = z.object({
   now: z.iso.datetime(),
@@ -53,6 +65,8 @@ async function main(): Promise<number> {
       llm: { type: 'string' },
       out: { type: 'string' },
       state: { type: 'string' },
+      store: { type: 'string' },
+      web: { type: 'string' },
       sources: { type: 'string' },
       report: { type: 'string' },
       verbose: { type: 'boolean', default: false },
@@ -91,10 +105,22 @@ async function main(): Promise<number> {
     ...(fetchFn ? { fetch: fetchFn } : {}),
   });
 
-  // State: fresh for dry runs (unless --state), persisted JSON for live runs.
-  const statePath =
-    values.state ?? (mode === 'live' ? join(PACKAGE_DIR, '.state', 'store.json') : undefined);
-  const store = statePath ? await MemoryStore.load(resolve(statePath)) : new MemoryStore();
+  // State: see chooseStore for the rules.
+  const choice = chooseStore({
+    mode,
+    ...(values.store ? { flag: values.store } : {}),
+    ...(values.state ? { statePath: resolve(values.state) } : {}),
+    defaultStatePath: join(PACKAGE_DIR, '.state', 'store.json'),
+    hasDatabaseUrl: Boolean(env.DATABASE_URL),
+    inCi: process.env['GITHUB_ACTIONS'] === 'true',
+  });
+  const sqlClient =
+    choice.kind === 'supabase' ? createPostgresClient(env.DATABASE_URL!) : undefined;
+  const store: Store = sqlClient
+    ? new SupabaseStore(sqlClient)
+    : choice.kind === 'memory' && choice.path
+      ? await MemoryStore.load(choice.path)
+      : new MemoryStore();
   for (const [sourceId, state] of Object.entries(seed)) {
     if (!(await store.getSourceState(sourceId)))
       await store.saveSourceState(sourceId, { ...state, consecutiveFailures: 0 });
@@ -122,35 +148,44 @@ async function main(): Promise<number> {
   log.info('pipeline starting', {
     mode,
     llm: llmMode,
+    store: choice.kind,
     sources: sources.filter((s) => s.enabled).length,
     now: now.toISOString(),
   });
-  const report = await runPipeline({
-    sources,
-    http,
-    articles: new HttpArticleFetcher(http, new RobotsChecker(http, BOT_NAME)),
-    store,
-    classifier,
-    summarizer,
-    now,
-    log,
-  });
+  try {
+    const report = await runPipeline({
+      sources,
+      http,
+      articles: new HttpArticleFetcher(http, new RobotsChecker(http, BOT_NAME)),
+      store,
+      classifier,
+      summarizer,
+      now,
+      log,
+    });
 
-  const files = await buildSite(store, { now, feedBaseUrls: listOf(env.FEED_BASE_URLS) });
-  await writeSite(outDir, files);
-  if (statePath) await store.save(resolve(statePath));
-  if (values.report)
-    await writeFile(
-      resolve(values.report),
-      `${JSON.stringify({ ...report, llm: chain?.stats() }, null, 2)}\n`,
+    const files = await buildSite(store, { now, feedBaseUrls: listOf(env.FEED_BASE_URLS) });
+    await writeSite(outDir, files);
+    await copyStaticSite(resolve(values.web ?? WEB_DIR), outDir);
+    const pruned = await store.prune(hoursBefore(now, RETENTION_DAYS * 24).toISOString());
+    if (pruned) log.info('pruned old bookkeeping', { articles: pruned });
+    if (choice.kind === 'memory' && choice.path) await (store as MemoryStore).save(choice.path);
+    if (values.report)
+      await writeFile(
+        resolve(values.report),
+        `${JSON.stringify({ ...report, llm: chain?.stats() }, null, 2)}\n`,
+      );
+
+    process.stdout.write(
+      `${formatReport(report, chain?.stats())}\n\nWrote ${files.size} files to ${outDir}\n`,
     );
 
-  process.stdout.write(
-    `${formatReport(report, chain?.stats())}\n\nWrote ${files.size} files to ${outDir}\n`,
-  );
-  const allSourcesFailed =
-    report.sources.length > 0 && report.sources.every((s) => s.status === 'error');
-  return allSourcesFailed ? 1 : 0;
+    const allSourcesFailed =
+      report.sources.length > 0 && report.sources.every((s) => s.status === 'error');
+    return allSourcesFailed ? 1 : 0;
+  } finally {
+    await sqlClient?.end();
+  }
 }
 
 main().then(
