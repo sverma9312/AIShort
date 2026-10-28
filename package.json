@@ -17,7 +17,8 @@
     "test": "pnpm -r run test",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
     "pipeline:dry": "pnpm --filter @aishort/pipeline pipeline:dry",
-    "pipeline:live": "pnpm --filter @aishort/pipeline pipeline:live"
+    "pipeline:live": "pnpm --filter @aishort/pipeline pipeline:live",
+    "db:migrate": "pnpm --filter @aishort/pipeline db:migrate"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

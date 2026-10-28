@@ -10,18 +10,22 @@
     "test": "vitest run",
     "pipeline:dry": "tsx src/cli.ts --mode dry",
     "pipeline:live": "tsx src/cli.ts --mode live",
-    "eval": "tsx eval/run.ts"
+    "eval": "tsx eval/run.ts",
+    "db:migrate": "tsx src/migrate.ts"
   },
   "dependencies": {
     "@aishort/shared": "workspace:*",
     "@mozilla/readability": "^0.6.0",
     "fast-xml-parser": "^5.11.2",
     "linkedom": "^0.18.14",
+    "postgres": "^3.4.9",
     "robots-parser": "^3.0.1",
     "yaml": "^2.9.1",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.13",
+    "@electric-sql/pglite-socket": "0.2.16",
     "@types/node": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:",
