@@ -26,6 +26,10 @@ const EnvSchema = z.object({
   ANTHROPIC_MODEL: withDefault('claude-haiku-4-5'),
   ANTHROPIC_RPM: rpm(50),
 
+  /** When both are set, live runs store state in Supabase instead of a local JSON file. */
+  SUPABASE_URL: optional,
+  SUPABASE_SERVICE_ROLE_KEY: optional,
+
   /** Comma-separated feed base URLs published in meta.json (primary first). */
   FEED_BASE_URLS: withDefault('https://example.github.io/AIShort'),
   /** Shown in our User-Agent so site owners can reach us. */

@@ -28,6 +28,8 @@ import { loadSources } from './sources/config';
 import { createFixtureFetch } from './sources/fixtureFetch';
 import { HttpClient } from './sources/http';
 import { MemoryStore } from './store/memoryStore';
+import { SupabaseStore } from './store/supabaseStore';
+import type { Store } from './store/types';
 
 const PACKAGE_DIR = fileURLToPath(new URL('..', import.meta.url));
 const FIXTURES_DIR = join(PACKAGE_DIR, 'fixtures');
@@ -92,9 +94,17 @@ async function main(): Promise<number> {
   });
 
   // State: fresh for dry runs (unless --state), persisted JSON for live runs.
-  const statePath =
-    values.state ?? (mode === 'live' ? join(PACKAGE_DIR, '.state', 'store.json') : undefined);
-  const store = statePath ? await MemoryStore.load(resolve(statePath)) : new MemoryStore();
+  // State: Supabase when configured (live), else a JSON file (live) or fresh memory (dry).
+  const useSupabase =
+    mode === 'live' && !values.state && env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY;
+  const statePath = useSupabase
+    ? undefined
+    : (values.state ?? (mode === 'live' ? join(PACKAGE_DIR, '.state', 'store.json') : undefined));
+  const memory = statePath ? await MemoryStore.load(resolve(statePath)) : new MemoryStore();
+  const store: Store = useSupabase
+    ? new SupabaseStore({ url: env.SUPABASE_URL!, serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY! })
+    : memory;
+  if (useSupabase) log.info('using Supabase store');
   for (const [sourceId, state] of Object.entries(seed)) {
     if (!(await store.getSourceState(sourceId)))
       await store.saveSourceState(sourceId, { ...state, consecutiveFailures: 0 });
@@ -138,7 +148,7 @@ async function main(): Promise<number> {
 
   const files = await buildSite(store, { now, feedBaseUrls: listOf(env.FEED_BASE_URLS) });
   await writeSite(outDir, files);
-  if (statePath) await store.save(resolve(statePath));
+  if (statePath) await memory.save(resolve(statePath));
   if (values.report)
     await writeFile(
       resolve(values.report),
