@@ -12,7 +12,12 @@ removes duplicates, summarizes each story with an LLM, and publishes the result 
 on GitHub Pages. The Expo mobile app downloads that feed — there is no app server, and the
 infrastructure runs entirely on free tiers.
 
-See [`docs/architecture/`](docs/architecture/) for the full architecture diagram (draw.io).
+## Documentation
+
+- [Architecture diagram](docs/architecture/) (draw.io)
+- [Implementation plan and status](docs/IMPLEMENTATION_PLAN.md)
+- [Testing locally](docs/LOCAL_TESTING.md)
+- [Pipeline README](services/pipeline/README.md)
 
 ## Repository layout
 
