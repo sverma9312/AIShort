@@ -15,7 +15,9 @@
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r run typecheck",
     "test": "pnpm -r run test",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
+    "pipeline:dry": "pnpm --filter @aishort/pipeline pipeline:dry",
+    "pipeline:live": "pnpm --filter @aishort/pipeline pipeline:live"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

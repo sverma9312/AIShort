@@ -8,6 +8,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "pipeline:dry": "tsx src/cli.ts --mode dry",
+    "pipeline:live": "tsx src/cli.ts --mode live",
     "eval": "tsx eval/run.ts"
   },
   "dependencies": {

@@ -18,7 +18,7 @@ See [`docs/architecture/`](docs/architecture/) for the full architecture diagram
 
 ```
 apps/mobile/         Expo app (iOS + Android)                    — Milestone 3
-services/pipeline/   Ingestion + summarization pipeline           — Milestone 1
+services/pipeline/   Ingestion + summarization pipeline (see its README)
 packages/shared/     Feed contract: Zod schemas, types, helpers
 supabase/            Database migrations                          — Milestone 2
 docs/                Architecture and project docs

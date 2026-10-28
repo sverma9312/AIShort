@@ -1,0 +1,36 @@
+# Sources for the offline dry run (pnpm pipeline:dry). URLs are served from fixtures/http.
+sources:
+  - id: example-lab
+    name: Example AI Lab
+    kind: rss
+    url: https://feeds.example.com/lab.xml
+    weight: 10
+    aiFocused: true
+
+  - id: example-robotics
+    name: Example Robotics Lab
+    kind: html
+    url: https://robotics.example.com/news
+    linkPattern: '^/news/[a-z0-9-]+/?$'
+    weight: 9
+    aiFocused: true
+
+  - id: example-tech-news
+    name: Example Tech News
+    kind: rss
+    url: https://news.example.org/feed.xml
+    weight: 6
+
+  - id: hf-daily-papers
+    name: Hugging Face Papers
+    kind: hf-papers
+    weight: 5
+    aiFocused: true
+    minPoints: 10
+    categoryHint: research
+
+  - id: hacker-news
+    name: Hacker News
+    kind: hn
+    weight: 4
+    minPoints: 100

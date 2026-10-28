@@ -1,0 +1,57 @@
+{
+  "now": "2026-10-28T10:00:00Z",
+  "seedSourceState": {
+    "example-robotics": { "lastOkAt": "2026-10-28T09:30:00Z" }
+  },
+  "routes": {
+    "https://feeds.example.com/lab.xml": {
+      "file": "lab.rss.xml",
+      "headers": { "content-type": "application/rss+xml", "etag": "\"lab-v1\"" }
+    },
+    "https://news.example.org/feed.xml": {
+      "file": "technews.atom.xml",
+      "headers": { "content-type": "application/atom+xml" }
+    },
+    "https://robotics.example.com/news": {
+      "file": "robotics-listing.html",
+      "headers": { "content-type": "text/html" }
+    },
+    "https://hn.algolia.com/api/v1/search_by_date": {
+      "file": "hn.json",
+      "headers": { "content-type": "application/json" }
+    },
+    "https://huggingface.co/api/daily_papers": {
+      "file": "hf-papers.json",
+      "headers": { "content-type": "application/json" }
+    },
+
+    "https://lab.example.com/news/nova-2": {
+      "file": "nova-2.html",
+      "headers": { "content-type": "text/html; charset=utf-8" }
+    },
+    "https://lab.example.com/news/safety-evals": {
+      "file": "safety-evals.html",
+      "headers": { "content-type": "text/html; charset=utf-8" }
+    },
+    "https://news.example.org/2026/10/27/acme-robotics-funding": {
+      "file": "acme-robotics.html",
+      "headers": { "content-type": "text/html" }
+    },
+    "https://news.example.org/2026/10/28/nova-2-open-weight-model": {
+      "file": "nova-2.html",
+      "headers": { "content-type": "text/html" }
+    },
+    "https://robotics.example.com/news/robot-hand": {
+      "file": "robot-hand.html",
+      "headers": { "content-type": "text/html" }
+    },
+    "https://robotics.example.com/news/old-post": {
+      "file": "old-post.html",
+      "headers": { "content-type": "text/html" }
+    },
+    "https://robotics.example.com/robots.txt": {
+      "body": "User-agent: *\nDisallow: /private/\n",
+      "headers": { "content-type": "text/plain" }
+    }
+  }
+}
