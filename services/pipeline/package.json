@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@aishort/shared": "workspace:*",
+    "@mozilla/readability": "^0.6.0",
     "fast-xml-parser": "^5.11.2",
     "linkedom": "^0.18.14",
+    "robots-parser": "^3.0.1",
     "yaml": "^2.9.1",
     "zod": "catalog:"
   },
