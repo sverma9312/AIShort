@@ -5,12 +5,13 @@
  *   pnpm pipeline:live   real sources and LLM providers (.env), state kept in .state/
  *
  * Options: --mode dry|live  --llm offline|real  --store memory|supabase  --out <dir>
- *          --state <file>  --sources <file>  --web <dir>  --report <file> (JSON)  --verbose
+ *          --state <file>  --sources <file>  --web <dir>  --report <file> (JSON)
+ *          --summary <file> (Markdown, appended; defaults to $GITHUB_STEP_SUMMARY)  --verbose
  *
  * State: dry runs start empty; live runs use Supabase when DATABASE_URL is set, otherwise
  * .state/store.json. In CI, live runs require DATABASE_URL.
  */
-import { readFile, writeFile } from 'node:fs/promises';
+import { appendFile, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -26,7 +27,8 @@ import { createProviders } from './llm/factory';
 import { ExtractiveSummarizer, LlmSummarizer, type Summarizer } from './llm/summarize';
 import { buildSite, writeSite } from './publish/buildSite';
 import { copyStaticSite } from './publish/staticSite';
-import { formatReport } from './report';
+import { collectAlerts, dispatchAlerts } from './alerts';
+import { formatMarkdownReport, formatReport } from './report';
 import { runPipeline } from './run';
 import { loadSources } from './sources/config';
 import { createFixtureFetch } from './sources/fixtureFetch';
@@ -69,6 +71,7 @@ async function main(): Promise<number> {
       web: { type: 'string' },
       sources: { type: 'string' },
       report: { type: 'string' },
+      summary: { type: 'string' },
       verbose: { type: 'boolean', default: false },
     },
     strict: true,
@@ -167,6 +170,16 @@ async function main(): Promise<number> {
     const files = await buildSite(store, { now, feedBaseUrls: listOf(env.FEED_BASE_URLS) });
     await writeSite(outDir, files);
     await copyStaticSite(resolve(values.web ?? WEB_DIR), outDir);
+    if (mode === 'live') {
+      await dispatchAlerts(collectAlerts(report), {
+        store,
+        now,
+        log,
+        ...(env.DISCORD_WEBHOOK_URL ? { webhookUrl: env.DISCORD_WEBHOOK_URL } : {}),
+      });
+    }
+    const summaryPath = values.summary ?? process.env['GITHUB_STEP_SUMMARY'];
+    if (summaryPath) await appendFile(summaryPath, formatMarkdownReport(report, chain?.stats()));
     const pruned = await store.prune(hoursBefore(now, RETENTION_DAYS * 24).toISOString());
     if (pruned) log.info('pruned old bookkeeping', { articles: pruned });
     if (choice.kind === 'memory' && choice.path) await (store as MemoryStore).save(choice.path);

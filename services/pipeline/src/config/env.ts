@@ -29,6 +29,9 @@ const EnvSchema = z.object({
   /** Supabase Postgres connection string (session pooler). When set, live runs use Supabase. */
   DATABASE_URL: optional,
 
+  /** Discord webhook for pipeline alerts (optional; alerts are only logged without it). */
+  DISCORD_WEBHOOK_URL: optional,
+
   /** Comma-separated feed base URLs published in meta.json (primary first). */
   FEED_BASE_URLS: withDefault('https://example.github.io/AIShort'),
   /** Shown in our User-Agent so site owners can reach us. */
