@@ -6,14 +6,16 @@
 
 ## Status
 
-| Milestone                   | Scope                                                               | Status                                             |
-| --------------------------- | ------------------------------------------------------------------- | -------------------------------------------------- |
-| **0. Foundation**           | Monorepo, shared feed contract, CI                                  | ✅ Done                                            |
-| **1. Pipeline core**        | Sources, normalize, extract, LLM layer, orchestrator, dry/live CLI  | ✅ Done (real LLM path not yet run with live keys) |
-| **2. Persistence + deploy** | Supabase, scheduled GitHub Actions run, GitHub Pages deploy, alerts | ⏳ Next                                            |
-| **3. Mobile app MVP**       | Expo app: swipe feed, offline cache, bookmarks, settings            | Planned                                            |
-| **4. Push + background**    | Push notifications, background refresh                              | Planned                                            |
-| **5. Release**              | Final name, EAS builds, store listings, testing tracks              | Planned                                            |
+**Summary (as of 2026-10-28): 3 of 6 milestones complete, 2 partially done, 1 not started.**
+
+| Milestone                   | Scope                                                               | Status                                                                                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0. Foundation**           | Monorepo, shared feed contract, CI                                  | ✅ Complete                                                                                                                                                               |
+| **1. Pipeline core**        | Sources, normalize, extract, LLM layer, orchestrator, dry/live CLI  | ✅ Complete (real LLM path not yet run with live keys)                                                                                                                    |
+| **2. Persistence + deploy** | Supabase, scheduled GitHub Actions run, GitHub Pages deploy, alerts | ✅ Complete in code (not yet deployed: needs Supabase project, secrets, Pages enabled)                                                                                    |
+| **3. Mobile app MVP**       | Expo app: swipe feed, offline cache, bookmarks, settings            | 🟡 Partial — app and unit tests done (`69033c4`); missing component/screen tests and Maestro E2E flows                                                                    |
+| **4. Push + background**    | Push notifications, background refresh                              | 🟡 Partial — app side done (token registration, deep links, background task); missing pipeline notify step (Expo push sending, receipts, daily cap); untested on a device |
+| **5. Release**              | Final name, EAS builds, store listings, testing tracks              | ❌ Not started (`docs/release.md` referenced by `docs/ops.md` doesn't exist yet)                                                                                          |
 
 ## 1. Principles
 
@@ -87,7 +89,7 @@ docs/                        architecture, plan, testing guide
 **Exit criteria (to confirm with real keys):** `pnpm pipeline:live` produces a feed you'd want to
 read, and `pnpm --filter @aishort/pipeline eval` passes the sample articles.
 
-### Milestone 2 — Persistence + automated deploy ⏳
+### Milestone 2 — Persistence + automated deploy ✅
 
 | PR                  | What                                                                                                                                                             | Key details                                                                                                                      |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -99,7 +101,9 @@ read, and `pnpm --filter @aishort/pipeline eval` passes the sample articles.
 **Soak week** — ready for users when: ≥ 95 % of runs succeed, < 5 % bad summaries in a review of
 100 cards, duplicates are rare, and the feed is never more than an hour stale.
 
-### Milestone 3 — Mobile app MVP
+### Milestone 3 — Mobile app MVP 🟡
+
+Done: PRs 13–18 (`69033c4`). Remaining: screen/component tests, PR 19 (Maestro).
 
 | PR                | What                                                                                                                   | Key details                                                                   |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
@@ -111,7 +115,9 @@ read, and `pnpm --filter @aishort/pipeline eval` passes the sample articles.
 | 18. Telemetry     | Sentry + PostHog with opt-out, error boundary, no personal data                                                        |                                                                               |
 | 19. E2E smoke     | Maestro flows: launch → swipe → bookmark → read more                                                                   |                                                                               |
 
-### Milestone 4 — Push + background refresh
+### Milestone 4 — Push + background refresh 🟡
+
+Done: PRs 20 and 22 (app side). Remaining: PR 21 (pipeline notify step), device testing.
 
 | PR                     | What                                                                                                     |
 | ---------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -119,7 +125,7 @@ read, and `pnpm --filter @aishort/pipeline eval` passes the sample articles.
 | 21. Pipeline notify    | Expo push in batches of 100, receipts clean up dead tokens, ≤ 2 pushes/day via `push_log`, quiet hours   |
 | 22. Background refresh | `expo-background-task`, roughly hourly (OS decides)                                                      |
 
-### Milestone 5 — Release
+### Milestone 5 — Release ❌
 
 | Task                    | What                                                                                                  |
 | ----------------------- | ----------------------------------------------------------------------------------------------------- |
