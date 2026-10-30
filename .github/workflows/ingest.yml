@@ -3,8 +3,8 @@ name: Ingest
 # Runs the pipeline every 30 minutes and deploys the feed + static pages to GitHub Pages.
 # Setup (once): docs/ops.md. Required secret: DATABASE_URL and at least one LLM key.
 on:
-  schedule:
-    - cron: '7,37 * * * *' # every 30 min, off the top of the hour (GitHub delays :00 jobs most)
+  #schedule:
+  #  - cron: '7,37 * * * *' # every 30 min, off the top of the hour (GitHub delays :00 jobs most)
   workflow_dispatch: # manual runs, and the external cron-job.org trigger
 
 permissions:
