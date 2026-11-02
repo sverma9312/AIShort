@@ -44,14 +44,16 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
   return (
     <View style={[styles.container, { backgroundColor: theme.card }]} testID={`card-${card.id}`}>
       {card.imageUrl ? (
-        <Image
-          source={{ uri: card.imageUrl }}
-          style={styles.image}
-          contentFit="cover"
-          transition={200}
-          accessibilityIgnoresInvertColors
-          accessible={false}
-        />
+        <View style={[styles.imageContainer, { backgroundColor: theme.card }]}>
+          <Image
+            source={{ uri: card.imageUrl }}
+            style={styles.image}
+            contentFit="contain"
+            transition={200}
+            accessibilityIgnoresInvertColors
+            accessible={false}
+          />
+        </View>
       ) : (
         <View style={[styles.noImageBanner, { backgroundColor: theme.chip }]}>
           <View style={[styles.noImageIconCircle, { backgroundColor: theme.card }]}>
@@ -123,7 +125,15 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
 
 const styles = StyleSheet.create({
   container: { flex: 1, overflow: 'hidden' },
-  image: { width: '100%', height: '38%' },
+  imageContainer: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    maxHeight: '34%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  image: { width: '100%', height: '100%' },
   noImageBanner: {
     width: '100%',
     height: '22%',
