@@ -57,10 +57,14 @@ function AppShell() {
           headerStyle: { backgroundColor: theme.card },
           headerTintColor: theme.text,
           contentStyle: { backgroundColor: theme.background },
+          headerBackTitle: 'Back',
         }}
       >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="card/[id]" options={{ title: 'Story', presentation: 'card' }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'AIShort' }} />
+        <Stack.Screen
+          name="card/[id]"
+          options={{ title: 'Story', presentation: 'card', headerBackTitle: 'Back' }}
+        />
       </Stack>
     </>
   );

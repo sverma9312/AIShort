@@ -25,7 +25,7 @@ export default function CardScreen() {
   }
   return (
     <>
-      <Stack.Screen options={{ title: card.sourceName }} />
+      <Stack.Screen options={{ title: card.sourceName, headerBackTitle: 'Back' }} />
       <NewsCard card={card} bookmarked={isBookmarked(card.id)} onToggleBookmark={toggle} />
     </>
   );
