@@ -123,10 +123,31 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
         </Modal>
       ) : null}
 
-      <View style={styles.body}>
+      <ScrollView
+        style={styles.bodyScroll}
+        contentContainerStyle={styles.bodyContent}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
         <View style={styles.meta}>
           <Text style={[styles.chip, { backgroundColor: theme.chip, color: theme.accent }]}>
             {CATEGORY_LABELS[card.category]}
+          </Text>
+          <Text
+            style={[
+              styles.secondaryChip,
+              { backgroundColor: theme.dark ? '#22222E' : '#EAEAEF', color: theme.text },
+            ]}
+          >
+            {card.sourceName}
+          </Text>
+          <Text
+            style={[
+              styles.secondaryChip,
+              { backgroundColor: theme.dark ? '#1A1A22' : '#F2F2F6', color: theme.muted },
+            ]}
+          >
+            {relativeTime(card.publishedAt, now)}
           </Text>
           {card.importance >= 8 ? (
             <Text style={[styles.top, { color: theme.accent }]}>Top story</Text>
@@ -136,10 +157,7 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
           {card.headline}
         </Text>
         <Text style={[styles.summary, { color: theme.text }]}>{card.summary}</Text>
-        <Text style={[styles.source, { color: theme.muted }]}>
-          {card.sourceName} · {relativeTime(card.publishedAt, now)}
-        </Text>
-      </View>
+      </ScrollView>
 
       <View style={[styles.actions, { borderTopColor: theme.border }]}>
         <Pressable
@@ -264,8 +282,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
-  body: { flex: 1, paddingHorizontal: 20, paddingTop: 16, gap: 10 },
-  meta: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  bodyScroll: { flex: 1 },
+  bodyContent: { paddingHorizontal: 20, paddingTop: 14, paddingBottom: 16, gap: 10 },
+  meta: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
   chip: {
     fontSize: 12,
     fontWeight: '600',
@@ -274,10 +293,17 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     overflow: 'hidden',
   },
-  top: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-  headline: { fontSize: 22, lineHeight: 28, fontWeight: '700' },
-  summary: { fontSize: 16, lineHeight: 24 },
-  source: { fontSize: 13 },
+  secondaryChip: {
+    fontSize: 12,
+    fontWeight: '500',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  top: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginLeft: 2 },
+  headline: { fontSize: 21, lineHeight: 27, fontWeight: '700' },
+  summary: { fontSize: 15, lineHeight: 23 },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
