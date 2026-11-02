@@ -15,6 +15,8 @@ export const STORAGE_KEYS = {
   feedBaseUrls: 'feed:baseUrls:v1',
   bookmarks: 'bookmarks:v1',
   settings: 'settings:v1',
+  readCards: 'feed:readCards:v1',
+  isCaughtUp: 'feed:isCaughtUp:v1',
 } as const;
 
 /** Reads and validates a JSON value; anything missing, corrupt or outdated yields undefined. */
