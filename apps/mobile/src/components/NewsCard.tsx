@@ -5,7 +5,7 @@ import * as WebBrowser from 'expo-web-browser';
 import type { ComponentProps } from 'react';
 import { useState } from 'react';
 import { Modal, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CATEGORY_LABELS } from '@/lib/categories';
 import { track } from '@/lib/telemetry';
 import { useTheme } from '@/lib/theme';
@@ -29,6 +29,7 @@ export interface NewsCardProps {
 
 export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardProps) {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
   const readMore = () => {
@@ -81,44 +82,65 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
           visible={isImageViewerOpen}
           transparent={true}
           animationType="fade"
+          statusBarTranslucent={true}
           onRequestClose={() => setIsImageViewerOpen(false)}
         >
           <View style={styles.modalBackdrop}>
-            <SafeAreaView style={styles.modalSafeArea} edges={['top', 'bottom']}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle} numberOfLines={1}>
-                  {card.sourceName}
-                </Text>
-                <Pressable
-                  onPress={() => setIsImageViewerOpen(false)}
-                  hitSlop={12}
-                  style={styles.modalCloseButton}
-                  accessibilityRole="button"
-                  accessibilityLabel="Close image"
-                >
-                  <Ionicons name="close" size={24} color="#FFFFFF" />
-                </Pressable>
-              </View>
-
-              <ScrollView
-                style={styles.modalScroll}
-                contentContainerStyle={styles.modalScrollContent}
-                maximumZoomScale={4}
-                minimumZoomScale={1}
-                showsHorizontalScrollIndicator={false}
-                showsVerticalScrollIndicator={false}
-                centerContent
+            <View
+              style={[
+                styles.modalHeader,
+                { paddingTop: Math.max(insets.top, 44) + 8 },
+              ]}
+            >
+              <Text style={styles.modalTitle} numberOfLines={1}>
+                {card.sourceName}
+              </Text>
+              <Pressable
+                onPress={() => setIsImageViewerOpen(false)}
+                hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
+                style={styles.modalCloseButton}
+                accessibilityRole="button"
+                accessibilityLabel="Close image"
               >
-                <Image
-                  source={{ uri: card.imageUrl }}
-                  style={styles.fullImage}
-                  contentFit="contain"
-                  transition={200}
-                  accessibilityIgnoresInvertColors
-                />
-              </ScrollView>
-              <Text style={styles.modalFooterHint}>Pinch to zoom • Tap ✕ to close</Text>
-            </SafeAreaView>
+                <Ionicons name="close" size={26} color="#FFFFFF" />
+              </Pressable>
+            </View>
+
+            <ScrollView
+              style={styles.modalScroll}
+              contentContainerStyle={styles.modalScrollContent}
+              maximumZoomScale={4}
+              minimumZoomScale={1}
+              showsHorizontalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
+              centerContent
+            >
+              <Image
+                source={{ uri: card.imageUrl }}
+                style={styles.fullImage}
+                contentFit="contain"
+                transition={200}
+                accessibilityIgnoresInvertColors
+              />
+            </ScrollView>
+
+            <View
+              style={[
+                styles.modalFooter,
+                { paddingBottom: Math.max(insets.bottom, 20) + 12 },
+              ]}
+            >
+              <Pressable
+                onPress={() => setIsImageViewerOpen(false)}
+                style={styles.modalClosePill}
+                accessibilityRole="button"
+                accessibilityLabel="Close image viewer"
+              >
+                <Ionicons name="close-circle-outline" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+                <Text style={styles.modalClosePillText}>Close</Text>
+              </Pressable>
+              <Text style={styles.modalFooterHint}>Pinch to zoom • Tap Close to exit</Text>
+            </View>
           </View>
         </Modal>
       ) : null}
@@ -222,27 +244,28 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000000',
   },
-  modalSafeArea: {
-    flex: 1,
-    backgroundColor: '#000000',
-  },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingBottom: 12,
+    zIndex: 10,
   },
   modalTitle: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
     flex: 1,
+    letterSpacing: 0.3,
   },
   modalCloseButton: {
-    padding: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
   },
   modalScroll: {
     flex: 1,
@@ -256,11 +279,31 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  modalFooter: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+  modalClosePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  modalClosePillText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
   modalFooterHint: {
     color: '#8E8E93',
     fontSize: 12,
     textAlign: 'center',
-    paddingBottom: 8,
   },
   noImageBanner: {
     width: '100%',
