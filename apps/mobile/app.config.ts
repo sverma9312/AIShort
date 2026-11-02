@@ -12,7 +12,7 @@ const VERSION = '1.0.0';
 const BRAND_COLOR = '#4F46E5';
 
 // Set after `eas init` (see docs/release.md). Without it, EAS Update and push tokens are disabled.
-const projectId = process.env.EAS_PROJECT_ID;
+const projectId = process.env.EAS_PROJECT_ID ?? 'c89b079c-370a-49e7-b056-0fe77c6a0350';
 // Optional: enables source map upload to Sentry during EAS builds (needs SENTRY_AUTH_TOKEN).
 const sentryOrg = process.env.SENTRY_ORG;
 const sentryProject = process.env.SENTRY_PROJECT;
