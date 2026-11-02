@@ -44,6 +44,7 @@ export default function FeedScreen() {
 
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [index, setIndex] = useState(0);
+  const indexRef = useRef(0);
   const [dismissedNew, setDismissedNew] = useState<string>();
   const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
   const [pullThresholdMet, setPullThresholdMet] = useState(false);
@@ -92,12 +93,14 @@ export default function FeedScreen() {
 
   const selectFilter = useCallback((next: CategoryFilter) => {
     setFilter(next);
+    indexRef.current = 0;
     setIndex(0);
     setShowAllRead(false);
   }, []);
 
   const onPageSelected = useCallback(
     (position: number) => {
+      indexRef.current = position;
       setIndex(position);
       update({ cardsViewed: settings.cardsViewed + 1 });
 
@@ -136,6 +139,7 @@ export default function FeedScreen() {
         });
         setShowAllRead(false);
         setCaughtUp(false);
+        indexRef.current = 0;
         setIndex(0);
       } else {
         setToast({ message: 'Up to date', icon: 'checkmark-circle' });
@@ -148,65 +152,81 @@ export default function FeedScreen() {
     }
   }, [refresh, setCaughtUp]);
 
-  // Gesture handler enabling pull-to-refresh on the first card
+  // Gesture handler enabling reliable pull-to-refresh on the first card
   const panResponder = useMemo(
     () =>
       PanResponder.create({
-        onMoveShouldSetPanResponder: (_, gesture) => {
+        onMoveShouldSetPanResponderCapture: (_, gesture) => {
           return (
-            index === 0 &&
-            gesture.dy > 12 &&
+            indexRef.current === 0 &&
+            gesture.dy > 8 &&
             Math.abs(gesture.dy) > Math.abs(gesture.dx) &&
             !isRefreshingRef.current
           );
         },
+        onMoveShouldSetPanResponder: (_, gesture) => {
+          return (
+            indexRef.current === 0 &&
+            gesture.dy > 8 &&
+            Math.abs(gesture.dy) > Math.abs(gesture.dx) &&
+            !isRefreshingRef.current
+          );
+        },
+        onPanResponderTerminationRequest: () => false,
         onPanResponderMove: (_, gesture) => {
-          if (gesture.dy > 0) {
-            const pullDistance = Math.min(gesture.dy * 0.45, 60);
-            pullAnim.setValue(pullDistance);
-            const met = pullDistance >= 40;
-            if (met !== pullThresholdMetRef.current) {
-              pullThresholdMetRef.current = met;
-              setPullThresholdMet(met);
-            }
+          const pullDistance = Math.max(0, Math.min(gesture.dy * 0.45, 60));
+          pullAnim.setValue(pullDistance);
+          const met = pullDistance >= 38;
+          if (met !== pullThresholdMetRef.current) {
+            pullThresholdMetRef.current = met;
+            setPullThresholdMet(met);
           }
         },
         onPanResponderRelease: (_, gesture) => {
-          const shouldRefresh = gesture.dy * 0.45 >= 40;
+          const shouldRefresh = gesture.dy * 0.45 >= 38;
           pullThresholdMetRef.current = false;
           setPullThresholdMet(false);
 
           if (shouldRefresh && !isRefreshingRef.current) {
+            isRefreshingRef.current = true;
             Animated.spring(pullAnim, {
               toValue: 44,
               useNativeDriver: false,
             }).start();
             void handleCheckUpdates().finally(() => {
+              isRefreshingRef.current = false;
               Animated.timing(pullAnim, {
                 toValue: 0,
                 duration: 200,
                 useNativeDriver: false,
-              }).start();
+              }).start(() => {
+                pullAnim.setValue(0);
+              });
             });
           } else {
             Animated.timing(pullAnim, {
               toValue: 0,
               duration: 180,
               useNativeDriver: false,
-            }).start();
+            }).start(() => {
+              pullAnim.setValue(0);
+            });
           }
         },
         onPanResponderTerminate: () => {
           pullThresholdMetRef.current = false;
           setPullThresholdMet(false);
+          isRefreshingRef.current = false;
           Animated.timing(pullAnim, {
             toValue: 0,
             duration: 180,
             useNativeDriver: false,
-          }).start();
+          }).start(() => {
+            pullAnim.setValue(0);
+          });
         },
       }),
-    [index, handleCheckUpdates, pullAnim],
+    [handleCheckUpdates, pullAnim],
   );
 
   // Ask about notifications once the reader has seen enough cards to know the app.
@@ -337,31 +357,28 @@ export default function FeedScreen() {
     body = renderCaughtUpCard(false);
   } else {
     body = (
-      <PagerView
-        key={`${filter}-${showAllRead ? 'all' : 'unread'}`}
-        ref={pager}
-        style={styles.pager}
-        orientation="vertical"
-        initialPage={0}
-        onPageSelected={(e) => onPageSelected(e.nativeEvent.position)}
-        testID="feed-pager"
-      >
-        {displayCards.map((card, i) => (
-          <View
-            key={card.id}
-            style={styles.page}
-            collapsable={false}
-            {...(i === 0 ? panResponder.panHandlers : {})}
-          >
-            {Math.abs(i - index) <= RENDER_WINDOW ? (
-              <NewsCard card={card} bookmarked={isBookmarked(card.id)} onToggleBookmark={toggle} />
-            ) : null}
+      <View style={styles.pagerContainer} {...panResponder.panHandlers}>
+        <PagerView
+          key={`${filter}-${showAllRead ? 'all' : 'unread'}`}
+          ref={pager}
+          style={styles.pager}
+          orientation="vertical"
+          initialPage={0}
+          onPageSelected={(e) => onPageSelected(e.nativeEvent.position)}
+          testID="feed-pager"
+        >
+          {displayCards.map((card, i) => (
+            <View key={card.id} style={styles.page} collapsable={false}>
+              {Math.abs(i - index) <= RENDER_WINDOW ? (
+                <NewsCard card={card} bookmarked={isBookmarked(card.id)} onToggleBookmark={toggle} />
+              ) : null}
+            </View>
+          ))}
+          <View key="caught-up-end" style={styles.page} collapsable={false}>
+            {Math.abs(displayCards.length - index) <= RENDER_WINDOW ? renderCaughtUpCard(true) : null}
           </View>
-        ))}
-        <View key="caught-up-end" style={styles.page} collapsable={false}>
-          {Math.abs(displayCards.length - index) <= RENDER_WINDOW ? renderCaughtUpCard(true) : null}
-        </View>
-      </PagerView>
+        </PagerView>
+      </View>
     );
   }
 
@@ -463,6 +480,7 @@ export default function FeedScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  pagerContainer: { flex: 1 },
   pullIndicator: {
     width: '100%',
     overflow: 'hidden',
