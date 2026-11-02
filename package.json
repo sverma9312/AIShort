@@ -10,6 +10,7 @@
     "node": ">=22.13.0"
   },
   "scripts": {
+    "eas-build-pre-install": "corepack enable",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

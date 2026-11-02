@@ -5,20 +5,22 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "pnpm": "12.16.1"
     },
     "preview": {
       "distribution": "internal",
+      "pnpm": "12.16.1",
       "android": {
         "buildType": "apk"
       }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "pnpm": "12.16.1"
     }
   },
   "submit": {
     "production": {}
   }
 }
-
