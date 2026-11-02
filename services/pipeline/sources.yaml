@@ -84,6 +84,43 @@ sources:
     weight: 8
     aiFocused: true
 
+  - id: qwen-blog
+    name: Qwen (Alibaba)
+    kind: rss
+    url: https://qwenlm.github.io/blog/index.xml
+    weight: 9
+    aiFocused: true
+    categoryHint: open-source
+
+  - id: cohere
+    name: Cohere
+    kind: rss
+    url: https://cohere.com/blog/rss.xml
+    weight: 9
+    aiFocused: true
+
+  - id: apple-ml
+    name: Apple ML Research
+    kind: rss
+    url: https://machinelearning.apple.com/rss.xml
+    weight: 9
+    aiFocused: true
+    categoryHint: research
+
+  - id: aws-ml
+    name: AWS Machine Learning
+    kind: rss
+    url: https://aws.amazon.com/blogs/machine-learning/feed/
+    weight: 8
+    aiFocused: true
+
+  - id: stability-ai
+    name: Stability AI
+    kind: rss
+    url: https://stability.ai/blog?format=rss
+    weight: 8
+    aiFocused: true
+
   # --- Tech press (AI sections) ---
   - id: techcrunch-ai
     name: TechCrunch
@@ -142,4 +179,27 @@ sources:
     weight: 5
     aiFocused: true
     minPoints: 10
+    categoryHint: research
+
+  # --- High-signal AI newsletters & publications ---
+  - id: import-ai
+    name: Import AI
+    kind: rss
+    url: https://importai.substack.com/feed
+    weight: 7
+    aiFocused: true
+
+  - id: last-week-in-ai
+    name: Last Week in AI
+    kind: rss
+    url: https://lastweekinai.substack.com/feed
+    weight: 7
+    aiFocused: true
+
+  - id: the-gradient
+    name: The Gradient
+    kind: rss
+    url: https://thegradient.pub/rss/
+    weight: 7
+    aiFocused: true
     categoryHint: research

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Banner } from '@/components/Banner';
@@ -117,6 +117,37 @@ export default function FeedScreen() {
             ) : null}
           </View>
         ))}
+        <View key="caught-up-end" style={styles.page} collapsable={false}>
+          {Math.abs(visible.length - index) <= RENDER_WINDOW ? (
+            <View style={[styles.caughtUpContainer, { backgroundColor: theme.card }]}>
+              <View style={[styles.caughtUpIconCircle, { backgroundColor: theme.chip }]}>
+                <Ionicons name="checkmark-circle-outline" size={56} color={theme.accent} />
+              </View>
+              <Text style={[styles.caughtUpTitle, { color: theme.text }]}>You're all caught up!</Text>
+              <Text style={[styles.caughtUpMessage, { color: theme.muted }]}>
+                You've read all the latest stories for now. We continuously monitor AI sources, so check back soon for fresh updates.
+              </Text>
+              <View style={styles.caughtUpActions}>
+                <Pressable
+                  onPress={() => void refresh()}
+                  style={[styles.caughtUpButton, { backgroundColor: theme.accent }]}
+                  accessibilityRole="button"
+                >
+                  <Ionicons name="refresh" size={18} color={theme.accentText} style={styles.buttonIcon} />
+                  <Text style={[styles.caughtUpButtonText, { color: theme.accentText }]}>Check for updates</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => pager.current?.setPage(0)}
+                  style={[styles.caughtUpButtonSecondary, { borderColor: theme.border }]}
+                  accessibilityRole="button"
+                >
+                  <Ionicons name="arrow-up" size={18} color={theme.text} style={styles.buttonIcon} />
+                  <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.text }]}>Back to top</Text>
+                </Pressable>
+              </View>
+            </View>
+          ) : null}
+        </View>
       </PagerView>
     );
   }
@@ -183,4 +214,62 @@ const styles = StyleSheet.create({
   refresh: { paddingHorizontal: 16 },
   pager: { flex: 1 },
   page: { flex: 1 },
+  caughtUpContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+    margin: 16,
+    borderRadius: 20,
+  },
+  caughtUpIconCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  caughtUpTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  caughtUpMessage: {
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+    marginBottom: 28,
+  },
+  caughtUpActions: {
+    width: '100%',
+    gap: 12,
+  },
+  caughtUpButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  caughtUpButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  caughtUpButtonSecondary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  caughtUpButtonTextSecondary: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  buttonIcon: {
+    marginRight: 6,
+  },
 });
