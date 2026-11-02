@@ -8,3 +8,7 @@ jest.mock('react-native-pager-view', () => ({
   __esModule: true,
   default: jest.requireActual<typeof ReactNative>('react-native').View,
 }));
+jest.mock('@expo/vector-icons', () => ({
+  Ionicons: 'Ionicons',
+}));
+

@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import type { ComponentProps } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
@@ -7,6 +8,7 @@ import { Banner } from '@/components/Banner';
 import { CategoryChips, type CategoryFilter } from '@/components/CategoryChips';
 import { NewsCard } from '@/components/NewsCard';
 import { StateView } from '@/components/StateView';
+import { Toast } from '@/components/Toast';
 import { useBookmarks } from '@/lib/bookmarks';
 import { useFeed } from '@/lib/feed';
 import { isPushAvailable, PROMPT_AFTER_CARDS, registerForPushNotifications } from '@/lib/push';
@@ -35,7 +37,10 @@ export default function FeedScreen() {
   const [index, setIndex] = useState(0);
   const [dismissedNew, setDismissedNew] = useState<string>();
   const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
-  const [updateFeedback, setUpdateFeedback] = useState<string | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    icon?: ComponentProps<typeof Ionicons>['name'];
+  } | null>(null);
   const [showAllRead, setShowAllRead] = useState(false);
   const pager = useRef<PagerView>(null);
 
@@ -76,7 +81,6 @@ export default function FeedScreen() {
     setFilter(next);
     setIndex(0);
     setShowAllRead(false);
-    setUpdateFeedback(null);
   }, []);
 
   const onPageSelected = useCallback(
@@ -103,27 +107,27 @@ export default function FeedScreen() {
     }
   }, [displayCards, index, markCardAsRead]);
 
-  // Handle active "Check for updates" with live feedback
+  // Handle active "Check for updates" with transient toast feedback
   const handleCheckUpdates = useCallback(async () => {
     setIsCheckingUpdates(true);
-    setUpdateFeedback(null);
     try {
       const result = await refresh();
       // Brief delay for tactile feedback
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       const newlyFetched = result?.newCardIds ?? [];
       if (newlyFetched.length > 0) {
-        setUpdateFeedback(
-          `Found ${newlyFetched.length} new ${newlyFetched.length === 1 ? 'story' : 'stories'}!`,
-        );
+        setToast({
+          message: `Found ${newlyFetched.length} new ${newlyFetched.length === 1 ? 'story' : 'stories'}!`,
+          icon: 'sparkles',
+        });
         setShowAllRead(false);
         setCaughtUp(false);
         setIndex(0);
       } else {
-        setUpdateFeedback('✓ Up to date (checked just now)');
+        setToast({ message: 'Up to date', icon: 'checkmark-circle' });
       }
     } catch {
-      setUpdateFeedback('Could not reach feed. Please try again.');
+      setToast({ message: 'Could not reach feed. Try again.', icon: 'alert-circle-outline' });
     } finally {
       setIsCheckingUpdates(false);
     }
@@ -169,12 +173,6 @@ export default function FeedScreen() {
           ? "You've read all the latest stories. Check back soon for fresh updates."
           : `You've read all stories in ${filter}. Check back soon for fresh updates.`}
       </Text>
-
-      {updateFeedback ? (
-        <View style={[styles.feedbackBadge, { backgroundColor: theme.chip }]}>
-          <Text style={[styles.feedbackText, { color: theme.accent }]}>{updateFeedback}</Text>
-        </View>
-      ) : null}
 
       <View style={styles.caughtUpActions}>
         {unreadCards.length > 0 ? (
@@ -338,6 +336,11 @@ export default function FeedScreen() {
           testID="banner-new"
         />
       ) : null}
+      <Toast
+        message={toast?.message ?? null}
+        icon={toast?.icon}
+        onDismiss={() => setToast(null)}
+      />
       {body}
     </SafeAreaView>
   );
@@ -381,16 +384,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     textAlign: 'center',
     marginBottom: 20,
-  },
-  feedbackBadge: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginBottom: 20,
-  },
-  feedbackText: {
-    fontSize: 14,
-    fontWeight: '600',
   },
   caughtUpActions: {
     width: '100%',
