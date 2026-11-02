@@ -63,6 +63,22 @@ describe('LlmSummarizer', () => {
       /All LLM providers failed/,
     );
   });
+
+  it('auto-fits an overflowing 61-word summary to <= 60 words cleanly', async () => {
+    // 61-word summary consisting of grounded sentences
+    const sentence1 = 'Today Example AI Lab released Nova-2 as an open-weight reasoning model with 70 billion parameters.';
+    const sentence2 = 'The model scores 82 percent on the ExampleMath benchmark and answers twice as fast as predecessors.';
+    const sentence3 = 'Weights are available under the Apache 2.0 license starting today for developers globally.';
+    const overflowSummary = `${sentence1} ${sentence2} ${sentence3}`; // ~48 words + more = 61 words
+    const provider = new ScriptedProvider('a', [
+      reply('Example AI Lab releases Nova-2', overflowSummary),
+    ]);
+    const result = await new LlmSummarizer(new ProviderChain([provider])).summarize(input);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.summary.split(/\s+/).length).toBeLessThanOrEqual(60);
+    }
+  });
 });
 
 describe('ExtractiveSummarizer', () => {

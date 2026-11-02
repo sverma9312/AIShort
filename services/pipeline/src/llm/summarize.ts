@@ -2,7 +2,7 @@ import { HEADLINE_MAX_WORDS, SUMMARY_MAX_WORDS, countWords } from '@aishort/shar
 import { z } from 'zod';
 import type { JsonLlm } from './chain';
 import { SUMMARIZE_SYSTEM, summarizeRetryPrompt, summarizeUserPrompt } from './prompts';
-import { validateSummary, type SummaryDraft } from './validate';
+import { validateSummary, SUMMARY_MIN_WORDS, type SummaryDraft } from './validate';
 
 export interface SummarizeInput {
   title: string;
@@ -44,13 +44,61 @@ export class LlmSummarizer implements Summarizer {
         },
         DraftSchema,
       );
-      const draft = { headline: tidyHeadline(data.headline), summary: data.summary.trim() };
+      const rawHeadline = tidyHeadline(data.headline);
+      const rawSummary = data.summary.trim();
+      const draft = {
+        headline:
+          countWords(rawHeadline) > HEADLINE_MAX_WORDS
+            ? fitHeadlineWords(rawHeadline)
+            : rawHeadline,
+        summary:
+          countWords(rawSummary) > SUMMARY_MAX_WORDS
+            ? fitSummaryWords(rawSummary)
+            : rawSummary,
+      };
       issues = validateSummary(draft, input);
       if (issues.length === 0) return { ok: true, ...draft, provider, attempts: attempt };
       previous = draft;
     }
     return { ok: false, issues, attempts: this.maxAttempts };
   }
+}
+
+export function fitSummaryWords(
+  summary: string,
+  maxWords: number = SUMMARY_MAX_WORDS,
+  minWords: number = SUMMARY_MIN_WORDS,
+): string {
+  if (countWords(summary) <= maxWords) return summary;
+
+  // 1. Try taking complete sentences if they add up to between minWords and maxWords
+  const sentences = summary.match(/[^.!?]+[.!?]+["'”)]?/g);
+  if (sentences && sentences.length > 1) {
+    let candidate = '';
+    for (const sentence of sentences) {
+      const next = candidate ? `${candidate} ${sentence.trim()}` : sentence.trim();
+      if (countWords(next) <= maxWords) {
+        candidate = next;
+      } else {
+        break;
+      }
+    }
+    if (candidate && countWords(candidate) >= minWords && countWords(candidate) <= maxWords) {
+      return candidate;
+    }
+  }
+
+  // 2. Otherwise trim cleanly at word boundary and terminate with period
+  const words = summary.trim().split(/\s+/u);
+  const trimmed = words.slice(0, maxWords).join(' ').replace(/[,;:\-\s]+$/, '');
+  return /[.!?]["'”)]?$/.test(trimmed) ? trimmed : `${trimmed}.`;
+}
+
+export function fitHeadlineWords(headline: string, maxWords: number = HEADLINE_MAX_WORDS): string {
+  const trimmed = tidyHeadline(headline);
+  if (countWords(trimmed) <= maxWords) return trimmed;
+  const words = trimmed.split(/\s+/u);
+  return words.slice(0, maxWords).join(' ').replace(/[,;:\-\s]+$/, '');
 }
 
 /**

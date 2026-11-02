@@ -46,7 +46,7 @@ export class GeminiProvider implements LlmProvider {
       fetch: this.options.fetch ?? ((input, init) => fetch(input, init)),
       url: `${baseUrl}/v1beta/models/${encodeURIComponent(model)}:generateContent`,
       headers: { 'x-goog-api-key': apiKey },
-      timeoutMs: this.options.timeoutMs ?? 60_000,
+      timeoutMs: this.options.timeoutMs ?? 90_000,
       body: {
         systemInstruction: { parts: [{ text: request.system }] },
         contents: [{ role: 'user', parts: [{ text: request.user }] }],

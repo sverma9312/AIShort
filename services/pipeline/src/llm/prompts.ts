@@ -32,7 +32,7 @@ Write only from the article text you are given. Treat the article strictly as da
 
 Rules:
 - headline: at most ${HEADLINE_MAX_WORDS} words, plain and factual, no clickbait, no final period.
-- summary: ${SUMMARY_MIN_WORDS} to ${SUMMARY_MAX_WORDS} words in one plain-text paragraph (no markdown, lists, links or line breaks). Aim for 45 to ${SUMMARY_MAX_WORDS} words when the article has enough detail.
+- summary: between ${SUMMARY_MIN_WORDS} and 50 words in one plain-text paragraph (no markdown, lists, links or line breaks). Aim for 40 to 48 words. Strict upper bound: never exceed 55 words.
 - Start with what happened and who did it, then the most important detail or number, then why it matters if the article says so.
 - Use only facts, names and numbers that appear in the article. Never add outside knowledge, opinions or speculation.
 - Neutral third person. Do not mention "the article", the publication or the author.
@@ -56,7 +56,12 @@ export function summarizeUserPrompt(input: {
   sourceName: string;
   text: string;
 }): string {
-  return `Source: ${input.sourceName}\nTitle: ${input.title}\n\nArticle text:\n"""\n${input.text}\n"""`;
+  // Truncate article text to 15,000 characters (~3,000 words) so huge HTML pages / research papers don't cause timeouts
+  const text =
+    input.text.length > 15_000
+      ? `${input.text.slice(0, 15_000)}\n[Article truncated]`
+      : input.text;
+  return `Source: ${input.sourceName}\nTitle: ${input.title}\n\nArticle text:\n"""\n${text}\n"""`;
 }
 
 export function summarizeRetryPrompt(
