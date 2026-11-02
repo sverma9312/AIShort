@@ -3,7 +3,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as WebBrowser from 'expo-web-browser';
 import type { ComponentProps } from 'react';
-import { Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Modal, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { CATEGORY_LABELS } from '@/lib/categories';
 import { track } from '@/lib/telemetry';
 import { useTheme } from '@/lib/theme';
@@ -27,6 +29,7 @@ export interface NewsCardProps {
 
 export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardProps) {
   const theme = useTheme();
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
   const readMore = () => {
     track('card_read_more', { category: card.category });
@@ -44,7 +47,12 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
   return (
     <View style={[styles.container, { backgroundColor: theme.card }]} testID={`card-${card.id}`}>
       {card.imageUrl ? (
-        <View style={[styles.imageContainer, { backgroundColor: theme.card }]}>
+        <Pressable
+          onPress={() => setIsImageViewerOpen(true)}
+          style={[styles.imageContainer, { backgroundColor: theme.card }]}
+          accessibilityRole="button"
+          accessibilityLabel="View full image"
+        >
           <Image
             source={{ uri: card.imageUrl }}
             style={styles.image}
@@ -53,7 +61,10 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
             accessibilityIgnoresInvertColors
             accessible={false}
           />
-        </View>
+          <View style={styles.zoomHint}>
+            <Ionicons name="scan-outline" size={14} color="#FFFFFF" />
+          </View>
+        </Pressable>
       ) : (
         <View style={[styles.noImageBanner, { backgroundColor: theme.chip }]}>
           <View style={[styles.noImageIconCircle, { backgroundColor: theme.card }]}>
@@ -64,6 +75,53 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
           </Text>
         </View>
       )}
+
+      {card.imageUrl ? (
+        <Modal
+          visible={isImageViewerOpen}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setIsImageViewerOpen(false)}
+        >
+          <View style={styles.modalBackdrop}>
+            <SafeAreaView style={styles.modalSafeArea} edges={['top', 'bottom']}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle} numberOfLines={1}>
+                  {card.sourceName}
+                </Text>
+                <Pressable
+                  onPress={() => setIsImageViewerOpen(false)}
+                  hitSlop={12}
+                  style={styles.modalCloseButton}
+                  accessibilityRole="button"
+                  accessibilityLabel="Close image"
+                >
+                  <Ionicons name="close" size={24} color="#FFFFFF" />
+                </Pressable>
+              </View>
+
+              <ScrollView
+                style={styles.modalScroll}
+                contentContainerStyle={styles.modalScrollContent}
+                maximumZoomScale={4}
+                minimumZoomScale={1}
+                showsHorizontalScrollIndicator={false}
+                showsVerticalScrollIndicator={false}
+                centerContent
+              >
+                <Image
+                  source={{ uri: card.imageUrl }}
+                  style={styles.fullImage}
+                  contentFit="contain"
+                  transition={200}
+                  accessibilityIgnoresInvertColors
+                />
+              </ScrollView>
+              <Text style={styles.modalFooterHint}>Pinch to zoom • Tap ✕ to close</Text>
+            </SafeAreaView>
+          </View>
+        </Modal>
+      ) : null}
 
       <View style={styles.body}>
         <View style={styles.meta}>
@@ -134,6 +192,58 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   image: { width: '100%', height: '100%' },
+  zoomHint: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    padding: 6,
+    borderRadius: 8,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: '#000000',
+  },
+  modalSafeArea: {
+    flex: 1,
+    backgroundColor: '#000000',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  modalTitle: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    flex: 1,
+  },
+  modalCloseButton: {
+    padding: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 20,
+  },
+  modalScroll: {
+    flex: 1,
+  },
+  modalScrollContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullImage: {
+    width: '100%',
+    height: '100%',
+  },
+  modalFooterHint: {
+    color: '#8E8E93',
+    fontSize: 12,
+    textAlign: 'center',
+    paddingBottom: 8,
+  },
   noImageBanner: {
     width: '100%',
     height: '22%',
