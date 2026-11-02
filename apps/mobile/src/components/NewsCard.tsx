@@ -1,12 +1,22 @@
-import type { Card } from '@aishort/shared';
+import type { Card, Category } from '@aishort/shared';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as WebBrowser from 'expo-web-browser';
+import type { ComponentProps } from 'react';
 import { Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { CATEGORY_LABELS } from '@/lib/categories';
 import { track } from '@/lib/telemetry';
 import { useTheme } from '@/lib/theme';
 import { relativeTime } from '@/lib/time';
+
+const CATEGORY_ICONS: Record<Category, ComponentProps<typeof Ionicons>['name']> = {
+  models: 'hardware-chip-outline',
+  research: 'flask-outline',
+  products: 'cube-outline',
+  business: 'trending-up-outline',
+  policy: 'shield-checkmark-outline',
+  'open-source': 'git-branch-outline',
+};
 
 export interface NewsCardProps {
   card: Card;
@@ -43,9 +53,12 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
           accessible={false}
         />
       ) : (
-        <View style={[styles.image, styles.placeholder, { backgroundColor: theme.chip }]}>
-          <Text style={[styles.placeholderText, { color: theme.accent }]}>
-            {CATEGORY_LABELS[card.category]}
+        <View style={[styles.noImageBanner, { backgroundColor: theme.chip }]}>
+          <View style={[styles.noImageIconCircle, { backgroundColor: theme.card }]}>
+            <Ionicons name={CATEGORY_ICONS[card.category]} size={36} color={theme.accent} />
+          </View>
+          <Text style={[styles.noImageSource, { color: theme.muted }]}>
+            {card.sourceName} · {CATEGORY_LABELS[card.category]}
           </Text>
         </View>
       )}
@@ -111,8 +124,26 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
 const styles = StyleSheet.create({
   container: { flex: 1, overflow: 'hidden' },
   image: { width: '100%', height: '38%' },
-  placeholder: { alignItems: 'center', justifyContent: 'center' },
-  placeholderText: { fontSize: 28, fontWeight: '700' },
+  noImageBanner: {
+    width: '100%',
+    height: '22%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  noImageIconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noImageSource: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
   body: { flex: 1, paddingHorizontal: 20, paddingTop: 16, gap: 10 },
   meta: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   chip: {
