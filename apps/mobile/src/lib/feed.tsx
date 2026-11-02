@@ -133,9 +133,16 @@ export function FeedProvider({
     return () => subscription.remove();
   }, [refresh]);
 
+  const cards = useMemo(() => {
+    const raw = snapshot?.feed.cards ?? [];
+    return [...raw].sort(
+      (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+    );
+  }, [snapshot]);
+
   const value = useMemo<FeedContextValue>(
     () => ({
-      cards: snapshot?.feed.cards ?? [],
+      cards,
       status,
       offline,
       ...(error ? { error } : {}),
@@ -144,7 +151,7 @@ export function FeedProvider({
       updateRequired,
       refresh,
     }),
-    [snapshot, status, offline, error, newCardIds, updateRequired, refresh],
+    [cards, status, offline, error, snapshot, newCardIds, updateRequired, refresh],
   );
   return <FeedContext.Provider value={value}>{children}</FeedContext.Provider>;
 }

@@ -1,7 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Animated,
+  PanResponder,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Banner } from '@/components/Banner';
@@ -37,6 +46,10 @@ export default function FeedScreen() {
   const [index, setIndex] = useState(0);
   const [dismissedNew, setDismissedNew] = useState<string>();
   const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
+  const [pullThresholdMet, setPullThresholdMet] = useState(false);
+  const pullAnim = useRef(new Animated.Value(0)).current;
+  const isRefreshingRef = useRef(false);
+  const pullThresholdMetRef = useRef(false);
   const [toast, setToast] = useState<{
     message: string;
     icon?: ComponentProps<typeof Ionicons>['name'];
@@ -110,6 +123,7 @@ export default function FeedScreen() {
   // Handle active "Check for updates" with transient toast feedback
   const handleCheckUpdates = useCallback(async () => {
     setIsCheckingUpdates(true);
+    isRefreshingRef.current = true;
     try {
       const result = await refresh();
       // Brief delay for tactile feedback
@@ -130,8 +144,70 @@ export default function FeedScreen() {
       setToast({ message: 'Could not reach feed. Try again.', icon: 'alert-circle-outline' });
     } finally {
       setIsCheckingUpdates(false);
+      isRefreshingRef.current = false;
     }
   }, [refresh, setCaughtUp]);
+
+  // Gesture handler enabling pull-to-refresh on the first card
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onMoveShouldSetPanResponder: (_, gesture) => {
+          return (
+            index === 0 &&
+            gesture.dy > 12 &&
+            Math.abs(gesture.dy) > Math.abs(gesture.dx) &&
+            !isRefreshingRef.current
+          );
+        },
+        onPanResponderMove: (_, gesture) => {
+          if (gesture.dy > 0) {
+            const pullDistance = Math.min(gesture.dy * 0.45, 60);
+            pullAnim.setValue(pullDistance);
+            const met = pullDistance >= 40;
+            if (met !== pullThresholdMetRef.current) {
+              pullThresholdMetRef.current = met;
+              setPullThresholdMet(met);
+            }
+          }
+        },
+        onPanResponderRelease: (_, gesture) => {
+          const shouldRefresh = gesture.dy * 0.45 >= 40;
+          pullThresholdMetRef.current = false;
+          setPullThresholdMet(false);
+
+          if (shouldRefresh && !isRefreshingRef.current) {
+            Animated.spring(pullAnim, {
+              toValue: 44,
+              useNativeDriver: false,
+            }).start();
+            void handleCheckUpdates().finally(() => {
+              Animated.timing(pullAnim, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: false,
+              }).start();
+            });
+          } else {
+            Animated.timing(pullAnim, {
+              toValue: 0,
+              duration: 180,
+              useNativeDriver: false,
+            }).start();
+          }
+        },
+        onPanResponderTerminate: () => {
+          pullThresholdMetRef.current = false;
+          setPullThresholdMet(false);
+          Animated.timing(pullAnim, {
+            toValue: 0,
+            duration: 180,
+            useNativeDriver: false,
+          }).start();
+        },
+      }),
+    [index, handleCheckUpdates, pullAnim],
+  );
 
   // Ask about notifications once the reader has seen enough cards to know the app.
   useEffect(() => {
@@ -271,7 +347,12 @@ export default function FeedScreen() {
         testID="feed-pager"
       >
         {displayCards.map((card, i) => (
-          <View key={card.id} style={styles.page} collapsable={false}>
+          <View
+            key={card.id}
+            style={styles.page}
+            collapsable={false}
+            {...(i === 0 ? panResponder.panHandlers : {})}
+          >
             {Math.abs(i - index) <= RENDER_WINDOW ? (
               <NewsCard card={card} bookmarked={isBookmarked(card.id)} onToggleBookmark={toggle} />
             ) : null}
@@ -341,6 +422,40 @@ export default function FeedScreen() {
         icon={toast?.icon}
         onDismiss={() => setToast(null)}
       />
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.pullIndicator,
+          {
+            height: pullAnim,
+            opacity: pullAnim.interpolate({
+              inputRange: [0, 15, 40],
+              outputRange: [0, 0.6, 1],
+              extrapolate: 'clamp',
+            }),
+            backgroundColor: theme.chip,
+          },
+        ]}
+      >
+        {isCheckingUpdates ? (
+          <View style={styles.pullIndicatorContent}>
+            <ActivityIndicator size="small" color={theme.accent} style={styles.pullIndicatorIcon} />
+            <Text style={[styles.pullIndicatorText, { color: theme.text }]}>Checking for updates…</Text>
+          </View>
+        ) : (
+          <View style={styles.pullIndicatorContent}>
+            <Ionicons
+              name={pullThresholdMet ? 'arrow-up' : 'arrow-down'}
+              size={15}
+              color={theme.accent}
+              style={styles.pullIndicatorIcon}
+            />
+            <Text style={[styles.pullIndicatorText, { color: theme.text }]}>
+              {pullThresholdMet ? 'Release to refresh' : 'Pull down to refresh'}
+            </Text>
+          </View>
+        )}
+      </Animated.View>
       {body}
     </SafeAreaView>
   );
@@ -348,6 +463,25 @@ export default function FeedScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  pullIndicator: {
+    width: '100%',
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pullIndicatorContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+  },
+  pullIndicatorIcon: {
+    marginRight: 6,
+  },
+  pullIndicatorText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
