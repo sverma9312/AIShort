@@ -42,6 +42,7 @@ export const CardSchema = z.object({
 export const FeedSchema = z.object({
   version: z.literal(FEED_VERSION),
   generatedAt: utcDateTime,
+  count: z.number().int().nonnegative().optional(),
   cards: z.array(CardSchema),
 });
 

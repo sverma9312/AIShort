@@ -31,8 +31,15 @@ export async function buildSite(store: Store, options: SiteOptions): Promise<Map
   const cards = await store.listVisibleCards(hoursBefore(now, archiveDays * 24).toISOString());
   const files = new Map<string, string>();
 
-  const feed = (list: CardRecord[]): Feed =>
-    FeedSchema.parse({ version: FEED_VERSION, generatedAt, cards: list.map(toPublicCard) });
+  const feed = (list: CardRecord[]): Feed => {
+    const publicCards = list.map(toPublicCard);
+    return FeedSchema.parse({
+      version: FEED_VERSION,
+      generatedAt,
+      count: publicCards.length,
+      cards: publicCards,
+    });
+  };
   files.set(FEED_PATHS.latest, json(feed(cards.slice(0, latestLimit))));
 
   const byDay = new Map<string, CardRecord[]>();

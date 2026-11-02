@@ -23,10 +23,25 @@
       </p>
       <h2>Get the app</h2>
       <p>Coming soon to the App Store and Google Play.</p>
+      <div id="live-status" style="margin: 1.5rem 0; padding: 0.75rem 1rem; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem;">
+        📡 <strong>Live Feed Status:</strong> <span id="status-text">Checking latest feed…</span>
+      </div>
       <footer>
         <a href="privacy/">Privacy policy</a> · <a href="support/">Support</a> ·
         <a href="v1/feed/latest.json">Feed (JSON)</a>
       </footer>
     </main>
+    <script>
+      fetch('v1/feed/latest.json')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var count = data.count !== undefined ? data.count : (data.cards ? data.cards.length : 0);
+          var dateStr = data.generatedAt ? new Date(data.generatedAt).toLocaleString() : 'recently';
+          document.getElementById('status-text').textContent = count + ' stories live • Updated ' + dateStr;
+        })
+        .catch(function() {
+          document.getElementById('status-text').textContent = 'Available at v1/feed/latest.json';
+        });
+    </script>
   </body>
 </html>
