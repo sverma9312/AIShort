@@ -6,16 +6,16 @@
 
 ## Status
 
-**Summary (as of 2026-10-28): 3 of 6 milestones complete, 2 partially done, 1 not started.**
+**Summary (as of 2026-11-02): 3 of 6 milestones complete, 2 partially done (with on-device local testing track complete), 1 not started.**
 
-| Milestone                   | Scope                                                               | Status                                                                                                                                                                    |
-| --------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **0. Foundation**           | Monorepo, shared feed contract, CI                                  | ✅ Complete                                                                                                                                                               |
-| **1. Pipeline core**        | Sources, normalize, extract, LLM layer, orchestrator, dry/live CLI  | ✅ Complete (real LLM path not yet run with live keys)                                                                                                                    |
-| **2. Persistence + deploy** | Supabase, scheduled GitHub Actions run, GitHub Pages deploy, alerts | ✅ Complete in code (not yet deployed: needs Supabase project, secrets, Pages enabled)                                                                                    |
-| **3. Mobile app MVP**       | Expo app: swipe feed, offline cache, bookmarks, settings            | 🟡 Partial — app and unit tests done (`69033c4`); missing component/screen tests and Maestro E2E flows                                                                    |
-| **4. Push + background**    | Push notifications, background refresh                              | 🟡 Partial — app side done (token registration, deep links, background task); missing pipeline notify step (Expo push sending, receipts, daily cap); untested on a device |
-| **5. Release**              | Final name, EAS builds, store listings, testing tracks              | ❌ Not started (`docs/release.md` referenced by `docs/ops.md` doesn't exist yet)                                                                                          |
+| Milestone                   | Scope                                                                       | Status                                                                                                                                                                                   |
+| --------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0. Foundation**           | Monorepo, shared feed contract, CI                                          | ✅ Complete                                                                                                                                                                              |
+| **1. Pipeline core**        | Sources, normalize, extract, LLM layer, orchestrator, dry/live CLI          | ✅ Complete (live key pipeline validated)                                                                                                                                                |
+| **2. Persistence + deploy** | Supabase, scheduled GitHub Actions run, GitHub Pages deploy, alerts         | ✅ Complete (live feed deployed to GitHub Pages; scheduled ingestion active)                                                                                                             |
+| **3. Mobile app MVP**       | Expo app: swipe feed, offline cache, bookmarks, settings, on-device testing | 🟡 Near complete — app, local on-device testing track (Expo Go iOS + EAS Preview APK Android), gestures & UI polish done (`7c577c4`); missing component/screen tests & Maestro E2E smoke |
+| **4. Push + background**    | Push notifications, background refresh                                      | 🟡 Partial — app side done (token registration, deep links, background task); missing pipeline notify step (Expo push sending, receipts, daily cap); untested on a device                |
+| **5. Release**              | Final name, EAS builds, store listings, testing tracks                      | ❌ Not started (local device testing track completed in M3 prior to store release tracks)                                                                                                |
 
 ## 1. Principles
 
@@ -103,17 +103,39 @@ read, and `pnpm --filter @aishort/pipeline eval` passes the sample articles.
 
 ### Milestone 3 — Mobile app MVP 🟡
 
-Done: PRs 13–18 (`69033c4`). Remaining: screen/component tests, PR 19 (Maestro).
+Done: PRs 13–18 (`69033c4`) and local device testing & polish (`7c577c4`). Remaining: screen/component tests, PR 19 (Maestro).
 
-| PR                | What                                                                                                                   | Key details                                                                   |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| 13. Expo scaffold | `apps/mobile` (TypeScript, Expo Router), Metro configured for the monorepo, imports `@aishort/shared`                  | `node-linker=hoisted` if React Native resolution needs it; placeholder app ID |
-| 14. Data layer    | `feedClient`: ETag requests, fallback base URLs from `meta.json`, `parseFeedLenient()`; MMKV; TanStack Query persister | Tests for 200 / 304 / network error / malformed card                          |
-| 15. Feed screen   | `<Card />` + vertical `PagerView`; loading, empty, error, offline states; prefetch next 5 images                       | Render only current ±2 cards; test on a low-end Android                       |
-| 16. Card actions  | Read more (`expo-web-browser`), Share, Bookmarks (full card copy in MMKV), category filter                             |                                                                               |
-| 17. Settings      | Theme, categories, notifications toggle, privacy link, version                                                         |                                                                               |
-| 18. Telemetry     | Sentry + PostHog with opt-out, error boundary, no personal data                                                        |                                                                               |
-| 19. E2E smoke     | Maestro flows: launch → swipe → bookmark → read more                                                                   |                                                                               |
+| PR                                     | What                                                                                                                                                                                                                                                               | Key details                                                                                     |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| 13. Expo scaffold                      | `apps/mobile` (TypeScript, Expo Router), Metro configured for the monorepo, imports `@aishort/shared`                                                                                                                                                              | `node-linker=hoisted` if React Native resolution needs it; placeholder app ID                   |
+| 14. Data layer                         | `feedClient`: ETag requests, fallback base URLs from `meta.json`, `parseFeedLenient()`; MMKV; TanStack Query persister                                                                                                                                             | Tests for 200 / 304 / network error / malformed card                                            |
+| 15. Feed screen                        | `<Card />` + vertical `PagerView`; loading, empty, error, offline states; prefetch next 5 images                                                                                                                                                                   | Render only current ±2 cards; test on a low-end Android                                         |
+| 16. Card actions                       | Read more (`expo-web-browser`), Share, Bookmarks (full card copy in MMKV), category filter                                                                                                                                                                         |                                                                                                 |
+| 17. Settings                           | Theme, categories, notifications toggle, privacy link, version                                                                                                                                                                                                     |                                                                                                 |
+| 18. Telemetry                          | Sentry + PostHog with opt-out, error boundary, no personal data                                                                                                                                                                                                    |                                                                                                 |
+| **18b. Local device testing & polish** | On-device validation without app store publishing: iOS via Expo Go (Metro LAN), Android via standalone EAS Preview APK (`buildType: apk`), pull-to-refresh PanResponder capture, transient `<Toast />` feedback, Dynamic Island safe image modal, animated tab bar | Validated on real iPhone & Android hardware; decoupled from store approval and fee requirements |
+| 19. E2E smoke                          | Maestro flows: launch → swipe → bookmark → read more                                                                                                                                                                                                               |                                                                                                 |
+
+#### Local & On-Device Testing Track (Pre-Publishing)
+
+To validate physical ergonomics, gesture interactions, and real-time feed consumption without store submission friction or account costs (Apple Developer $99/year fee, Google Play Console registration, 14-day 12-tester closed testing gate), an explicit pre-publishing device testing track was added:
+
+1. **iOS Testing via Expo Go**:
+   - Runs directly on physical iPhones using the Expo Go client over Metro Wi-Fi / LAN (`npx expo start`).
+   - Enables instantaneous code fast-refresh and real-time debugging without requiring an Apple Developer Account, provisioning profiles, or TestFlight builds.
+   - Allowed live verification of Dynamic Island / notch safe area handling for modals and navigation.
+
+2. **Android Testing via EAS Preview APK**:
+   - Standalone internal distribution `.apk` builds configured in `apps/mobile/eas.json` under the `preview` profile (`buildType: "apk"`).
+   - Built via Expo Application Services cloud (`eas build --platform android --profile preview --no-wait`) or locally (`eas build -p android --profile preview --local`).
+   - Generates directly downloadable `.apk` files for immediate sideloading and installation on any physical Android device or emulator without Google Play Store review.
+   - Runs within EAS free-tier allowances (15 cloud builds/month for iOS/Android, unlimited local builds).
+
+3. **Physical Device Ergonomics & Gesture Polish**:
+   - **Card 0 Pull-to-Refresh**: Built a custom gesture responder with capture phase (`onMoveShouldSetPanResponderCapture`), termination lock (`onPanResponderTerminationRequest: () => false`), and a real-time card index ref (`indexRef`) to prevent gesture collisions between the outer vertical `PagerView` and the inner card `ScrollView`.
+   - **Dynamic Island & Notch-Safe Image Viewer**: Integrated `useSafeAreaInsets()` directly into the full-screen image viewer `<Modal />` with dynamic top padding (`Math.max(insets.top, 44) + 8`), a 44×44px top-right touch target, and a secondary bottom `[ Close ]` pill to ensure comfortable single-handed dismissal on notched devices.
+   - **Transient Toast Feedback**: Replaced static screen badges with a floating animated `<Toast />` HUD (`FadeInDown`/`FadeOutUp`) for non-intrusive feedback ("You're caught up", "Refreshed", etc.).
+   - **Animated Bottom Tab Bar**: Added active highlight capsule pill, outline-to-filled icon state transitions, and tactile spring scale animations on tab presses.
 
 ### Milestone 4 — Push + background refresh 🟡
 
@@ -127,38 +149,44 @@ Done: PRs 20 and 22 (app side). Remaining: PR 21 (pipeline notify step), device 
 
 ### Milestone 5 — Release ❌
 
-| Task                    | What                                                                                                  |
-| ----------------------- | ----------------------------------------------------------------------------------------------------- |
-| 23. Final name + app ID | Rename everywhere; the app ID can't change after the first upload                                     |
-| 24. EAS                 | `eas.json` profiles, EAS Update channels, `eas-build.yml` on `v*` tags                                |
-| 25. Store assets        | Icon, splash, screenshots; Play Data safety, content rating, News apps declaration; Apple App Privacy |
-| 26. Testing tracks      | Start Play closed testing (12 testers × 14 days) at the end of Milestone 3; TestFlight in parallel    |
+| Task                     | What                                                                                                                                        |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| 23. Final name + app ID  | Rename everywhere; the app ID can't change after the first upload                                                                           |
+| 24. EAS                  | `eas.json` profiles, EAS Update channels, `eas-build.yml` on `v*` tags                                                                      |
+| 25. Store assets         | Icon, splash, screenshots; Play Data safety, content rating, News apps declaration; Apple App Privacy                                       |
+| 26. Store testing tracks | Play closed testing (12 testers × 14 days) and Apple TestFlight; follows the Milestone 3 local device testing track (Expo Go & Preview APK) |
 
 ## 5. Testing strategy
 
-| Layer                 | Tool                                                       | Protects                                                 |
-| --------------------- | ---------------------------------------------------------- | -------------------------------------------------------- |
-| Unit                  | Vitest                                                     | URL cleanup, prefilter, extraction, validators, failover |
-| Contract              | Shared Zod schemas + `packages/shared/fixtures`            | Pipeline and app agree on the feed                       |
-| End-to-end (pipeline) | `run.test.ts` on the dry-run fixtures                      | Cards, dedupe, idempotency, LLM outages, baseline, caps  |
-| LLM quality           | `pnpm --filter @aishort/pipeline eval` (manual, real keys) | Summary quality across prompt changes                    |
-| Integration           | Local Supabase, nightly (M2)                               | SQL, RLS, similarity queries                             |
-| App E2E               | Maestro (M3)                                               | Core flows on real builds                                |
-| Production guard      | Schema validation before every publish                     | A bad run never replaces a good feed                     |
+| Layer                 | Tool                                                       | Protects                                                                |
+| --------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Unit                  | Vitest                                                     | URL cleanup, prefilter, extraction, validators, failover                |
+| Contract              | Shared Zod schemas + `packages/shared/fixtures`            | Pipeline and app agree on the feed                                      |
+| End-to-end (pipeline) | `run.test.ts` on the dry-run fixtures                      | Cards, dedupe, idempotency, LLM outages, baseline, caps                 |
+| LLM quality           | `pnpm --filter @aishort/pipeline eval` (manual, real keys) | Summary quality across prompt changes                                   |
+| Integration           | Local Supabase, nightly (M2)                               | SQL, RLS, similarity queries                                            |
+| On-device (pre-store) | Expo Go (iOS) · EAS Preview APK (Android)                  | Physical ergonomics, gesture conflicts, notch insets, real feed caching |
+| App E2E               | Maestro (M3)                                               | Core flows on real builds                                               |
+| Production guard      | Schema validation before every publish                     | A bad run never replaces a good feed                                    |
 
 ## 6. Decisions and deviations log
 
-| Decision                                                          | Why                                                                                                                           |
-| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| TypeScript held at 6.0.x                                          | typescript-eslint supports TypeScript < 6.1; Dependabot ignores ≥ 6.1                                                         |
-| `fetch` injected into the HTTP client instead of MSW              | Simpler tests and the same fixture `fetch` powers the dry run                                                                 |
-| pnpm `allowBuilds: esbuild`                                       | pnpm 12 blocks install scripts; tsx needs esbuild's                                                                           |
-| Mistral via RSS (`/news/rss`), Anthropic + Meta via listing pages | Found while smoke-testing live sources                                                                                        |
-| VentureBeat disabled                                              | Returned HTTP 429 when checked                                                                                                |
-| Listing-page baseline on first crawl                              | Listing pages have no dates; avoids publishing a site's back catalog                                                          |
-| Titles with different numbers never merge                         | "GPT-6" vs "GPT-7" would otherwise look like the same story                                                                   |
-| Models are env settings (`GEMINI_MODEL`, `GROQ_MODEL`)            | Free-tier model lineups change often                                                                                          |
-| A Gemini (Google AI Pro) subscription doesn't raise API limits    | API keys are billed per Cloud project tier; start on the free tier, link billing (with a budget alert) only if quotas run out |
+| Decision                                                          | Why                                                                                                                                                    |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| TypeScript held at 6.0.x                                          | typescript-eslint supports TypeScript < 6.1; Dependabot ignores ≥ 6.1                                                                                  |
+| `fetch` injected into the HTTP client instead of MSW              | Simpler tests and the same fixture `fetch` powers the dry run                                                                                          |
+| pnpm `allowBuilds: esbuild`                                       | pnpm 12 blocks install scripts; tsx needs esbuild's                                                                                                    |
+| Mistral via RSS (`/news/rss`), Anthropic + Meta via listing pages | Found while smoke-testing live sources                                                                                                                 |
+| VentureBeat disabled                                              | Returned HTTP 429 when checked                                                                                                                         |
+| Listing-page baseline on first crawl                              | Listing pages have no dates; avoids publishing a site's back catalog                                                                                   |
+| Titles with different numbers never merge                         | "GPT-6" vs "GPT-7" would otherwise look like the same story                                                                                            |
+| Models are env settings (`GEMINI_MODEL`, `GROQ_MODEL`)            | Free-tier model lineups change often                                                                                                                   |
+| A Gemini (Google AI Pro) subscription doesn't raise API limits    | API keys are billed per Cloud project tier; start on the free tier, link billing (with a budget alert) only if quotas run out                          |
+| On-device pre-store testing track (Expo Go + EAS APK)             | Validate UX and ergonomics on physical devices early without paying for Apple Dev ($99/yr) or waiting on Google Play 14-day closed testing             |
+| Capture-phase PanResponder for feed pull-to-refresh               | Native `PagerView` and inner `ScrollView` swallowed vertical swipe gestures; capture phase and termination locks guarantee smooth pull-down on card 0  |
+| Dynamic Island / notch safe insets for full-screen modals         | Native `<Modal>` resets safe area context; reading root `useSafeAreaInsets().top` ensures modal controls never overlap hardware cutouts or status bars |
+| Transient `<Toast />` overlay over persistent status badges       | Persistent caught-up badges cluttered screen space and went stale; auto-dismissing animated toast provides clear feedback without obscuring cards      |
+| Standalone `preview` APK profile in `eas.json`                    | Production builds default to `.aab` for Google Play; `preview` profile builds `.apk` for zero-friction sideloading and testing on Android devices      |
 
 ## 7. Known limitations
 
