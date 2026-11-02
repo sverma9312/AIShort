@@ -57,12 +57,20 @@ export default function FeedScreen() {
   const displayCards = showAllRead ? visible : unreadCards;
 
   // The user is caught up if read history has loaded, not reviewing past stories,
-  // and either they reached the caught-up screen previously or all visible stories are read.
+  // and all visible stories in this filter have been read.
   const userIsCaughtUp =
     readHistoryLoaded &&
     !showAllRead &&
     visible.length > 0 &&
-    (isCaughtUp || unreadCards.length === 0);
+    unreadCards.length === 0;
+
+  // Periodically check for new stories every 2.5 minutes while the app is sitting open
+  useEffect(() => {
+    const timer = setInterval(() => {
+      void refresh();
+    }, 2.5 * 60_000);
+    return () => clearInterval(timer);
+  }, [refresh]);
 
   const selectFilter = useCallback((next: CategoryFilter) => {
     setFilter(next);
@@ -100,12 +108,16 @@ export default function FeedScreen() {
     setIsCheckingUpdates(true);
     setUpdateFeedback(null);
     try {
-      await refresh();
+      const result = await refresh();
       // Brief delay for tactile feedback
       await new Promise((resolve) => setTimeout(resolve, 600));
-      if (newCardIds.length > 0) {
-        setUpdateFeedback(`Found ${newCardIds.length} new ${newCardIds.length === 1 ? 'story' : 'stories'}!`);
+      const newlyFetched = result?.newCardIds ?? [];
+      if (newlyFetched.length > 0) {
+        setUpdateFeedback(
+          `Found ${newlyFetched.length} new ${newlyFetched.length === 1 ? 'story' : 'stories'}!`,
+        );
         setShowAllRead(false);
+        setCaughtUp(false);
         setIndex(0);
       } else {
         setUpdateFeedback('✓ Up to date (checked just now)');
@@ -115,7 +127,7 @@ export default function FeedScreen() {
     } finally {
       setIsCheckingUpdates(false);
     }
-  }, [newCardIds.length, refresh]);
+  }, [refresh, setCaughtUp]);
 
   // Ask about notifications once the reader has seen enough cards to know the app.
   useEffect(() => {
@@ -144,7 +156,7 @@ export default function FeedScreen() {
   }, [settings.cardsViewed, settings.notifications, update]);
 
   const newKey = newCardIds.join(',');
-  const showNewPill = newCardIds.length > 0 && index > 0 && dismissedNew !== newKey;
+  const showNewPill = newCardIds.length > 0 && dismissedNew !== newKey;
 
   const renderCaughtUpCard = (inPager = false) => (
     <View style={[styles.caughtUpContainer, { backgroundColor: theme.card }]}>
@@ -165,6 +177,22 @@ export default function FeedScreen() {
       ) : null}
 
       <View style={styles.caughtUpActions}>
+        {unreadCards.length > 0 ? (
+          <Pressable
+            onPress={() => {
+              setShowAllRead(false);
+              setIndex(0);
+            }}
+            style={[styles.caughtUpButton, { backgroundColor: '#10B981' }]}
+            accessibilityRole="button"
+          >
+            <Ionicons name="sparkles" size={18} color="#FFFFFF" style={styles.buttonIcon} />
+            <Text style={[styles.caughtUpButtonText, { color: '#FFFFFF' }]}>
+              Read new stories ({unreadCards.length})
+            </Text>
+          </Pressable>
+        ) : null}
+
         <Pressable
           onPress={() => void handleCheckUpdates()}
           disabled={isCheckingUpdates}

@@ -34,7 +34,7 @@ interface FeedContextValue {
   /** Ids added by the most recent refresh. */
   newCardIds: string[];
   updateRequired: boolean;
-  refresh: () => Promise<void>;
+  refresh: () => Promise<{ newCardIds: string[] }>;
 }
 
 const FeedContext = createContext<FeedContextValue | undefined>(undefined);
@@ -62,9 +62,9 @@ export function FeedProvider({
   const [updateRequired, setUpdateRequired] = useState(false);
   const snapshotRef = useRef<FeedSnapshot | undefined>(undefined);
   const baseUrlsRef = useRef<string[]>([...builtInBaseUrls]);
-  const inFlight = useRef<Promise<void> | undefined>(undefined);
+  const inFlight = useRef<Promise<{ newCardIds: string[] }> | undefined>(undefined);
 
-  const refresh = useCallback(() => {
+  const refresh = useCallback((): Promise<{ newCardIds: string[] }> => {
     // Coalesce overlapping refreshes (foreground + pull-to-refresh + mount).
     inFlight.current ??= (async () => {
       setStatus(snapshotRef.current ? 'refreshing' : 'loading');
@@ -81,10 +81,12 @@ export function FeedProvider({
         setOffline(false);
         setError(undefined);
         setStatus('ready');
+        return { newCardIds: result.newCardIds };
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
         setOffline(Boolean(snapshotRef.current));
         setStatus(snapshotRef.current ? 'ready' : 'error');
+        return { newCardIds: [] };
       } finally {
         inFlight.current = undefined;
       }
