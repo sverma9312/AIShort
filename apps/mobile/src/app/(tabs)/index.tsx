@@ -166,7 +166,7 @@ export default function FeedScreen() {
       <Text style={[styles.caughtUpTitle, { color: theme.text }]}>You're all caught up!</Text>
       <Text style={[styles.caughtUpMessage, { color: theme.muted }]}>
         {filter === 'all'
-          ? "You've read all the latest stories. We continuously monitor 26 AI sources, so check back soon for fresh updates."
+          ? "You've read all the latest stories. Check back soon for fresh updates."
           : `You've read all stories in ${filter}. Check back soon for fresh updates.`}
       </Text>
 

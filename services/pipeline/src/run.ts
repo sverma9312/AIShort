@@ -53,8 +53,8 @@ export interface PipelineOptions {
 }
 
 export const DEFAULT_OPTIONS: PipelineOptions = {
-  maxAgeHours: 48,
-  dedupeWindowHours: 48,
+  maxAgeHours: 168,
+  dedupeWindowHours: 168,
   similarityThreshold: 0.5,
   minImportance: 4,
   maxCandidates: 60,

@@ -95,7 +95,7 @@ sources:
   - id: cohere
     name: Cohere
     kind: rss
-    url: https://cohere.com/blog/rss.xml
+    url: https://raw.githubusercontent.com/alan-turing-institute/ai-rss-feeds/main/feeds/cohere-blog.xml
     weight: 9
     aiFocused: true
 
@@ -117,7 +117,7 @@ sources:
   - id: stability-ai
     name: Stability AI
     kind: rss
-    url: https://stability.ai/blog?format=rss
+    url: https://raw.githubusercontent.com/leontloveless/ai-rss-feeds/main/feeds/stability-ai.xml
     weight: 8
     aiFocused: true
 
