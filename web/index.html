@@ -135,35 +135,116 @@
           class="modal-body"
           style="
             flex-direction: column;
-            max-width: 400px;
+            max-width: 440px;
             margin: 0 auto;
-            padding: 1.5rem;
+            padding: 1.25rem 1.5rem 2rem;
             text-align: center;
             color: #fff;
+            justify-content: flex-start;
           "
         >
-          <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem">AIShort Web App</h2>
-          <p style="color: #a0a0ab; font-size: 0.95rem; margin-bottom: 1.25rem">
-            Swipeable AI news summarized in 60 words or less. Refreshed automatically every 30
-            minutes.
+          <div style="font-size: 2.2rem; margin-bottom: 0.25rem">📰</div>
+          <h2 style="font-size: 1.4rem; margin-bottom: 0.4rem; font-weight: 700">
+            AIShort Web App
+          </h2>
+          <p style="color: #a0a0ab; font-size: 0.9rem; margin-bottom: 1.2rem; line-height: 1.45">
+            Swipeable AI news summarized in 60 words or less. Refreshed automatically every hour.
           </p>
+
+          <!-- Dynamic PWA install button (shown if Chrome beforeinstallprompt fires) -->
+          <button
+            id="btn-pwa-install"
+            style="
+              display: none;
+              width: 100%;
+              background: linear-gradient(135deg, #6366f1, #4f46e5);
+              color: #ffffff;
+              border: none;
+              border-radius: 12px;
+              padding: 0.75rem 1rem;
+              font-size: 0.95rem;
+              font-weight: 700;
+              cursor: pointer;
+              margin-bottom: 1rem;
+              box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+            "
+          >
+            ⚡ Install AIShort App
+          </button>
+
+          <!-- Android Section -->
           <div
             style="
               background: rgba(255, 255, 255, 0.08);
+              border: 1px solid rgba(255, 255, 255, 0.12);
               border-radius: 14px;
-              padding: 1rem;
+              padding: 1rem 1.1rem;
               text-align: left;
-              margin-bottom: 1.25rem;
+              margin-bottom: 0.85rem;
               font-size: 0.88rem;
-              line-height: 1.5;
+              line-height: 1.55;
             "
           >
-            <strong style="color: #818cf8; display: block; margin-bottom: 0.35rem"
-              >📱 iPhone Demo Tip:</strong
+            <strong
+              style="
+                color: #34d399;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                margin-bottom: 0.4rem;
+              "
             >
-            Tap <strong>Share ⎋</strong> in Safari and select
-            <strong>"Add to Home Screen"</strong> to run AIShort full-screen like a native app.
+              <span>🤖</span> <span>Android & Mobile Browser Tips:</span>
+            </strong>
+            <ul style="margin: 0; padding-left: 1.2rem; color: #e2e8f0; font-size: 0.85rem">
+              <li style="margin-bottom: 0.35rem">
+                <strong>Swipe Up / Down:</strong> Swipe vertically to flip smoothly between stories
+                (cards snap into full view).
+              </li>
+              <li style="margin-bottom: 0.35rem">
+                <strong>Tap to Zoom:</strong> Tap any card image to view in high resolution with pan
+                and tap-to-zoom.
+              </li>
+              <li>
+                <strong>Run Full-Screen (No Address Bar):</strong> Tap
+                <strong>⋮ (three dots)</strong> in Chrome and tap <strong>"Install app"</strong> (or
+                <strong>"Add to Home screen"</strong>) to remove the browser address bar and run
+                like a native app.
+              </li>
+            </ul>
           </div>
+
+          <!-- iPhone Section -->
+          <div
+            style="
+              background: rgba(255, 255, 255, 0.08);
+              border: 1px solid rgba(255, 255, 255, 0.12);
+              border-radius: 14px;
+              padding: 1rem 1.1rem;
+              text-align: left;
+              margin-bottom: 1.2rem;
+              font-size: 0.88rem;
+              line-height: 1.55;
+            "
+          >
+            <strong
+              style="
+                color: #818cf8;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                margin-bottom: 0.4rem;
+              "
+            >
+              <span>📱</span> <span>iPhone Safari Tip:</span>
+            </strong>
+            <p style="margin: 0; color: #e2e8f0; font-size: 0.85rem">
+              Tap <strong>Share ⎋</strong> at the bottom of Safari and select
+              <strong>"Add to Home Screen"</strong> to run AIShort full-screen without address bars,
+              just like a native iOS app.
+            </p>
+          </div>
+
           <div style="font-size: 0.82rem; color: #71717a">
             <a href="privacy/" style="color: #818cf8; text-decoration: none">Privacy Policy</a> ·
             <a href="support/" style="color: #818cf8; text-decoration: none">Support</a> ·
@@ -629,6 +710,34 @@
         });
         document.getElementById('info-modal').addEventListener('click', function (e) {
           if (e.target === this) this.classList.remove('open');
+        });
+
+        // Dynamic PWA Install Prompt for Android & Chrome
+        var deferredPrompt = null;
+        var installBtn = document.getElementById('btn-pwa-install');
+        window.addEventListener('beforeinstallprompt', function (e) {
+          e.preventDefault();
+          deferredPrompt = e;
+          if (installBtn) {
+            installBtn.style.display = 'block';
+          }
+        });
+        if (installBtn) {
+          installBtn.addEventListener('click', function () {
+            if (deferredPrompt) {
+              deferredPrompt.prompt();
+              deferredPrompt.userChoice.then(function (choice) {
+                if (choice && choice.outcome === 'accepted') {
+                  installBtn.style.display = 'none';
+                }
+                deferredPrompt = null;
+              });
+            }
+          });
+        }
+        window.addEventListener('appinstalled', function () {
+          if (installBtn) installBtn.style.display = 'none';
+          deferredPrompt = null;
         });
 
         // Category filter buttons
