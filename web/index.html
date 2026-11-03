@@ -326,6 +326,7 @@
                     card.imageUrl
                       ? `
                     <div class="card-image-wrap" onclick="window.openImage('${encodeURI(card.imageUrl)}')">
+                      <img class="card-image-blur" src="${card.imageUrl}" alt="" aria-hidden="true" />
                       <img class="card-image" src="${card.imageUrl}" alt="${card.headline}" loading="${i === 0 ? 'eager' : 'lazy'}" />
                       <div class="zoom-badge">🔍 Tap to zoom</div>
                     </div>
