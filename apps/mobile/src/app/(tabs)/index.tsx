@@ -340,95 +340,89 @@ export default function FeedScreen() {
           </Pressable>
 
           {inPager ? (
-            <>
-              <Pressable
-                onPress={() => pager.current?.setPage(0)}
-                style={[styles.caughtUpButtonSecondary, { borderColor: theme.border }]}
-                accessibilityRole="button"
-              >
-                <Ionicons name="arrow-up" size={18} color={theme.text} style={styles.buttonIcon} />
-                <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.text }]}>
-                  Back to top
-                </Text>
-              </Pressable>
-              {isReviewing ? (
-                <Pressable
-                  onPress={() => {
-                    setReviewMode('none');
-                    setPagerEpoch((e) => e + 1);
-                    indexRef.current = 0;
-                    setIndex(0);
-                  }}
-                  style={[
-                    styles.caughtUpButtonSecondary,
-                    { borderColor: theme.border, marginTop: 8 },
-                  ]}
-                  accessibilityRole="button"
-                >
-                  <Ionicons
-                    name="close-circle-outline"
-                    size={18}
-                    color={theme.text}
-                    style={styles.buttonIcon}
-                  />
-                  <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.text }]}>
-                    Back to caught up
-                  </Text>
-                </Pressable>
-              ) : null}
-            </>
-          ) : (
-            <>
-              {todayCards.length > 0 ? (
-                <Pressable
-                  onPress={() => {
-                    setReviewMode('today');
-                    setPagerEpoch((e) => e + 1);
-                    indexRef.current = 0;
-                    setIndex(0);
-                  }}
-                  style={[
-                    styles.caughtUpButtonSecondary,
-                    { borderColor: theme.border, marginBottom: 8 },
-                  ]}
-                  accessibilityRole="button"
-                >
-                  <Ionicons
-                    name="today-outline"
-                    size={18}
-                    color={theme.text}
-                    style={styles.buttonIcon}
-                  />
-                  <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.text }]}>
-                    Review today's stories ({todayCards.length})
-                  </Text>
-                </Pressable>
-              ) : null}
+            <Pressable
+              onPress={() => pager.current?.setPage(0)}
+              style={[styles.caughtUpButtonSecondary, { borderColor: theme.border }]}
+              accessibilityRole="button"
+            >
+              <Ionicons name="arrow-up" size={18} color={theme.text} style={styles.buttonIcon} />
+              <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.text }]}>
+                Back to top
+              </Text>
+            </Pressable>
+          ) : null}
 
-              {visible.length > todayCards.length ? (
-                <Pressable
-                  onPress={() => {
-                    setReviewMode('all');
-                    setPagerEpoch((e) => e + 1);
-                    indexRef.current = 0;
-                    setIndex(0);
-                  }}
-                  style={[styles.caughtUpButtonSecondary, { borderColor: theme.border }]}
-                  accessibilityRole="button"
-                >
-                  <Ionicons
-                    name="book-outline"
-                    size={18}
-                    color={theme.muted}
-                    style={styles.buttonIcon}
-                  />
-                  <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.muted }]}>
-                    Review all past stories ({visible.length})
-                  </Text>
-                </Pressable>
-              ) : null}
-            </>
-          )}
+          {reviewMode !== 'today' && todayCards.length > 0 ? (
+            <Pressable
+              onPress={() => {
+                setReviewMode('today');
+                setPagerEpoch((e) => e + 1);
+                indexRef.current = 0;
+                setIndex(0);
+              }}
+              style={[styles.caughtUpButtonSecondary, { borderColor: theme.border }]}
+              accessibilityRole="button"
+            >
+              <Ionicons
+                name="today-outline"
+                size={18}
+                color={theme.text}
+                style={styles.buttonIcon}
+              />
+              <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.text }]}>
+                Review today's stories ({todayCards.length})
+              </Text>
+            </Pressable>
+          ) : null}
+
+          {reviewMode !== 'all' && visible.length > todayCards.length ? (
+            <Pressable
+              onPress={() => {
+                setReviewMode('all');
+                setPagerEpoch((e) => e + 1);
+                indexRef.current = 0;
+                setIndex(0);
+              }}
+              style={[styles.caughtUpButtonSecondary, { borderColor: theme.border }]}
+              accessibilityRole="button"
+            >
+              <Ionicons
+                name="book-outline"
+                size={18}
+                color={theme.muted}
+                style={styles.buttonIcon}
+              />
+              <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.muted }]}>
+                Review all past stories ({visible.length})
+              </Text>
+            </Pressable>
+          ) : null}
+
+          {isReviewing ? (
+            <Pressable
+              onPress={() => {
+                setReviewMode('none');
+                setPagerEpoch((e) => e + 1);
+                indexRef.current = 0;
+                setIndex(0);
+              }}
+              style={[
+                styles.caughtUpButtonSecondary,
+                { borderColor: theme.border },
+              ]}
+              accessibilityRole="button"
+            >
+              <Ionicons
+                name="close-circle-outline"
+                size={18}
+                color={theme.text}
+                style={styles.buttonIcon}
+              />
+              <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.text }]}>
+                Back to caught up
+              </Text>
+            </Pressable>
+          ) : null}
         </View>
       </View>
     );
