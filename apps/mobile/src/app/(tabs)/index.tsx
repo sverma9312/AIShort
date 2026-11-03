@@ -109,12 +109,18 @@ export default function FeedScreen() {
   }, []);
 
   const handleReadNewStories = useCallback(() => {
-    setReviewMode('none');
+    setFilter('all');
     setCaughtUp(false);
     indexRef.current = 0;
     setIndex(0);
+    const unread = cards.filter((c) => !readCardIds.has(c.id));
+    if (unread.length === 0) {
+      setReviewMode('today');
+    } else {
+      setReviewMode('none');
+    }
     setPagerEpoch((e) => e + 1);
-  }, [setCaughtUp]);
+  }, [cards, readCardIds, setCaughtUp]);
 
   const onPageSelected = useCallback(
     (position: number) => {
