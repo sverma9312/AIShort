@@ -1,4 +1,4 @@
-import { CATEGORIES, HEADLINE_MAX_WORDS, SUMMARY_MAX_WORDS } from '@aishort/shared';
+import { CATEGORIES, HEADLINE_MAX_WORDS } from '@aishort/shared';
 import { SUMMARY_MIN_WORDS } from './validate';
 
 // Bump a version whenever its prompt changes, so eval reports and cards can be compared.
@@ -58,9 +58,7 @@ export function summarizeUserPrompt(input: {
 }): string {
   // Truncate article text to 15,000 characters (~3,000 words) so huge HTML pages / research papers don't cause timeouts
   const text =
-    input.text.length > 15_000
-      ? `${input.text.slice(0, 15_000)}\n[Article truncated]`
-      : input.text;
+    input.text.length > 15_000 ? `${input.text.slice(0, 15_000)}\n[Article truncated]` : input.text;
   return `Source: ${input.sourceName}\nTitle: ${input.title}\n\nArticle text:\n"""\n${text}\n"""`;
 }
 

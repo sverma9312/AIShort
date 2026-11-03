@@ -34,13 +34,7 @@ export default function FeedScreen() {
   const { cards, status, offline, newCardIds, updateRequired, refresh } = useFeed();
   const { settings, update } = useSettings();
   const { isBookmarked, toggle } = useBookmarks();
-  const {
-    readCardIds,
-    isCaughtUp,
-    loaded: readHistoryLoaded,
-    markCardAsRead,
-    setCaughtUp,
-  } = useReadHistory();
+  const { readCardIds, loaded: readHistoryLoaded, markCardAsRead, setCaughtUp } = useReadHistory();
 
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [index, setIndex] = useState(0);
@@ -78,10 +72,7 @@ export default function FeedScreen() {
   // The user is caught up if read history has loaded, not reviewing past stories,
   // and all visible stories in this filter have been read.
   const userIsCaughtUp =
-    readHistoryLoaded &&
-    !showAllRead &&
-    visible.length > 0 &&
-    unreadCards.length === 0;
+    readHistoryLoaded && !showAllRead && visible.length > 0 && unreadCards.length === 0;
 
   // Periodically check for new stories every 2.5 minutes while the app is sitting open
   useEffect(() => {
@@ -290,7 +281,10 @@ export default function FeedScreen() {
         <Pressable
           onPress={() => void handleCheckUpdates()}
           disabled={isCheckingUpdates}
-          style={[styles.caughtUpButton, { backgroundColor: theme.accent, opacity: isCheckingUpdates ? 0.7 : 1 }]}
+          style={[
+            styles.caughtUpButton,
+            { backgroundColor: theme.accent, opacity: isCheckingUpdates ? 0.7 : 1 },
+          ]}
           accessibilityRole="button"
         >
           {isCheckingUpdates ? (
@@ -310,7 +304,9 @@ export default function FeedScreen() {
             accessibilityRole="button"
           >
             <Ionicons name="arrow-up" size={18} color={theme.text} style={styles.buttonIcon} />
-            <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.text }]}>Back to top</Text>
+            <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.text }]}>
+              Back to top
+            </Text>
           </Pressable>
         ) : visible.length > 0 ? (
           <Pressable
@@ -370,12 +366,18 @@ export default function FeedScreen() {
           {displayCards.map((card, i) => (
             <View key={card.id} style={styles.page} collapsable={false}>
               {Math.abs(i - index) <= RENDER_WINDOW ? (
-                <NewsCard card={card} bookmarked={isBookmarked(card.id)} onToggleBookmark={toggle} />
+                <NewsCard
+                  card={card}
+                  bookmarked={isBookmarked(card.id)}
+                  onToggleBookmark={toggle}
+                />
               ) : null}
             </View>
           ))}
           <View key="caught-up-end" style={styles.page} collapsable={false}>
-            {Math.abs(displayCards.length - index) <= RENDER_WINDOW ? renderCaughtUpCard(true) : null}
+            {Math.abs(displayCards.length - index) <= RENDER_WINDOW
+              ? renderCaughtUpCard(true)
+              : null}
           </View>
         </PagerView>
       </View>
@@ -434,11 +436,7 @@ export default function FeedScreen() {
           testID="banner-new"
         />
       ) : null}
-      <Toast
-        message={toast?.message ?? null}
-        icon={toast?.icon}
-        onDismiss={() => setToast(null)}
-      />
+      <Toast message={toast?.message ?? null} icon={toast?.icon} onDismiss={() => setToast(null)} />
       <Animated.View
         pointerEvents="none"
         style={[
@@ -457,7 +455,9 @@ export default function FeedScreen() {
         {isCheckingUpdates ? (
           <View style={styles.pullIndicatorContent}>
             <ActivityIndicator size="small" color={theme.accent} style={styles.pullIndicatorIcon} />
-            <Text style={[styles.pullIndicatorText, { color: theme.text }]}>Checking for updates…</Text>
+            <Text style={[styles.pullIndicatorText, { color: theme.text }]}>
+              Checking for updates…
+            </Text>
           </View>
         ) : (
           <View style={styles.pullIndicatorContent}>

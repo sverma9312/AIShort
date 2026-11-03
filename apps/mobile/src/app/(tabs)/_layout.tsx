@@ -1,9 +1,22 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
-import { Animated, type ColorValue, Pressable, StyleSheet } from 'react-native';
+import {
+  Animated,
+  type ColorValue,
+  Pressable,
+  type PressableProps,
+  type StyleProp,
+  StyleSheet,
+  type ViewStyle,
+} from 'react-native';
 import { useTheme } from '@/lib/theme';
+
+interface TabBarButtonProps extends Omit<PressableProps, 'children' | 'style'> {
+  children?: ReactNode;
+  style?: StyleProp<ViewStyle>;
+}
 
 interface AnimatedTabIconProps {
   name: ComponentProps<typeof Ionicons>['name'];
@@ -65,7 +78,7 @@ function AnimatedTabIcon({ name, activeName, focused, color, size }: AnimatedTab
   );
 }
 
-function TabBarButton(props: any) {
+function TabBarButton(props: TabBarButtonProps) {
   const pressScale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -85,18 +98,20 @@ function TabBarButton(props: any) {
     }).start();
   };
 
+  const { style, children, onPressIn, onPressOut, ...rest } = props;
+
   return (
     <Pressable
-      {...props}
+      {...rest}
       onPressIn={(e) => {
         handlePressIn();
-        props.onPressIn?.(e);
+        onPressIn?.(e);
       }}
       onPressOut={(e) => {
         handlePressOut();
-        props.onPressOut?.(e);
+        onPressOut?.(e);
       }}
-      style={[props.style, { flex: 1 }]}
+      style={[style, { flex: 1 }]}
     >
       <Animated.View
         style={{
@@ -106,7 +121,7 @@ function TabBarButton(props: any) {
           transform: [{ scale: pressScale }],
         }}
       >
-        {props.children}
+        {children}
       </Animated.View>
     </Pressable>
   );

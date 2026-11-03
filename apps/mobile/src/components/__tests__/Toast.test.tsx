@@ -24,12 +24,10 @@ describe('Toast', () => {
     expect(getByTestId('toast')).toBeTruthy();
     expect(getByText('Up to date')).toBeTruthy();
 
-    act(() => {
+    await act(() => {
       jest.advanceTimersByTime(2500);
     });
 
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 });
-
-
