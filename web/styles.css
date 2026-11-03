@@ -579,13 +579,15 @@ main.static-page footer {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.92);
+  background: rgba(0, 0, 0, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex;
   flex-direction: column;
   z-index: 1000;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.25s ease;
 }
 
 .modal-overlay.open {
@@ -594,20 +596,62 @@ main.static-page footer {
 }
 
 .modal-header {
-  padding: 1rem;
+  padding-top: max(1.2rem, calc(env(safe-area-inset-top, 0) + 0.8rem));
+  padding-bottom: 0.8rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+.modal-title {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.modal-action-btn {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.modal-action-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .modal-close-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  border: none;
-  width: 36px;
-  height: 36px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   font-size: 1.2rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
 }
 
 .modal-body {
@@ -616,13 +660,71 @@ main.static-page footer {
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y pinch-zoom;
 }
 
 .modal-img {
-  max-width: 100%;
-  max-height: 80vh;
+  max-width: 96%;
+  max-height: 72vh;
   object-fit: contain;
   border-radius: 12px;
+  cursor: zoom-in;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.modal-img.zoomed {
+  cursor: grab;
+  max-width: none;
+  max-height: none;
+}
+
+.modal-img.zoomed:active {
+  cursor: grabbing;
+}
+
+.modal-footer {
+  padding-top: 0.8rem;
+  padding-bottom: max(1.2rem, calc(env(safe-area-inset-bottom, 0) + 0.8rem));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.5);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 10;
+}
+
+.modal-close-pill {
+  background: #ffffff;
+  color: #0f172a;
+  border: none;
+  border-radius: 24px;
+  padding: 0.65rem 1.6rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+}
+
+.modal-close-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+.modal-hint {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.2px;
 }
 
 /* Toast HUD */

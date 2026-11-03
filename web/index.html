@@ -100,10 +100,23 @@
         aria-label="Image preview"
       >
         <div class="modal-header">
-          <button id="modal-close" class="modal-close-btn" aria-label="Close image">✕</button>
+          <span class="modal-title" id="modal-image-title">Image Preview</span>
+          <div style="display: flex; gap: 8px; align-items: center">
+            <button id="modal-zoom-toggle" class="modal-action-btn" aria-label="Toggle zoom">
+              <span>🔍</span> <span id="modal-zoom-text">Zoom</span>
+            </button>
+            <button id="modal-close" class="modal-close-btn" aria-label="Close image">✕</button>
+          </div>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" id="modal-body">
           <img id="modal-img" class="modal-img" src="" alt="Enlarged news preview" />
+        </div>
+        <div class="modal-footer">
+          <button id="modal-close-bottom" class="modal-close-pill" aria-label="Close image preview">
+            <span>✕</span>
+            <span>Close</span>
+          </button>
+          <p class="modal-hint">Tap image to zoom in/out • Tap Close to exit</p>
         </div>
       </div>
 
@@ -280,6 +293,8 @@
           }
         };
 
+        var currentFiltered = [];
+
         // Render Cards
         function renderCards() {
           var container = document.getElementById('cards-wrapper');
@@ -292,6 +307,7 @@
             }
             return true;
           });
+          currentFiltered = filtered;
 
           if (filtered.length === 0) {
             container.innerHTML = `
@@ -330,7 +346,7 @@
                   ${
                     card.imageUrl
                       ? `
-                    <div class="card-image-wrap" onclick="window.openImage('${encodeURI(card.imageUrl)}')">
+                    <div class="card-image-wrap" onclick="window.openCardImage(${i})">
                       <img class="card-image-blur" src="${card.imageUrl}" alt="" aria-hidden="true" />
                       <img class="card-image" src="${card.imageUrl}" alt="${card.headline}" loading="${i === 0 ? 'eager' : 'lazy'}" />
                       <div class="zoom-badge">🔍 Tap to zoom</div>
@@ -394,6 +410,13 @@
           container.innerHTML = html;
         }
 
+        window.openCardImage = function (index) {
+          var card = currentFiltered[index];
+          if (card && card.imageUrl) {
+            window.openImage(card.imageUrl, card.sourceName || 'Image Preview');
+          }
+        };
+
         window.handleBookmarkClick = function (id) {
           var card = allCards.find(function (c) {
             return c.id === id;
@@ -401,15 +424,149 @@
           if (card) toggleBookmark(card);
         };
 
-        window.openImage = function (url) {
-          document.getElementById('modal-img').src = url;
-          document.getElementById('image-modal').classList.add('open');
+        // Image Viewer with Zoom & Pan
+        var modalImg = document.getElementById('modal-img');
+        var imageModal = document.getElementById('image-modal');
+        var modalZoomBtn = document.getElementById('modal-zoom-toggle');
+        var modalZoomText = document.getElementById('modal-zoom-text');
+        var isImageZoomed = false;
+        var panX = 0;
+        var panY = 0;
+        var dragStartX = 0;
+        var dragStartY = 0;
+        var isDragging = false;
+        var hasDragged = false;
+
+        function updateTransform() {
+          if (isImageZoomed) {
+            modalImg.style.transform = 'scale(2.2) translate3d(' + panX + 'px, ' + panY + 'px, 0)';
+          } else {
+            modalImg.style.transform = '';
+          }
+        }
+
+        function setZoom(zoomed) {
+          isImageZoomed = zoomed;
+          panX = 0;
+          panY = 0;
+          if (zoomed) {
+            modalImg.classList.add('zoomed');
+            updateTransform();
+            if (modalZoomText) modalZoomText.textContent = 'Reset';
+          } else {
+            modalImg.classList.remove('zoomed');
+            updateTransform();
+            if (modalZoomText) modalZoomText.textContent = 'Zoom';
+          }
+        }
+
+        window.openImage = function (url, title) {
+          setZoom(false);
+          modalImg.src = url;
+          var titleEl = document.getElementById('modal-image-title');
+          if (titleEl) titleEl.textContent = title || 'Image Preview';
+          imageModal.classList.add('open');
+          document.body.style.overflow = 'hidden';
         };
-        document.getElementById('modal-close').addEventListener('click', function () {
-          document.getElementById('image-modal').classList.remove('open');
+
+        function closeImageModal() {
+          imageModal.classList.remove('open');
+          setZoom(false);
+          document.body.style.overflow = '';
+        }
+
+        document.getElementById('modal-close').addEventListener('click', closeImageModal);
+        var closeBottomBtn = document.getElementById('modal-close-bottom');
+        if (closeBottomBtn) closeBottomBtn.addEventListener('click', closeImageModal);
+
+        if (modalZoomBtn) {
+          modalZoomBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            setZoom(!isImageZoomed);
+          });
+        }
+
+        // Pointer / Touch drag when zoomed
+        function startDrag(clientX, clientY) {
+          if (!isImageZoomed) return;
+          isDragging = true;
+          hasDragged = false;
+          dragStartX = clientX;
+          dragStartY = clientY;
+        }
+
+        function moveDrag(clientX, clientY) {
+          if (!isDragging || !isImageZoomed) return;
+          var dx = (clientX - dragStartX) / 2.2;
+          var dy = (clientY - dragStartY) / 2.2;
+          if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+            hasDragged = true;
+          }
+          panX += dx;
+          panY += dy;
+          dragStartX = clientX;
+          dragStartY = clientY;
+          updateTransform();
+        }
+
+        function endDrag() {
+          isDragging = false;
+        }
+
+        modalImg.addEventListener('mousedown', function (e) {
+          startDrag(e.clientX, e.clientY);
         });
-        document.getElementById('image-modal').addEventListener('click', function (e) {
-          if (e.target === this) this.classList.remove('open');
+        window.addEventListener('mousemove', function (e) {
+          moveDrag(e.clientX, e.clientY);
+        });
+        window.addEventListener('mouseup', function () {
+          endDrag();
+        });
+
+        modalImg.addEventListener(
+          'touchstart',
+          function (e) {
+            if (e.touches.length === 1) {
+              startDrag(e.touches[0].clientX, e.touches[0].clientY);
+            }
+          },
+          { passive: true },
+        );
+
+        window.addEventListener(
+          'touchmove',
+          function (e) {
+            if (e.touches.length === 1 && isDragging) {
+              moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+            }
+          },
+          { passive: true },
+        );
+
+        window.addEventListener('touchend', function () {
+          endDrag();
+        });
+
+        modalImg.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (hasDragged) {
+            hasDragged = false;
+            return;
+          }
+          setZoom(!isImageZoomed);
+        });
+
+        document.getElementById('modal-body').addEventListener('click', function (e) {
+          if (e.target === this) closeImageModal();
+        });
+        imageModal.addEventListener('click', function (e) {
+          if (e.target === this) closeImageModal();
+        });
+
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && imageModal.classList.contains('open')) {
+            closeImageModal();
+          }
         });
 
         // Info modal
@@ -483,8 +640,15 @@
             `;
           });
 
-        // Register Service Worker for offline PWA support
+        // Register Service Worker for offline PWA support with auto-reload on update
         if ('serviceWorker' in navigator) {
+          var refreshing = false;
+          navigator.serviceWorker.addEventListener('controllerchange', function () {
+            if (!refreshing) {
+              refreshing = true;
+              window.location.reload();
+            }
+          });
           window.addEventListener('load', function () {
             navigator.serviceWorker.register('sw.js').catch(function (err) {
               console.log('ServiceWorker registration omitted:', err);
