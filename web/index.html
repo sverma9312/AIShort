@@ -70,6 +70,7 @@
         <button class="cat-pill" data-category="business">Business</button>
         <button class="cat-pill" data-category="policy">Policy</button>
         <button class="cat-pill" data-category="open-source">Open source</button>
+        <button class="cat-pill cat-pill-top" data-category="top">★ Top Story</button>
       </nav>
 
       <!-- Vertical Swipe Deck Container -->
@@ -284,7 +285,11 @@
           var container = document.getElementById('cards-wrapper');
           var filtered = allCards.filter(function (card) {
             if (showOnlyBookmarks && !bookmarkedIds.has(card.id)) return false;
-            if (activeCategory !== 'all' && card.category !== activeCategory) return false;
+            if (activeCategory === 'top') {
+              if ((card.importance || 0) < 8) return false;
+            } else if (activeCategory !== 'all' && card.category !== activeCategory) {
+              return false;
+            }
             return true;
           });
 

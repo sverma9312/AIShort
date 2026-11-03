@@ -56,10 +56,11 @@ export default function FeedScreen() {
 
   const visible = useMemo(
     () =>
-      cards.filter(
-        (c) =>
-          settings.categories.includes(c.category) && (filter === 'all' || c.category === filter),
-      ),
+      cards.filter((c) => {
+        if (!settings.categories.includes(c.category)) return false;
+        if (filter === 'top') return c.importance >= 8;
+        return filter === 'all' || c.category === filter;
+      }),
     [cards, settings.categories, filter],
   );
 
@@ -298,7 +299,9 @@ export default function FeedScreen() {
             ? `You've reached the end of ${reviewMode === 'today' ? "today's" : 'past'} stories.`
             : filter === 'all'
               ? "You've read all the latest stories. Check back soon for fresh updates."
-              : `You've read all stories in ${filter}. Check back soon for fresh updates.`}
+              : filter === 'top'
+                ? "You've read all the top stories. Check back soon for fresh updates."
+                : `You've read all stories in ${filter}. Check back soon for fresh updates.`}
         </Text>
 
         <View style={styles.caughtUpActions}>
@@ -406,10 +409,7 @@ export default function FeedScreen() {
                 indexRef.current = 0;
                 setIndex(0);
               }}
-              style={[
-                styles.caughtUpButtonSecondary,
-                { borderColor: theme.border },
-              ]}
+              style={[styles.caughtUpButtonSecondary, { borderColor: theme.border }]}
               accessibilityRole="button"
             >
               <Ionicons
