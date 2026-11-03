@@ -1,0 +1,23 @@
+{
+  "name": "AIShort — AI news in 60 words",
+  "short_name": "AIShort",
+  "description": "Very short AI news summaries as swipeable cards.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0B0B0E",
+  "theme_color": "#4F46E5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
