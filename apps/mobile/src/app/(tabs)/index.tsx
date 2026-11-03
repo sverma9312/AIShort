@@ -19,6 +19,7 @@ import { NewsCard } from '@/components/NewsCard';
 import { StateView } from '@/components/StateView';
 import { Toast } from '@/components/Toast';
 import { useBookmarks } from '@/lib/bookmarks';
+import { CATEGORY_LABELS } from '@/lib/categories';
 import { useFeed } from '@/lib/feed';
 import { isPushAvailable, PROMPT_AFTER_CARDS, registerForPushNotifications } from '@/lib/push';
 import { useReadHistory } from '@/lib/readHistory';
@@ -105,7 +106,6 @@ export default function FeedScreen() {
     setFilter(next);
     indexRef.current = 0;
     setIndex(0);
-    setReviewMode('none');
     setPagerEpoch((e) => e + 1);
   }, []);
 
@@ -292,11 +292,17 @@ export default function FeedScreen() {
           <Ionicons name="checkmark-circle-outline" size={56} color={theme.accent} />
         </View>
         <Text style={[styles.caughtUpTitle, { color: theme.text }]}>
-          {isReviewing ? "You've reviewed these stories" : "You're all caught up!"}
+          {isReviewing
+            ? reviewMode === 'today' && todayCards.length === 0
+              ? 'No stories today'
+              : "You've reviewed these stories"
+            : "You're all caught up!"}
         </Text>
         <Text style={[styles.caughtUpMessage, { color: theme.muted }]}>
           {isReviewing
-            ? `You've reached the end of ${reviewMode === 'today' ? "today's" : 'past'} stories.`
+            ? reviewMode === 'today' && todayCards.length === 0
+              ? `There were no stories published today in ${filter === 'top' ? 'Top Stories' : filter === 'all' ? 'the feed' : CATEGORY_LABELS[filter]}.`
+              : `You've reached the end of ${reviewMode === 'today' ? "today's" : 'past'} stories.`
             : filter === 'all'
               ? "You've read all the latest stories. Check back soon for fresh updates."
               : filter === 'top'
@@ -342,7 +348,7 @@ export default function FeedScreen() {
             </Text>
           </Pressable>
 
-          {inPager ? (
+          {inPager && displayCards.length > 0 ? (
             <Pressable
               onPress={() => pager.current?.setPage(0)}
               style={[styles.caughtUpButtonSecondary, { borderColor: theme.border }]}
@@ -451,6 +457,9 @@ export default function FeedScreen() {
     );
   } else if (userIsCaughtUp) {
     // Directly show caught-up screen when user is already caught up
+    body = renderCaughtUpCard(false);
+  } else if (reviewMode === 'today' && todayCards.length === 0) {
+    // Reviewing today, but this specific category has no stories published today
     body = renderCaughtUpCard(false);
   } else {
     body = (
