@@ -136,6 +136,7 @@ To validate physical ergonomics, gesture interactions, and real-time feed consum
    - **Dynamic Island & Notch-Safe Image Viewer**: Integrated `useSafeAreaInsets()` directly into the full-screen image viewer `<Modal />` with dynamic top padding (`Math.max(insets.top, 44) + 8`), a 44×44px top-right touch target, and a secondary bottom `[ Close ]` pill to ensure comfortable single-handed dismissal on notched devices.
    - **Transient Toast Feedback**: Replaced static screen badges with a floating animated `<Toast />` HUD (`FadeInDown`/`FadeOutUp`) for non-intrusive feedback ("You're caught up", "Refreshed", etc.).
    - **Animated Bottom Tab Bar**: Added active highlight capsule pill, outline-to-filled icon state transitions, and tactile spring scale animations on tab presses.
+   - **Zero-Server Mobile Web PWA Track**: Deployed an interactive Inshorts-style Web App on GitHub Pages (`web/index.html`, `styles.css`, `manifest.json`, `sw.js`). Enables 24/7 cross-device demos on iOS (via Safari "Add to Home Screen" standalone mode) and Android without running a local dev server or needing an Apple Developer Account.
 
 ### Milestone 4 — Push + background refresh 🟡
 
