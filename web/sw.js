@@ -1,4 +1,4 @@
-const CACHE_NAME = 'aishort-v3';
+const CACHE_NAME = 'aishort-v4';
 const STATIC_ASSETS = [
   './',
   './index.html',

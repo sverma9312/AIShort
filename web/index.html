@@ -278,19 +278,70 @@
         updateBookmarkCount();
 
         // Share card
-        window.shareCard = function (headline, url) {
-          if (navigator.share) {
-            navigator.share({ title: headline, text: headline, url: url }).catch(function () {});
-          } else {
+        function copyShareLink(headline, url) {
+          var text = headline + '\n' + url;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard
-              .writeText(headline + '\n\n' + url)
+              .writeText(text)
               .then(function () {
-                showToast('Link copied to clipboard!');
+                showToast('Link copied to clipboard! 📋');
               })
               .catch(function () {
-                showToast('Sharing not supported on this device');
+                legacyCopy(text);
               });
+          } else {
+            legacyCopy(text);
           }
+        }
+
+        function legacyCopy(text) {
+          try {
+            var textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            var success = document.execCommand('copy');
+            document.body.removeChild(textarea);
+            if (success) {
+              showToast('Link copied to clipboard! 📋');
+            } else {
+              showToast('Sharing not supported');
+            }
+          } catch (e) {
+            showToast('Sharing not supported');
+          }
+        }
+
+        window.shareCardIndex = function (index) {
+          var card = currentFiltered[index];
+          if (!card) return;
+          var shareData = {
+            title: card.headline,
+            text: card.headline,
+            url: card.sourceUrl,
+          };
+
+          if (navigator.share) {
+            navigator
+              .share(shareData)
+              .then(function () {
+                showToast('Shared successfully!');
+              })
+              .catch(function (err) {
+                if (err && err.name !== 'AbortError') {
+                  copyShareLink(card.headline, card.sourceUrl);
+                }
+              });
+          } else {
+            copyShareLink(card.headline, card.sourceUrl);
+          }
+        };
+
+        window.shareCard = function (headline, url) {
+          copyShareLink(headline, url);
         };
 
         var currentFiltered = [];
@@ -375,7 +426,7 @@
                     <a class="btn-read-more" href="${card.sourceUrl}" target="_blank" rel="noopener noreferrer">
                       Read more at ${card.sourceName} ↗
                     </a>
-                    <button class="action-icon-btn" aria-label="Share story" onclick="window.shareCard(${JSON.stringify(card.headline)}, ${JSON.stringify(card.sourceUrl)})">
+                    <button class="action-icon-btn" aria-label="Share story" onclick="window.shareCardIndex(${i})">
                       <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;">
                         <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/>
                       </svg>
