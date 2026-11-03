@@ -8,6 +8,8 @@ export interface ToastProps {
   message: string | null;
   icon?: ComponentProps<typeof Ionicons>['name'];
   durationMs?: number;
+  position?: 'top' | 'bottom';
+  bottomOffset?: number;
   onDismiss: () => void;
   testID?: string;
 }
@@ -16,19 +18,22 @@ export function Toast({
   message,
   icon = 'checkmark-circle',
   durationMs = 2200,
+  position = 'bottom',
+  bottomOffset = 24,
   onDismiss,
   testID = 'toast',
 }: ToastProps) {
   const theme = useTheme();
   const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(-8)).current;
+  const startTranslate = position === 'top' ? -10 : 10;
+  const translateY = useRef(new Animated.Value(startTranslate)).current;
 
   useEffect(() => {
     if (!message) return;
 
     // Reset and animate in
     opacity.setValue(0);
-    translateY.setValue(-8);
+    translateY.setValue(startTranslate);
 
     Animated.parallel([
       Animated.timing(opacity, {
@@ -52,7 +57,7 @@ export function Toast({
           useNativeDriver: true,
         }),
         Animated.timing(translateY, {
-          toValue: -8,
+          toValue: startTranslate,
           duration: 200,
           useNativeDriver: true,
         }),
@@ -62,7 +67,7 @@ export function Toast({
     }, durationMs);
 
     return () => clearTimeout(timer);
-  }, [message, durationMs, onDismiss, opacity, translateY]);
+  }, [message, durationMs, onDismiss, opacity, translateY, startTranslate]);
 
   if (!message) return null;
 
@@ -72,6 +77,7 @@ export function Toast({
       testID={testID}
       style={[
         styles.container,
+        position === 'top' ? { top: 56 } : { bottom: bottomOffset },
         {
           opacity,
           transform: [{ translateY }],
@@ -90,7 +96,6 @@ export function Toast({
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    top: 56,
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
@@ -113,4 +118,3 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
 });
-
