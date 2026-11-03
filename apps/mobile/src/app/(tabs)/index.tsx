@@ -406,29 +406,6 @@ export default function FeedScreen() {
               </Text>
             </Pressable>
           ) : null}
-
-          {isReviewing ? (
-            <Pressable
-              onPress={() => {
-                setReviewMode('none');
-                setPagerEpoch((e) => e + 1);
-                indexRef.current = 0;
-                setIndex(0);
-              }}
-              style={[styles.caughtUpButtonSecondary, { borderColor: theme.border }]}
-              accessibilityRole="button"
-            >
-              <Ionicons
-                name="close-circle-outline"
-                size={18}
-                color={theme.text}
-                style={styles.buttonIcon}
-              />
-              <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.text }]}>
-                Back to caught up
-              </Text>
-            </Pressable>
-          ) : null}
         </View>
       </View>
     );
