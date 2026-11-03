@@ -22,6 +22,68 @@ const THEMES: { value: Settings['theme']; label: string }[] = [
   { value: 'dynamic', label: 'Dynamic' },
 ];
 
+function Row({
+  label,
+  children,
+  borderBottomColor,
+  textColor,
+  testID,
+}: {
+  label: string;
+  children: ReactNode;
+  borderBottomColor: string;
+  textColor: string;
+  testID?: string;
+}) {
+  return (
+    <View style={[styles.row, { borderBottomColor }]} testID={testID}>
+      <Text style={[styles.label, { color: textColor }]}>{label}</Text>
+      {children}
+    </View>
+  );
+}
+
+function Section({
+  title,
+  children,
+  mutedColor,
+  cardColor,
+}: {
+  title: string;
+  children: ReactNode;
+  mutedColor: string;
+  cardColor: string;
+}) {
+  return (
+    <View style={styles.section}>
+      <Text style={[styles.sectionTitle, { color: mutedColor }]}>{title}</Text>
+      <View style={[styles.card, { backgroundColor: cardColor }]}>{children}</View>
+    </View>
+  );
+}
+
+function Link({
+  label,
+  url,
+  borderBottomColor,
+  accentColor,
+}: {
+  label: string;
+  url: string;
+  borderBottomColor: string;
+  accentColor: string;
+}) {
+  return (
+    <Pressable
+      onPress={() => void WebBrowser.openBrowserAsync(url)}
+      accessibilityRole="link"
+      style={[styles.row, { borderBottomColor }]}
+    >
+      <Text style={[styles.label, { color: accentColor }]}>{label}</Text>
+    </Pressable>
+  );
+}
+
 export default function SettingsScreen() {
   const theme = useTheme();
   const { settings, update, toggleCategory } = useSettings();
@@ -46,42 +108,12 @@ export default function SettingsScreen() {
     else Alert.alert('Something went wrong', 'Please try again later.');
   };
 
-  const Row = ({
-    label,
-    children,
-    testID,
-  }: {
-    label: string;
-    children: ReactNode;
-    testID?: string;
-  }) => (
-    <View style={[styles.row, { borderBottomColor: theme.border }]} testID={testID}>
-      <Text style={[styles.label, { color: theme.text }]}>{label}</Text>
-      {children}
-    </View>
-  );
-  const Section = ({ title, children }: { title: string; children: ReactNode }) => (
-    <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: theme.muted }]}>{title}</Text>
-      <View style={[styles.card, { backgroundColor: theme.card }]}>{children}</View>
-    </View>
-  );
-  const Link = ({ label, url }: { label: string; url: string }) => (
-    <Pressable
-      onPress={() => void WebBrowser.openBrowserAsync(url)}
-      accessibilityRole="link"
-      style={[styles.row, { borderBottomColor: theme.border }]}
-    >
-      <Text style={[styles.label, { color: theme.accent }]}>{label}</Text>
-    </Pressable>
-  );
-
   return (
     <ScrollView
       style={{ backgroundColor: theme.background }}
       contentContainerStyle={styles.content}
     >
-      <Section title="APPEARANCE">
+      <Section title="APPEARANCE" mutedColor={theme.muted} cardColor={theme.card}>
         <View style={styles.segmented}>
           {THEMES.map(({ value, label }) => {
             const active = settings.theme === value;
@@ -110,12 +142,19 @@ export default function SettingsScreen() {
         </View>
       </Section>
 
-      <Section title="CATEGORIES IN YOUR FEED">
+      <Section title="CATEGORIES IN YOUR FEED" mutedColor={theme.muted} cardColor={theme.card}>
         {ALL_CATEGORIES.map((category) => (
-          <Row key={category} label={CATEGORY_LABELS[category]}>
+          <Row
+            key={`row-cat-${category}`}
+            label={CATEGORY_LABELS[category]}
+            borderBottomColor={theme.border}
+            textColor={theme.text}
+          >
             <Switch
+              key={`category-switch-${category}`}
               value={settings.categories.includes(category)}
-              onValueChange={() => toggleCategory(category)}
+              onValueChange={(val) => toggleCategory(category, val)}
+              trackColor={{ false: theme.border, true: theme.accent }}
               accessibilityLabel={`Show ${CATEGORY_LABELS[category]}`}
               testID={`category-${category}`}
             />
@@ -123,11 +162,17 @@ export default function SettingsScreen() {
         ))}
       </Section>
 
-      <Section title="NOTIFICATIONS">
-        <Row label="Top stories (max 2 a day)">
+      <Section title="NOTIFICATIONS" mutedColor={theme.muted} cardColor={theme.card}>
+        <Row
+          label="Top stories (max 2 a day)"
+          borderBottomColor={theme.border}
+          textColor={theme.text}
+        >
           <Switch
+            key="notifications-switch"
             value={settings.notifications === true}
             onValueChange={(on) => void setNotifications(on)}
+            trackColor={{ false: theme.border, true: theme.accent }}
             disabled={!isPushAvailable()}
             accessibilityLabel="Top story notifications"
             testID="notifications"
@@ -135,17 +180,33 @@ export default function SettingsScreen() {
         </Row>
       </Section>
 
-      <Section title="PRIVACY">
-        <Row label="Analytics & crash reports">
+      <Section title="PRIVACY" mutedColor={theme.muted} cardColor={theme.card}>
+        <Row
+          label="Analytics & crash reports"
+          borderBottomColor={theme.border}
+          textColor={theme.text}
+        >
           <Switch
+            key="analytics-switch"
             value={settings.analytics}
             onValueChange={(on) => update({ analytics: on })}
+            trackColor={{ false: theme.border, true: theme.accent }}
             accessibilityLabel="Analytics and crash reports"
             testID="analytics"
           />
         </Row>
-        <Link label="Privacy policy" url={config.privacyUrl} />
-        <Link label="Support & feedback" url={config.supportUrl} />
+        <Link
+          label="Privacy policy"
+          url={config.privacyUrl}
+          borderBottomColor={theme.border}
+          accentColor={theme.accent}
+        />
+        <Link
+          label="Support & feedback"
+          url={config.supportUrl}
+          borderBottomColor={theme.border}
+          accentColor={theme.accent}
+        />
       </Section>
 
       <Text style={[styles.footer, { color: theme.muted }]}>

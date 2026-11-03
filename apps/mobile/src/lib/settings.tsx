@@ -31,7 +31,7 @@ interface SettingsContextValue {
   settings: Settings;
   loaded: boolean;
   update: (patch: Partial<Settings>) => void;
-  toggleCategory: (category: Category) => void;
+  toggleCategory: (category: Category, forceValue?: boolean) => void;
 }
 
 const SettingsContext = createContext<SettingsContextValue>({
@@ -70,14 +70,16 @@ export function SettingsProvider({
   );
 
   const toggleCategory = useCallback(
-    (category: Category) => {
+    (category: Category, forceValue?: boolean) => {
       setSettings((current) => {
-        const enabled = current.categories.includes(category);
+        const currentlyEnabled = current.categories.includes(category);
+        const shouldEnable = forceValue !== undefined ? forceValue : !currentlyEnabled;
+        if (currentlyEnabled === shouldEnable) return current;
         // Keep at least one category, or the feed would always be empty.
-        if (enabled && current.categories.length === 1) return current;
-        const categories = enabled
-          ? current.categories.filter((c) => c !== category)
-          : ALL_CATEGORIES.filter((c) => c === category || current.categories.includes(c));
+        if (!shouldEnable && current.categories.length === 1) return current;
+        const categories = shouldEnable
+          ? ALL_CATEGORIES.filter((c) => c === category || current.categories.includes(c))
+          : current.categories.filter((c) => c !== category);
         const next = { ...current, categories };
         void writeJson(store, STORAGE_KEYS.settings, next);
         return next;
