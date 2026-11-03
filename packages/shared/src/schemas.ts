@@ -27,6 +27,15 @@ function text(maxWords: number) {
 
 export const CategorySchema = z.enum(CATEGORIES);
 
+export const CardPaletteSchema = z.object({
+  primary: z.string(),
+  accent: z.string(),
+  accentText: z.string(),
+  chip: z.string(),
+  card: z.string(),
+  background: z.string(),
+});
+
 export const CardSchema = z.object({
   id: z.string().min(1),
   headline: text(HEADLINE_MAX_WORDS),
@@ -37,6 +46,7 @@ export const CardSchema = z.object({
   sourceUrl: webUrl,
   imageUrl: webUrl.nullable(),
   publishedAt: utcDateTime,
+  palette: CardPaletteSchema.optional(),
 });
 
 export const FeedSchema = z.object({
@@ -54,6 +64,7 @@ export const MetaSchema = z.object({
 });
 
 export type Category = z.infer<typeof CategorySchema>;
+export type CardPalette = z.infer<typeof CardPaletteSchema>;
 export type Card = z.infer<typeof CardSchema>;
 export type Feed = z.infer<typeof FeedSchema>;
 export type Meta = z.infer<typeof MetaSchema>;

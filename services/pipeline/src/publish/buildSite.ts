@@ -85,6 +85,7 @@ function toPublicCard(card: CardRecord): Card {
     sourceUrl: card.sourceUrl,
     imageUrl: card.imageUrl,
     publishedAt: card.publishedAt,
+    ...(card.palette ? { palette: card.palette } : {}),
   };
 }
 

@@ -1,4 +1,4 @@
-import { CardSchema } from '@aishort/shared';
+import { CardSchema, generateCardPalette } from '@aishort/shared';
 import { groupBySimilarity } from './dedupe/similarity';
 import type { ArticleFetcher } from './extract/fetchArticle';
 import { mapLimit } from './lib/concurrency';
@@ -445,6 +445,7 @@ export async function runPipeline(
       sourceUrl: primary.canonical,
       imageUrl: primary.imageUrl ?? null,
       publishedAt: primary.publishedAt,
+      palette: generateCardPalette(classification.category, primary.imageUrl),
     });
     if (!card.success) {
       log.warn('card failed schema validation', {

@@ -19,6 +19,7 @@ const THEMES: { value: Settings['theme']; label: string }[] = [
   { value: 'system', label: 'System' },
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
+  { value: 'dynamic', label: 'Dynamic' },
 ];
 
 export default function SettingsScreen() {
@@ -93,7 +94,14 @@ export default function SettingsScreen() {
                 testID={`theme-${value}`}
                 style={[styles.segment, { backgroundColor: active ? theme.accent : theme.chip }]}
               >
-                <Text style={{ color: active ? theme.accentText : theme.text, fontWeight: '600' }}>
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    color: active ? theme.accentText : theme.text,
+                    fontWeight: '600',
+                    fontSize: 13,
+                  }}
+                >
                   {label}
                 </Text>
               </Pressable>
@@ -163,7 +171,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   label: { fontSize: 16 },
-  segmented: { flexDirection: 'row', gap: 8, padding: 12 },
+  segmented: { flexDirection: 'row', gap: 6, padding: 8 },
   segment: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: 8 },
   footer: { fontSize: 12, lineHeight: 18, textAlign: 'center', marginTop: 8 },
 });

@@ -3,6 +3,7 @@ import { useSettings } from './settings';
 
 export interface Theme {
   dark: boolean;
+  isDynamic: boolean;
   background: string;
   card: string;
   text: string;
@@ -16,6 +17,7 @@ export interface Theme {
 
 const light: Theme = {
   dark: false,
+  isDynamic: false,
   background: '#F4F4F6',
   card: '#FFFFFF',
   text: '#111114',
@@ -29,6 +31,7 @@ const light: Theme = {
 
 const dark: Theme = {
   dark: true,
+  isDynamic: false,
   background: '#0B0B0E',
   card: '#17171C',
   text: '#F2F2F5',
@@ -43,6 +46,11 @@ const dark: Theme = {
 export function useTheme(): Theme {
   const system = useColorScheme();
   const { settings } = useSettings();
-  const mode = settings.theme === 'system' ? (system ?? 'light') : settings.theme;
-  return mode === 'dark' ? dark : light;
+  const isDynamic = settings.theme === 'dynamic';
+  const mode =
+    settings.theme === 'dynamic' || settings.theme === 'system'
+      ? (system ?? 'dark')
+      : settings.theme;
+  const base = mode === 'dark' ? dark : light;
+  return isDynamic ? { ...base, isDynamic: true } : base;
 }

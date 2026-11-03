@@ -13,10 +13,15 @@ describe('copyStaticSite', () => {
     await copyStaticSite(WEB_DIR, out);
     expect((await readdir(out)).sort()).toEqual([
       '.nojekyll',
+      'apple-touch-icon.png',
+      'favicon.png',
+      'icon.png',
       'index.html',
+      'manifest.json',
       'privacy',
       'styles.css',
       'support',
+      'sw.js',
     ]);
     expect(await readFile(join(out, 'privacy', 'index.html'), 'utf8')).toContain('Privacy policy');
   });

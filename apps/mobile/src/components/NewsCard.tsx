@@ -1,4 +1,4 @@
-import type { Card, Category } from '@aishort/shared';
+import { generateCardPalette, type Card, type Category } from '@aishort/shared';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as WebBrowser from 'expo-web-browser';
@@ -32,6 +32,20 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
   const insets = useSafeAreaInsets();
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
+  const palette = card.palette ?? generateCardPalette(card.category, card.imageUrl);
+  const isDynamic = theme.isDynamic;
+
+  const cardBackground = isDynamic ? (card.imageUrl ? '#0B0B0E' : palette.card) : theme.card;
+  const accentColor = isDynamic ? palette.accent : theme.accent;
+  const accentTextColor = isDynamic ? palette.accentText : theme.accentText;
+  const chipBg = isDynamic ? (theme.dark ? palette.chip : '#EEF0FF') : theme.chip;
+  const chipTextColor = isDynamic ? (theme.dark ? '#FFFFFF' : accentColor) : theme.accent;
+  const cardBorderColor = isDynamic
+    ? theme.dark
+      ? 'rgba(255, 255, 255, 0.08)'
+      : 'rgba(0, 0, 0, 0.06)'
+    : theme.border;
+
   const readMore = () => {
     track('card_read_more', { category: card.category });
     void WebBrowser.openBrowserAsync(card.sourceUrl);
@@ -46,11 +60,41 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.card }]} testID={`card-${card.id}`}>
+    <View
+      style={[styles.container, { backgroundColor: cardBackground }]}
+      testID={`card-${card.id}`}
+    >
+      {isDynamic && card.imageUrl ? (
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          <Image
+            source={{ uri: card.imageUrl }}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            blurRadius={50}
+            transition={200}
+            accessibilityIgnoresInvertColors
+            accessible={false}
+          />
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor: theme.dark
+                  ? 'rgba(11, 11, 16, 0.82)'
+                  : 'rgba(255, 255, 255, 0.85)',
+              },
+            ]}
+          />
+        </View>
+      ) : null}
+
       {card.imageUrl ? (
         <Pressable
           onPress={() => setIsImageViewerOpen(true)}
-          style={[styles.imageContainer, { backgroundColor: theme.card }]}
+          style={[
+            styles.imageContainer,
+            { backgroundColor: isDynamic ? 'transparent' : theme.card },
+          ]}
           accessibilityRole="button"
           accessibilityLabel="View full image"
         >
@@ -67,9 +111,16 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
           </View>
         </Pressable>
       ) : (
-        <View style={[styles.noImageBanner, { backgroundColor: theme.chip }]}>
-          <View style={[styles.noImageIconCircle, { backgroundColor: theme.card }]}>
-            <Ionicons name={CATEGORY_ICONS[card.category]} size={36} color={theme.accent} />
+        <View
+          style={[styles.noImageBanner, { backgroundColor: isDynamic ? palette.chip : theme.chip }]}
+        >
+          <View
+            style={[
+              styles.noImageIconCircle,
+              { backgroundColor: isDynamic ? palette.card : theme.card },
+            ]}
+          >
+            <Ionicons name={CATEGORY_ICONS[card.category]} size={36} color={accentColor} />
           </View>
           <Text style={[styles.noImageSource, { color: theme.muted }]}>
             {card.sourceName} · {CATEGORY_LABELS[card.category]}
@@ -86,12 +137,7 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
           onRequestClose={() => setIsImageViewerOpen(false)}
         >
           <View style={styles.modalBackdrop}>
-            <View
-              style={[
-                styles.modalHeader,
-                { paddingTop: Math.max(insets.top, 44) + 8 },
-              ]}
-            >
+            <View style={[styles.modalHeader, { paddingTop: Math.max(insets.top, 44) + 8 }]}>
               <Text style={styles.modalTitle} numberOfLines={1}>
                 {card.sourceName}
               </Text>
@@ -124,19 +170,19 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
               />
             </ScrollView>
 
-            <View
-              style={[
-                styles.modalFooter,
-                { paddingBottom: Math.max(insets.bottom, 20) + 12 },
-              ]}
-            >
+            <View style={[styles.modalFooter, { paddingBottom: Math.max(insets.bottom, 20) + 12 }]}>
               <Pressable
                 onPress={() => setIsImageViewerOpen(false)}
                 style={styles.modalClosePill}
                 accessibilityRole="button"
                 accessibilityLabel="Close image viewer"
               >
-                <Ionicons name="close-circle-outline" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+                <Ionicons
+                  name="close-circle-outline"
+                  size={18}
+                  color="#FFFFFF"
+                  style={{ marginRight: 6 }}
+                />
                 <Text style={styles.modalClosePillText}>Close</Text>
               </Pressable>
               <Text style={styles.modalFooterHint}>Pinch to zoom • Tap Close to exit</Text>
@@ -152,13 +198,22 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
         bounces={false}
       >
         <View style={styles.meta}>
-          <Text style={[styles.chip, { backgroundColor: theme.chip, color: theme.accent }]}>
+          <Text style={[styles.chip, { backgroundColor: chipBg, color: chipTextColor }]}>
             {CATEGORY_LABELS[card.category]}
           </Text>
           <Text
             style={[
               styles.secondaryChip,
-              { backgroundColor: theme.dark ? '#22222E' : '#EAEAEF', color: theme.text },
+              {
+                backgroundColor: isDynamic
+                  ? theme.dark
+                    ? 'rgba(255, 255, 255, 0.12)'
+                    : 'rgba(0, 0, 0, 0.06)'
+                  : theme.dark
+                    ? '#22222E'
+                    : '#EAEAEF',
+                color: theme.text,
+              },
             ]}
           >
             {card.sourceName}
@@ -166,13 +221,22 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
           <Text
             style={[
               styles.secondaryChip,
-              { backgroundColor: theme.dark ? '#1A1A22' : '#F2F2F6', color: theme.muted },
+              {
+                backgroundColor: isDynamic
+                  ? theme.dark
+                    ? 'rgba(255, 255, 255, 0.08)'
+                    : 'rgba(0, 0, 0, 0.04)'
+                  : theme.dark
+                    ? '#1A1A22'
+                    : '#F2F2F6',
+                color: theme.muted,
+              },
             ]}
           >
             {relativeTime(card.publishedAt, now)}
           </Text>
           {card.importance >= 8 ? (
-            <Text style={[styles.top, { color: theme.accent }]}>Top story</Text>
+            <Text style={[styles.top, { color: accentColor }]}>Top story</Text>
           ) : null}
         </View>
         <Text style={[styles.headline, { color: theme.text }]} accessibilityRole="header">
@@ -181,15 +245,15 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
         <Text style={[styles.summary, { color: theme.text }]}>{card.summary}</Text>
       </ScrollView>
 
-      <View style={[styles.actions, { borderTopColor: theme.border }]}>
+      <View style={[styles.actions, { borderTopColor: cardBorderColor }]}>
         <Pressable
           onPress={readMore}
-          style={[styles.readMore, { backgroundColor: theme.accent }]}
+          style={[styles.readMore, { backgroundColor: accentColor }]}
           accessibilityRole="link"
           accessibilityLabel={`Read more at ${card.sourceName}`}
           testID="read-more"
         >
-          <Text style={[styles.readMoreText, { color: theme.accentText }]}>
+          <Text style={[styles.readMoreText, { color: accentTextColor }]}>
             Read more at {card.sourceName}
           </Text>
         </Pressable>
@@ -213,7 +277,7 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
           <Ionicons
             name={bookmarked ? 'bookmark' : 'bookmark-outline'}
             size={24}
-            color={bookmarked ? theme.accent : theme.text}
+            color={bookmarked ? accentColor : theme.text}
           />
         </Pressable>
       </View>
@@ -344,7 +408,13 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     overflow: 'hidden',
   },
-  top: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginLeft: 2 },
+  top: {
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginLeft: 2,
+  },
   headline: { fontSize: 21, lineHeight: 27, fontWeight: '700' },
   summary: { fontSize: 15, lineHeight: 23 },
   actions: {
