@@ -49,7 +49,9 @@ export default function FeedScreen() {
     message: string;
     icon?: ComponentProps<typeof Ionicons>['name'];
   } | null>(null);
-  const [showAllRead, setShowAllRead] = useState(false);
+  type ReviewMode = 'none' | 'today' | 'all';
+  const [reviewMode, setReviewMode] = useState<ReviewMode>('none');
+  const [pagerEpoch, setPagerEpoch] = useState(0);
   const pager = useRef<PagerView>(null);
 
   const visible = useMemo(
@@ -66,13 +68,29 @@ export default function FeedScreen() {
     [visible, readCardIds],
   );
 
-  // If user tapped "Review past stories", show all; otherwise show unread cards
-  const displayCards = showAllRead ? visible : unreadCards;
+  const todayCards = useMemo(() => {
+    const now = new Date();
+    return visible.filter((c) => {
+      const cardDate = new Date(c.publishedAt);
+      return (
+        cardDate.getDate() === now.getDate() &&
+        cardDate.getMonth() === now.getMonth() &&
+        cardDate.getFullYear() === now.getFullYear()
+      );
+    });
+  }, [visible]);
+
+  // If user tapped "Review today's stories" or "Review all past stories", show that subset; otherwise show unread
+  const displayCards = useMemo(() => {
+    if (reviewMode === 'today') return todayCards;
+    if (reviewMode === 'all') return visible;
+    return unreadCards;
+  }, [reviewMode, todayCards, visible, unreadCards]);
 
   // The user is caught up if read history has loaded, not reviewing past stories,
   // and all visible stories in this filter have been read.
   const userIsCaughtUp =
-    readHistoryLoaded && !showAllRead && visible.length > 0 && unreadCards.length === 0;
+    readHistoryLoaded && reviewMode === 'none' && visible.length > 0 && unreadCards.length === 0;
 
   // Periodically check for new stories every 2.5 minutes while the app is sitting open
   useEffect(() => {
@@ -86,8 +104,17 @@ export default function FeedScreen() {
     setFilter(next);
     indexRef.current = 0;
     setIndex(0);
-    setShowAllRead(false);
+    setReviewMode('none');
+    setPagerEpoch((e) => e + 1);
   }, []);
+
+  const handleReadNewStories = useCallback(() => {
+    setReviewMode('none');
+    setCaughtUp(false);
+    indexRef.current = 0;
+    setIndex(0);
+    setPagerEpoch((e) => e + 1);
+  }, [setCaughtUp]);
 
   const onPageSelected = useCallback(
     (position: number) => {
@@ -128,10 +155,11 @@ export default function FeedScreen() {
           message: `Found ${newlyFetched.length} new ${newlyFetched.length === 1 ? 'story' : 'stories'}!`,
           icon: 'sparkles',
         });
-        setShowAllRead(false);
+        setReviewMode('none');
         setCaughtUp(false);
         indexRef.current = 0;
         setIndex(0);
+        setPagerEpoch((e) => e + 1);
       } else {
         setToast({ message: 'Up to date', icon: 'checkmark-circle' });
       }
@@ -249,83 +277,156 @@ export default function FeedScreen() {
   const newKey = newCardIds.join(',');
   const showNewPill = newCardIds.length > 0 && dismissedNew !== newKey;
 
-  const renderCaughtUpCard = (inPager = false) => (
-    <View style={[styles.caughtUpContainer, { backgroundColor: theme.card }]}>
-      <View style={[styles.caughtUpIconCircle, { backgroundColor: theme.chip }]}>
-        <Ionicons name="checkmark-circle-outline" size={56} color={theme.accent} />
-      </View>
-      <Text style={[styles.caughtUpTitle, { color: theme.text }]}>You're all caught up!</Text>
-      <Text style={[styles.caughtUpMessage, { color: theme.muted }]}>
-        {filter === 'all'
-          ? "You've read all the latest stories. Check back soon for fresh updates."
-          : `You've read all stories in ${filter}. Check back soon for fresh updates.`}
-      </Text>
+  const renderCaughtUpCard = (inPager = false) => {
+    const isReviewing = reviewMode !== 'none';
+    return (
+      <View style={[styles.caughtUpContainer, { backgroundColor: theme.card }]}>
+        <View style={[styles.caughtUpIconCircle, { backgroundColor: theme.chip }]}>
+          <Ionicons name="checkmark-circle-outline" size={56} color={theme.accent} />
+        </View>
+        <Text style={[styles.caughtUpTitle, { color: theme.text }]}>
+          {isReviewing ? "You've reviewed these stories" : "You're all caught up!"}
+        </Text>
+        <Text style={[styles.caughtUpMessage, { color: theme.muted }]}>
+          {isReviewing
+            ? `You've reached the end of ${reviewMode === 'today' ? "today's" : 'past'} stories.`
+            : filter === 'all'
+              ? "You've read all the latest stories. Check back soon for fresh updates."
+              : `You've read all stories in ${filter}. Check back soon for fresh updates.`}
+        </Text>
 
-      <View style={styles.caughtUpActions}>
-        {unreadCards.length > 0 ? (
+        <View style={styles.caughtUpActions}>
+          {unreadCards.length > 0 ? (
+            <Pressable
+              onPress={handleReadNewStories}
+              style={[styles.caughtUpButton, { backgroundColor: '#10B981' }]}
+              accessibilityRole="button"
+            >
+              <Ionicons name="sparkles" size={18} color="#FFFFFF" style={styles.buttonIcon} />
+              <Text style={[styles.caughtUpButtonText, { color: '#FFFFFF' }]}>
+                Read new stories ({unreadCards.length})
+              </Text>
+            </Pressable>
+          ) : null}
+
           <Pressable
-            onPress={() => {
-              setShowAllRead(false);
-              setIndex(0);
-            }}
-            style={[styles.caughtUpButton, { backgroundColor: '#10B981' }]}
+            onPress={() => void handleCheckUpdates()}
+            disabled={isCheckingUpdates}
+            style={[
+              styles.caughtUpButton,
+              { backgroundColor: theme.accent, opacity: isCheckingUpdates ? 0.7 : 1 },
+            ]}
             accessibilityRole="button"
           >
-            <Ionicons name="sparkles" size={18} color="#FFFFFF" style={styles.buttonIcon} />
-            <Text style={[styles.caughtUpButtonText, { color: '#FFFFFF' }]}>
-              Read new stories ({unreadCards.length})
+            {isCheckingUpdates ? (
+              <ActivityIndicator size="small" color={theme.accentText} style={styles.buttonIcon} />
+            ) : (
+              <Ionicons
+                name="refresh"
+                size={18}
+                color={theme.accentText}
+                style={styles.buttonIcon}
+              />
+            )}
+            <Text style={[styles.caughtUpButtonText, { color: theme.accentText }]}>
+              {isCheckingUpdates ? 'Checking for updates…' : 'Check for updates'}
             </Text>
           </Pressable>
-        ) : null}
 
-        <Pressable
-          onPress={() => void handleCheckUpdates()}
-          disabled={isCheckingUpdates}
-          style={[
-            styles.caughtUpButton,
-            { backgroundColor: theme.accent, opacity: isCheckingUpdates ? 0.7 : 1 },
-          ]}
-          accessibilityRole="button"
-        >
-          {isCheckingUpdates ? (
-            <ActivityIndicator size="small" color={theme.accentText} style={styles.buttonIcon} />
+          {inPager ? (
+            <>
+              <Pressable
+                onPress={() => pager.current?.setPage(0)}
+                style={[styles.caughtUpButtonSecondary, { borderColor: theme.border }]}
+                accessibilityRole="button"
+              >
+                <Ionicons name="arrow-up" size={18} color={theme.text} style={styles.buttonIcon} />
+                <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.text }]}>
+                  Back to top
+                </Text>
+              </Pressable>
+              {isReviewing ? (
+                <Pressable
+                  onPress={() => {
+                    setReviewMode('none');
+                    setPagerEpoch((e) => e + 1);
+                    indexRef.current = 0;
+                    setIndex(0);
+                  }}
+                  style={[
+                    styles.caughtUpButtonSecondary,
+                    { borderColor: theme.border, marginTop: 8 },
+                  ]}
+                  accessibilityRole="button"
+                >
+                  <Ionicons
+                    name="close-circle-outline"
+                    size={18}
+                    color={theme.text}
+                    style={styles.buttonIcon}
+                  />
+                  <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.text }]}>
+                    Back to caught up
+                  </Text>
+                </Pressable>
+              ) : null}
+            </>
           ) : (
-            <Ionicons name="refresh" size={18} color={theme.accentText} style={styles.buttonIcon} />
-          )}
-          <Text style={[styles.caughtUpButtonText, { color: theme.accentText }]}>
-            {isCheckingUpdates ? 'Checking for updates…' : 'Check for updates'}
-          </Text>
-        </Pressable>
+            <>
+              {todayCards.length > 0 ? (
+                <Pressable
+                  onPress={() => {
+                    setReviewMode('today');
+                    setPagerEpoch((e) => e + 1);
+                    indexRef.current = 0;
+                    setIndex(0);
+                  }}
+                  style={[
+                    styles.caughtUpButtonSecondary,
+                    { borderColor: theme.border, marginBottom: 8 },
+                  ]}
+                  accessibilityRole="button"
+                >
+                  <Ionicons
+                    name="today-outline"
+                    size={18}
+                    color={theme.text}
+                    style={styles.buttonIcon}
+                  />
+                  <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.text }]}>
+                    Review today's stories ({todayCards.length})
+                  </Text>
+                </Pressable>
+              ) : null}
 
-        {inPager ? (
-          <Pressable
-            onPress={() => pager.current?.setPage(0)}
-            style={[styles.caughtUpButtonSecondary, { borderColor: theme.border }]}
-            accessibilityRole="button"
-          >
-            <Ionicons name="arrow-up" size={18} color={theme.text} style={styles.buttonIcon} />
-            <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.text }]}>
-              Back to top
-            </Text>
-          </Pressable>
-        ) : visible.length > 0 ? (
-          <Pressable
-            onPress={() => {
-              setShowAllRead(true);
-              setIndex(0);
-            }}
-            style={[styles.caughtUpButtonSecondary, { borderColor: theme.border }]}
-            accessibilityRole="button"
-          >
-            <Ionicons name="book-outline" size={18} color={theme.text} style={styles.buttonIcon} />
-            <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.text }]}>
-              Review past stories ({visible.length})
-            </Text>
-          </Pressable>
-        ) : null}
+              {visible.length > todayCards.length ? (
+                <Pressable
+                  onPress={() => {
+                    setReviewMode('all');
+                    setPagerEpoch((e) => e + 1);
+                    indexRef.current = 0;
+                    setIndex(0);
+                  }}
+                  style={[styles.caughtUpButtonSecondary, { borderColor: theme.border }]}
+                  accessibilityRole="button"
+                >
+                  <Ionicons
+                    name="book-outline"
+                    size={18}
+                    color={theme.muted}
+                    style={styles.buttonIcon}
+                  />
+                  <Text style={[styles.caughtUpButtonTextSecondary, { color: theme.muted }]}>
+                    Review all past stories ({visible.length})
+                  </Text>
+                </Pressable>
+              ) : null}
+            </>
+          )}
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   let body;
   if (!cards.length && status === 'loading') {
@@ -355,7 +456,7 @@ export default function FeedScreen() {
     body = (
       <View style={styles.pagerContainer} {...panResponder.panHandlers}>
         <PagerView
-          key={`${filter}-${showAllRead ? 'all' : 'unread'}`}
+          key={`${filter}-${reviewMode}-${pagerEpoch}`}
           ref={pager}
           style={styles.pager}
           orientation="vertical"
@@ -429,9 +530,7 @@ export default function FeedScreen() {
           text={`${newCardIds.length} new ${newCardIds.length === 1 ? 'story' : 'stories'} — tap to see`}
           onPress={() => {
             setDismissedNew(newKey);
-            setShowAllRead(false);
-            setCaughtUp(false);
-            pager.current?.setPage(0);
+            handleReadNewStories();
           }}
           testID="banner-new"
         />
