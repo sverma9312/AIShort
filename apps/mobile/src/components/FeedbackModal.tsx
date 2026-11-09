@@ -28,6 +28,8 @@ interface TypeConfig {
   buttonLabel: string;
   subjectPlaceholder: string;
   messagePlaceholder: string;
+  successTitle: string;
+  successMessage: string;
 }
 
 const FEEDBACK_CONFIGS: Record<FeedbackType, TypeConfig> = {
@@ -38,6 +40,9 @@ const FEEDBACK_CONFIGS: Record<FeedbackType, TypeConfig> = {
     buttonLabel: 'Submit Suggestion',
     subjectPlaceholder: 'e.g. Add dark mode toggle or new category',
     messagePlaceholder: 'Describe what you would like to see added or improved in AIShort...',
+    successTitle: 'Suggestion Received!',
+    successMessage:
+      'Thank you for your suggestion! Ideas like yours help shape future updates of AIShort. Your idea was sent directly to our team at ',
   },
   bug: {
     id: 'bug',
@@ -46,6 +51,9 @@ const FEEDBACK_CONFIGS: Record<FeedbackType, TypeConfig> = {
     buttonLabel: 'Report Bug',
     subjectPlaceholder: 'e.g. Story image failed to load',
     messagePlaceholder: 'Describe what happened, what you expected, and any steps to reproduce...',
+    successTitle: 'Bug Report Received!',
+    successMessage:
+      'Thank you for reporting this issue. We will investigate and work on a fix. Your report was sent directly to our team at ',
   },
   source: {
     id: 'source',
@@ -54,6 +62,9 @@ const FEEDBACK_CONFIGS: Record<FeedbackType, TypeConfig> = {
     buttonLabel: 'Suggest Source',
     subjectPlaceholder: 'e.g. Add MIT Technology Review AI',
     messagePlaceholder: 'Provide the website name, publication URL, or RSS feed link...',
+    successTitle: 'Source Suggestion Received!',
+    successMessage:
+      'Thank you for suggesting a new source! We review all suggested publications and feeds for addition to our pipeline. Sent directly to our team at ',
   },
   query: {
     id: 'query',
@@ -62,6 +73,9 @@ const FEEDBACK_CONFIGS: Record<FeedbackType, TypeConfig> = {
     buttonLabel: 'Submit Question',
     subjectPlaceholder: 'e.g. Question about story updates or privacy',
     messagePlaceholder: 'Ask your question here and we will get back to you...',
+    successTitle: 'Question Received!',
+    successMessage:
+      'Thank you for reaching out! We have received your question and will get back to you as soon as possible. Sent directly to our team at ',
   },
 };
 
@@ -224,10 +238,12 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
               <View style={[styles.successIconBubble, { backgroundColor: `${theme.accent}18` }]}>
                 <Ionicons name="checkmark-circle" size={56} color={theme.accent} />
               </View>
-              <Text style={[styles.successTitle, { color: theme.text }]}>Feedback Received!</Text>
+              <Text style={[styles.successTitle, { color: theme.text }]}>
+                {currentConfig.successTitle}
+              </Text>
               <Text style={[styles.successMessage, { color: theme.muted }]}>
-                Thank you for helping us improve AIShort. Your message was sent directly to our
-                team at <Text style={{ color: theme.accent, fontWeight: '600' }}>{config.supportEmail}</Text>.
+                {currentConfig.successMessage}
+                <Text style={{ color: theme.accent, fontWeight: '600' }}>{config.supportEmail}</Text>.
               </Text>
               <Pressable
                 onPress={handleClose}
