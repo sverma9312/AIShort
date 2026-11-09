@@ -19,10 +19,10 @@ import { useTheme } from '@/lib/theme';
 import { relativeTime } from '@/lib/time';
 
 const THEMES: { value: Settings['theme']; label: string }[] = [
+  { value: 'dynamic', label: 'Dynamic' },
   { value: 'system', label: 'System' },
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
-  { value: 'dynamic', label: 'Dynamic' },
 ];
 
 function Row({

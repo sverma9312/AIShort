@@ -13,7 +13,7 @@ import { ALL_CATEGORIES } from './categories';
 import { deviceStorage, readJson, STORAGE_KEYS, writeJson, type KeyValueStore } from './storage';
 
 export const SettingsSchema = z.object({
-  theme: z.enum(['system', 'light', 'dark', 'dynamic']).default('system'),
+  theme: z.enum(['system', 'light', 'dark', 'dynamic']).default('dynamic'),
   /** Categories shown in the feed. */
   categories: z.array(CategorySchema).default([...ALL_CATEGORIES]),
   /** undefined = never asked; true/false = the user's choice. */
