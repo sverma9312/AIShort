@@ -11,4 +11,3 @@ jest.mock('react-native-pager-view', () => ({
 jest.mock('@expo/vector-icons', () => ({
   Ionicons: 'Ionicons',
 }));
-

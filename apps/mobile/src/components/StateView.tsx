@@ -17,7 +17,10 @@ export function StateView({
 }) {
   const theme = useTheme();
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]} testID={`state-${kind}`}>
+    <View
+      style={[styles.container, { backgroundColor: theme.background }]}
+      testID={`state-${kind}`}
+    >
       {kind === 'loading' ? <ActivityIndicator size="large" color={theme.accent} /> : null}
       {title ? <Text style={[styles.title, { color: theme.text }]}>{title}</Text> : null}
       {message ? <Text style={[styles.message, { color: theme.muted }]}>{message}</Text> : null}

@@ -52,9 +52,7 @@ export class LlmSummarizer implements Summarizer {
             ? fitHeadlineWords(rawHeadline)
             : rawHeadline,
         summary:
-          countWords(rawSummary) > SUMMARY_MAX_WORDS
-            ? fitSummaryWords(rawSummary)
-            : rawSummary,
+          countWords(rawSummary) > SUMMARY_MAX_WORDS ? fitSummaryWords(rawSummary) : rawSummary,
       };
       issues = validateSummary(draft, input);
       if (issues.length === 0) return { ok: true, ...draft, provider, attempts: attempt };
@@ -90,7 +88,10 @@ export function fitSummaryWords(
 
   // 2. Otherwise trim cleanly at word boundary and terminate with period
   const words = summary.trim().split(/\s+/u);
-  const trimmed = words.slice(0, maxWords).join(' ').replace(/[,;:\-\s]+$/, '');
+  const trimmed = words
+    .slice(0, maxWords)
+    .join(' ')
+    .replace(/[,;:\-\s]+$/, '');
   return /[.!?]["'”)]?$/.test(trimmed) ? trimmed : `${trimmed}.`;
 }
 
@@ -98,7 +99,10 @@ export function fitHeadlineWords(headline: string, maxWords: number = HEADLINE_M
   const trimmed = tidyHeadline(headline);
   if (countWords(trimmed) <= maxWords) return trimmed;
   const words = trimmed.split(/\s+/u);
-  return words.slice(0, maxWords).join(' ').replace(/[,;:\-\s]+$/, '');
+  return words
+    .slice(0, maxWords)
+    .join(' ')
+    .replace(/[,;:\-\s]+$/, '');
 }
 
 /**

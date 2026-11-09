@@ -131,6 +131,28 @@ main.static-page footer {
   z-index: 100;
 }
 
+.app-header-inner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Mobile Defaults for Desktop Elements (Zero impact on phone viewport) */
+.desktop-banner,
+.desktop-nav,
+.desktop-only {
+  display: none !important;
+}
+
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -263,39 +285,6 @@ main.static-page footer {
   -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
-}
-
-/* Desktop layout centering */
-@media (min-width: 768px) {
-  body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #050508;
-  }
-  #app {
-    max-width: 440px;
-    height: 94dvh;
-    border-radius: 36px;
-    box-shadow:
-      0 25px 60px rgba(0, 0, 0, 0.65),
-      0 0 0 1px rgba(255, 255, 255, 0.1);
-    overflow: hidden;
-    position: relative;
-  }
-  .app-header {
-    border-top-left-radius: 36px;
-    border-top-right-radius: 36px;
-    max-width: 440px;
-    margin: 0 auto;
-    left: auto;
-    right: auto;
-  }
-  .category-bar {
-    max-width: 440px;
-    left: auto;
-    right: auto;
-  }
 }
 
 /* Individual Card */
@@ -770,4 +759,354 @@ main.static-page footer {
   color: #ffffff;
   cursor: pointer;
   font-size: 1.1rem;
+}
+
+/* -------------------------------------------------------------
+ * Desktop / Laptop Adaptations (Screens >= 768px)
+ * Mobile screens (< 768px) remain 100% full-screen vertical swipe.
+ * ------------------------------------------------------------- */
+@media (min-width: 768px) {
+  body {
+    display: block;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.12), transparent 55%), var(--bg);
+    overflow: hidden;
+  }
+
+  [data-theme='light'] body {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(79, 70, 229, 0.08), transparent 55%), var(--bg);
+  }
+
+  #app {
+    max-width: none;
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Desktop Top Announcement Banner */
+  .desktop-banner {
+    display: block !important;
+    background: linear-gradient(90deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.95));
+    color: #ffffff;
+    font-size: 0.85rem;
+    padding: 0.45rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    flex-shrink: 0;
+    z-index: 120;
+    box-shadow: 0 2px 10px rgba(79, 70, 229, 0.25);
+  }
+
+  .desktop-banner-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .desktop-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .desktop-banner-badge {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+  }
+
+  .desktop-banner-text {
+    font-size: 0.84rem;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+  }
+
+  .desktop-banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .desktop-banner-btn {
+    background: #ffffff;
+    color: #4338ca;
+    border: none;
+    border-radius: 14px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .desktop-banner-btn:hover {
+    background: #eef2ff;
+    transform: translateY(-1px);
+  }
+
+  .desktop-banner-close {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1rem;
+    cursor: pointer;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+  }
+
+  .desktop-banner-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+  }
+
+  .desktop-only {
+    display: inline-block !important;
+  }
+
+  .brand-edition {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    background: rgba(125, 125, 150, 0.14);
+    padding: 2px 7px;
+    border-radius: 6px;
+    margin-left: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  /* Full-width App Header on Desktop */
+  .app-header {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    max-width: none;
+    width: 100%;
+    border-radius: 0;
+    padding: 0 1.5rem;
+    height: 56px;
+    flex-shrink: 0;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .app-header-inner {
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Centered Category Pills Bar */
+  .category-bar {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    max-width: none;
+    width: 100%;
+    padding: 0.55rem 1.5rem;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Deck Container Fills Remaining Vertical Space */
+  .deck-container {
+    margin-top: 0;
+    height: 100%;
+    flex: 1;
+    min-height: 0;
+    position: relative;
+  }
+
+  /* Tablet / Medium Desktop (768px - 1023px): Centered Vertical Card */
+  .card-wrapper {
+    padding: 1.25rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .news-card {
+    max-width: 600px;
+    height: min(680px, 94%);
+    border-radius: 22px;
+    box-shadow:
+      0 16px 40px rgba(0, 0, 0, 0.35),
+      0 0 0 1px var(--border);
+  }
+
+  /* Floating Desktop Navigation Controls */
+  .desktop-nav {
+    display: flex !important;
+    position: fixed;
+    right: max(1.5rem, calc((100vw - 1100px) / 2 + 1rem));
+    top: 54%;
+    transform: translateY(-50%);
+    flex-direction: column;
+    align-items: center;
+    gap: 0.55rem;
+    z-index: 95;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 0.65rem 0.55rem;
+    border-radius: 28px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .desktop-nav-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--chip-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+  }
+
+  .desktop-nav-btn:hover:not(:disabled) {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+    transform: scale(1.06);
+  }
+
+  .desktop-nav-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .desktop-nav-key {
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-top: -2px;
+    opacity: 0.8;
+  }
+
+  .desktop-nav-counter {
+    font-size: 0.78rem;
+    font-weight: 750;
+    color: var(--muted);
+    padding: 0.2rem 0.4rem;
+    text-align: center;
+    min-width: 48px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .desktop-nav-hint {
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-align: center;
+    max-width: 48px;
+    line-height: 1.2;
+    padding-top: 0.2rem;
+    border-top: 1px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+}
+
+/* -------------------------------------------------------------
+ * Large Screens / Laptops (Screens >= 1024px)
+ * Wide horizontal split card layout for optimal desktop reading.
+ * ------------------------------------------------------------- */
+@media (min-width: 1024px) {
+  .news-card {
+    max-width: 920px;
+    height: min(540px, 80%);
+    flex-direction: row;
+    border-radius: 24px;
+    box-shadow:
+      0 24px 60px rgba(0, 0, 0, 0.4),
+      0 0 0 1px var(--border);
+  }
+
+  .card-image-wrap {
+    width: 48%;
+    height: 100%;
+    max-height: none;
+    aspect-ratio: unset;
+    border-right: 1px solid var(--border);
+  }
+
+  .card-no-image {
+    width: 48%;
+    height: 100%;
+    min-height: unset;
+    border-right: 1px solid var(--border);
+    border-bottom: none;
+  }
+
+  .card-content {
+    width: 52%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .card-body {
+    padding: 1.5rem 1.75rem 1rem;
+  }
+
+  .card-headline {
+    font-size: 1.45rem;
+    line-height: 1.35;
+    margin-bottom: 0.9rem;
+    font-weight: 750;
+  }
+
+  .card-summary {
+    font-size: 1.08rem;
+    line-height: 1.65;
+  }
+
+  .card-actions {
+    padding: 0.95rem 1.75rem;
+  }
+
+  .caught-up-card {
+    max-width: 540px;
+    height: auto;
+    padding: 2.5rem 2rem;
+    border-radius: 24px;
+  }
 }

@@ -200,11 +200,7 @@ export default function SettingsScreen() {
             testID="analytics"
           />
         </Row>
-        <Row
-          label="Clear read history"
-          borderBottomColor={theme.border}
-          textColor={theme.text}
-        >
+        <Row label="Clear read history" borderBottomColor={theme.border} textColor={theme.text}>
           <Pressable
             onPress={() => {
               Alert.alert(
@@ -252,10 +248,7 @@ export default function SettingsScreen() {
         {'\n'}Summaries are written by AI from the linked articles and may contain mistakes.
       </Text>
 
-      <FeedbackModal
-        visible={feedbackVisible}
-        onClose={() => setFeedbackVisible(false)}
-      />
+      <FeedbackModal visible={feedbackVisible} onClose={() => setFeedbackVisible(false)} />
     </ScrollView>
   );
 }

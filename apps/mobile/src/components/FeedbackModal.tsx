@@ -155,7 +155,13 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
         }),
       });
 
-      const data = await response.json().catch(() => null);
+      interface FormSubmitResult {
+        success?: boolean | string;
+        message?: string;
+      }
+      const data: FormSubmitResult | null = (await response
+        .json()
+        .catch(() => null)) as FormSubmitResult | null;
 
       if (response.ok && (data?.success === 'true' || data?.success === true)) {
         setSubmitted(true);
@@ -166,7 +172,10 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
         // Fallback for endpoints returning 200 without success boolean
         setSubmitted(true);
       } else {
-        const detail = data?.message ?? 'Please check your connection or email us directly.';
+        const detail: string =
+          typeof data?.message === 'string'
+            ? data.message
+            : 'Please check your connection or email us directly.';
         setErrorMessage(detail);
       }
     } catch {
@@ -243,7 +252,10 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
               </Text>
               <Text style={[styles.successMessage, { color: theme.muted }]}>
                 {currentConfig.successMessage}
-                <Text style={{ color: theme.accent, fontWeight: '600' }}>{config.supportEmail}</Text>.
+                <Text style={{ color: theme.accent, fontWeight: '600' }}>
+                  {config.supportEmail}
+                </Text>
+                .
               </Text>
               <Pressable
                 onPress={handleClose}
@@ -282,10 +294,7 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
                         style={{ marginRight: 6 }}
                       />
                       <Text
-                        style={[
-                          styles.chipText,
-                          { color: active ? theme.accentText : theme.text },
-                        ]}
+                        style={[styles.chipText, { color: active ? theme.accentText : theme.text }]}
                       >
                         {t.label}
                       </Text>

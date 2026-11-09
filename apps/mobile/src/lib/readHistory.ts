@@ -65,4 +65,3 @@ export function useReadHistory(store: KeyValueStore = deviceStorage) {
     resetReadHistory,
   };
 }
-

@@ -25,6 +25,7 @@ describe('SettingsProvider and category toggling', () => {
 
     // Toggle off "models"
     await act(async () => {
+      await Promise.resolve();
       result.current.toggleCategory('models', false);
     });
 
@@ -36,6 +37,7 @@ describe('SettingsProvider and category toggling', () => {
 
     // Toggle off "open-source"
     await act(async () => {
+      await Promise.resolve();
       result.current.toggleCategory('open-source', false);
     });
 
@@ -45,6 +47,7 @@ describe('SettingsProvider and category toggling', () => {
 
     // Update analytics to false
     await act(async () => {
+      await Promise.resolve();
       result.current.update({ analytics: false });
     });
 
@@ -55,6 +58,7 @@ describe('SettingsProvider and category toggling', () => {
 
     // Toggle on "models"
     await act(async () => {
+      await Promise.resolve();
       result.current.toggleCategory('models', true);
     });
 

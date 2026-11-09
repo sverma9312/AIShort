@@ -25,39 +25,73 @@
   </head>
   <body>
     <div id="app">
+      <!-- Desktop "Best viewed on mobile" announcement banner (hidden on mobile screens) -->
+      <aside
+        class="desktop-banner"
+        id="desktop-banner"
+        role="banner"
+        aria-label="Mobile app announcement"
+      >
+        <div class="desktop-banner-inner">
+          <div class="desktop-banner-content">
+            <span class="desktop-banner-badge">📱 Mobile Experience</span>
+            <span class="desktop-banner-text">
+              AIShort is optimized for vertical touchscreen swipe · Best viewed in the mobile app.
+            </span>
+          </div>
+          <div class="desktop-banner-actions">
+            <button id="btn-desktop-install" class="desktop-banner-btn" type="button">
+              Get Mobile App
+            </button>
+            <button
+              id="btn-desktop-dismiss"
+              class="desktop-banner-close"
+              type="button"
+              aria-label="Dismiss banner"
+              title="Dismiss"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      </aside>
+
       <!-- App Header -->
       <header class="app-header">
-        <div class="brand">
-          <span class="brand-badge">AI</span>
-          <span class="brand-title">AIShort</span>
-        </div>
-        <div class="header-actions">
-          <button id="btn-theme" class="icon-btn" aria-label="Toggle theme" title="Toggle theme">
-            <svg id="theme-icon" viewBox="0 0 24 24">
-              <!-- Default: Moon (Dark mode active) -->
-              <path
-                d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"
-              />
-            </svg>
-          </button>
-          <button
-            id="btn-bookmarks"
-            class="icon-btn"
-            aria-label="View bookmarks"
-            title="View bookmarks"
-          >
-            <svg viewBox="0 0 24 24">
-              <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z" />
-            </svg>
-            <span id="bookmark-count" class="badge-count" style="display: none">0</span>
-          </button>
-          <button id="btn-info" class="icon-btn" aria-label="App info" title="About AIShort">
-            <svg viewBox="0 0 24 24">
-              <path
-                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
-              />
-            </svg>
-          </button>
+        <div class="app-header-inner">
+          <div class="brand">
+            <span class="brand-badge">AI</span>
+            <span class="brand-title">AIShort</span>
+            <span class="brand-edition desktop-only">Web Edition</span>
+          </div>
+          <div class="header-actions">
+            <button id="btn-theme" class="icon-btn" aria-label="Toggle theme" title="Toggle theme">
+              <svg id="theme-icon" viewBox="0 0 24 24">
+                <!-- Default: Moon (Dark mode active) -->
+                <path
+                  d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"
+                />
+              </svg>
+            </button>
+            <button
+              id="btn-bookmarks"
+              class="icon-btn"
+              aria-label="View bookmarks"
+              title="View bookmarks"
+            >
+              <svg viewBox="0 0 24 24">
+                <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z" />
+              </svg>
+              <span id="bookmark-count" class="badge-count" style="display: none">0</span>
+            </button>
+            <button id="btn-info" class="icon-btn" aria-label="App info" title="About AIShort">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -87,6 +121,36 @@
           </div>
         </div>
       </main>
+
+      <!-- Floating Desktop Navigation Controls (hidden on mobile screens) -->
+      <aside class="desktop-nav" id="desktop-nav" aria-label="Story navigation controls">
+        <button
+          id="btn-deck-prev"
+          class="desktop-nav-btn"
+          type="button"
+          aria-label="Previous story (Up arrow or K)"
+          title="Previous story (Up arrow, Shift+Space, or K)"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" />
+          </svg>
+          <span class="desktop-nav-key">↑</span>
+        </button>
+        <div class="desktop-nav-counter" id="desktop-nav-counter" title="Current story">1 / 1</div>
+        <button
+          id="btn-deck-next"
+          class="desktop-nav-btn"
+          type="button"
+          aria-label="Next story (Down arrow, Spacebar, or J)"
+          title="Next story (Down arrow, Spacebar, or J)"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+          </svg>
+          <span class="desktop-nav-key">↓</span>
+        </button>
+        <div class="desktop-nav-hint">Space / Arrows</div>
+      </aside>
 
       <!-- Toast Notification HUD -->
       <div id="toast" class="toast-hud" role="alert">Action completed</div>
@@ -461,6 +525,7 @@
                 renderCards();
               });
             }
+            updateDesktopNav();
             return;
           }
 
@@ -492,31 +557,33 @@
                   `
                   }
 
-                  <div class="card-body">
-                    <div class="meta-row">
-                      <span class="chip chip-category">${catLabel}</span>
-                      <span class="chip chip-source">${card.sourceName}</span>
-                      <span class="chip chip-time">${timeAgo(card.publishedAt)}</span>
-                      ${isTop ? '<span class="chip chip-top">★ Top story</span>' : ''}
+                  <div class="card-content">
+                    <div class="card-body">
+                      <div class="meta-row">
+                        <span class="chip chip-category">${catLabel}</span>
+                        <span class="chip chip-source">${card.sourceName}</span>
+                        <span class="chip chip-time">${timeAgo(card.publishedAt)}</span>
+                        ${isTop ? '<span class="chip chip-top">★ Top story</span>' : ''}
+                      </div>
+                      <h2 class="card-headline">${card.headline}</h2>
+                      <p class="card-summary">${card.summary}</p>
                     </div>
-                    <h2 class="card-headline">${card.headline}</h2>
-                    <p class="card-summary">${card.summary}</p>
-                  </div>
 
-                  <div class="card-actions">
-                    <a class="btn-read-more" href="${card.sourceUrl}" target="_blank" rel="noopener noreferrer">
-                      Read more at ${card.sourceName} ↗
-                    </a>
-                    <button class="action-icon-btn" aria-label="Share story" onclick="window.shareCardIndex(${i})">
-                      <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;">
-                        <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/>
-                      </svg>
-                    </button>
-                    <button class="action-icon-btn ${isBookmarked ? 'bookmarked' : ''}" aria-label="Bookmark story" data-card-id="${card.id}" onclick="window.handleBookmarkClick('${card.id}')">
-                      <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;">
-                        <path d="${isBookmarked ? 'M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z' : 'M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z'}"/>
-                      </svg>
-                    </button>
+                    <div class="card-actions">
+                      <a class="btn-read-more" href="${card.sourceUrl}" target="_blank" rel="noopener noreferrer">
+                        Read more at ${card.sourceName} ↗
+                      </a>
+                      <button class="action-icon-btn" aria-label="Share story" onclick="window.shareCardIndex(${i})">
+                        <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;">
+                          <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/>
+                        </svg>
+                      </button>
+                      <button class="action-icon-btn ${isBookmarked ? 'bookmarked' : ''}" aria-label="Bookmark story" data-card-id="${card.id}" onclick="window.handleBookmarkClick('${card.id}')">
+                        <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;">
+                          <path d="${isBookmarked ? 'M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z' : 'M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z'}"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </article>
               </div>
@@ -540,6 +607,7 @@
           `;
 
           container.innerHTML = html;
+          updateDesktopNav();
         }
 
         window.openCardImage = function (index) {
@@ -764,14 +832,97 @@
           document.getElementById('deck-container').scrollTo({ top: 0, behavior: 'instant' });
         });
 
-        // Keyboard navigation (Arrow Up/Down, J/K)
-        document.addEventListener('keydown', function (e) {
-          var deck = document.getElementById('deck-container');
+        // Desktop "Best viewed on mobile" Banner
+        var desktopBanner = document.getElementById('desktop-banner');
+        var btnDesktopDismiss = document.getElementById('btn-desktop-dismiss');
+        var btnDesktopInstall = document.getElementById('btn-desktop-install');
+
+        if (sessionStorage.getItem('aishort_hide_desktop_banner') === '1') {
+          if (desktopBanner) desktopBanner.style.display = 'none';
+        }
+
+        if (btnDesktopDismiss) {
+          btnDesktopDismiss.addEventListener('click', function () {
+            if (desktopBanner) desktopBanner.style.display = 'none';
+            sessionStorage.setItem('aishort_hide_desktop_banner', '1');
+          });
+        }
+
+        if (btnDesktopInstall) {
+          btnDesktopInstall.addEventListener('click', function () {
+            var infoModal = document.getElementById('info-modal');
+            if (infoModal) infoModal.classList.add('open');
+          });
+        }
+
+        // Desktop Floating Navigation Controls & Counter
+        var deck = document.getElementById('deck-container');
+
+        function updateDesktopNav() {
+          var counter = document.getElementById('desktop-nav-counter');
+          var prevBtn = document.getElementById('btn-deck-prev');
+          var nextBtn = document.getElementById('btn-deck-next');
+          if (!counter) return;
+          var total = currentFiltered.length;
+          if (total === 0) {
+            counter.textContent = '0 / 0';
+            if (prevBtn) prevBtn.disabled = true;
+            if (nextBtn) nextBtn.disabled = true;
+            return;
+          }
+          var cardHeight = deck.clientHeight || 1;
+          var currentIndex = Math.round(deck.scrollTop / cardHeight) + 1;
+          currentIndex = Math.max(1, Math.min(currentIndex, total));
+          counter.textContent = currentIndex + ' / ' + total;
+          if (prevBtn) prevBtn.disabled = currentIndex <= 1;
+          if (nextBtn) nextBtn.disabled = currentIndex >= total;
+        }
+
+        function scrollDeckBy(direction) {
           var cardHeight = deck.clientHeight;
-          if (e.key === 'ArrowDown' || e.key === 'j') {
+          deck.scrollBy({ top: direction * cardHeight, behavior: 'smooth' });
+        }
+
+        var btnDeckPrev = document.getElementById('btn-deck-prev');
+        var btnDeckNext = document.getElementById('btn-deck-next');
+        if (btnDeckPrev) {
+          btnDeckPrev.addEventListener('click', function () {
+            scrollDeckBy(-1);
+          });
+        }
+        if (btnDeckNext) {
+          btnDeckNext.addEventListener('click', function () {
+            scrollDeckBy(1);
+          });
+        }
+
+        var scrollRaf = null;
+        deck.addEventListener(
+          'scroll',
+          function () {
+            if (scrollRaf) cancelAnimationFrame(scrollRaf);
+            scrollRaf = requestAnimationFrame(updateDesktopNav);
+          },
+          { passive: true },
+        );
+
+        // Keyboard navigation (Arrow Up/Down, J/K, Page Up/Down, Spacebar)
+        document.addEventListener('keydown', function (e) {
+          if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+          var cardHeight = deck.clientHeight;
+          if (e.key === 'ArrowDown' || e.key === 'j' || e.key === 'PageDown') {
+            e.preventDefault();
             deck.scrollBy({ top: cardHeight, behavior: 'smooth' });
-          } else if (e.key === 'ArrowUp' || e.key === 'k') {
+          } else if (e.key === 'ArrowUp' || e.key === 'k' || e.key === 'PageUp') {
+            e.preventDefault();
             deck.scrollBy({ top: -cardHeight, behavior: 'smooth' });
+          } else if (e.key === ' ') {
+            e.preventDefault();
+            if (e.shiftKey) {
+              deck.scrollBy({ top: -cardHeight, behavior: 'smooth' });
+            } else {
+              deck.scrollBy({ top: cardHeight, behavior: 'smooth' });
+            }
           }
         });
 
