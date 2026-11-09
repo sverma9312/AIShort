@@ -21,12 +21,51 @@ import { useTheme } from '@/lib/theme';
 
 type FeedbackType = 'suggestion' | 'bug' | 'source' | 'query';
 
-const FEEDBACK_TYPES: { id: FeedbackType; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { id: 'suggestion', label: 'Suggestion', icon: 'bulb-outline' },
-  { id: 'bug', label: 'Bug Report', icon: 'bug-outline' },
-  { id: 'source', label: 'New Source', icon: 'newspaper-outline' },
-  { id: 'query', label: 'Question', icon: 'help-circle-outline' },
-];
+interface TypeConfig {
+  id: FeedbackType;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  buttonLabel: string;
+  subjectPlaceholder: string;
+  messagePlaceholder: string;
+}
+
+const FEEDBACK_CONFIGS: Record<FeedbackType, TypeConfig> = {
+  suggestion: {
+    id: 'suggestion',
+    label: 'Suggestion',
+    icon: 'bulb-outline',
+    buttonLabel: 'Submit Suggestion',
+    subjectPlaceholder: 'e.g. Add dark mode toggle or new category',
+    messagePlaceholder: 'Describe what you would like to see added or improved in AIShort...',
+  },
+  bug: {
+    id: 'bug',
+    label: 'Bug Report',
+    icon: 'bug-outline',
+    buttonLabel: 'Report Bug',
+    subjectPlaceholder: 'e.g. Story image failed to load',
+    messagePlaceholder: 'Describe what happened, what you expected, and any steps to reproduce...',
+  },
+  source: {
+    id: 'source',
+    label: 'New Source',
+    icon: 'newspaper-outline',
+    buttonLabel: 'Suggest Source',
+    subjectPlaceholder: 'e.g. Add MIT Technology Review AI',
+    messagePlaceholder: 'Provide the website name, publication URL, or RSS feed link...',
+  },
+  query: {
+    id: 'query',
+    label: 'Question',
+    icon: 'help-circle-outline',
+    buttonLabel: 'Submit Question',
+    subjectPlaceholder: 'e.g. Question about story updates or privacy',
+    messagePlaceholder: 'Ask your question here and we will get back to you...',
+  },
+};
+
+const FEEDBACK_TYPES: TypeConfig[] = Object.values(FEEDBACK_CONFIGS);
 
 interface FeedbackModalProps {
   visible: boolean;
@@ -44,6 +83,8 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const currentConfig = FEEDBACK_CONFIGS[type];
 
   const resetForm = () => {
     setType('suggestion');
@@ -65,7 +106,7 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
     const trimmedMessage = message.trim();
 
     if (!trimmedSubject) {
-      Alert.alert('Subject required', 'Please enter a short subject for your feedback.');
+      Alert.alert('Subject required', 'Please enter a short subject for your message.');
       return;
     }
     if (!trimmedMessage) {
@@ -76,8 +117,7 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
     setSubmitting(true);
     setErrorMessage(null);
 
-    const typeConfig = FEEDBACK_TYPES.find((t) => t.id === type);
-    const typeLabel = typeConfig ? typeConfig.label : 'Feedback';
+    const typeLabel = currentConfig.label;
     const appVersion = Constants.expoConfig?.version ?? '1.0.0';
     const platformInfo = `${Platform.OS} ${Platform.Version}`;
 
@@ -87,6 +127,8 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
+          Origin: 'https://sverma9312.github.io',
+          Referer: 'https://sverma9312.github.io/AIShort/',
         },
         body: JSON.stringify({
           _subject: `[AIShort ${typeLabel}] ${trimmedSubject}`,
@@ -99,11 +141,18 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
         }),
       });
 
-      if (response.ok) {
+      const data = await response.json().catch(() => null);
+
+      if (response.ok && (data?.success === 'true' || data?.success === true)) {
+        setSubmitted(true);
+      } else if (data && data.success === 'false' && typeof data.message === 'string') {
+        // If form needs activation or specific error
+        setErrorMessage(data.message);
+      } else if (response.ok) {
+        // Fallback for endpoints returning 200 without success boolean
         setSubmitted(true);
       } else {
-        const errorData = await response.json().catch(() => null);
-        const detail = errorData?.message ?? 'Please try again later or email us directly.';
+        const detail = data?.message ?? 'Please check your connection or email us directly.';
         setErrorMessage(detail);
       }
     } catch {
@@ -116,9 +165,8 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
   };
 
   const openMailFallback = () => {
-    const typeLabel = FEEDBACK_TYPES.find((t) => t.id === type)?.label ?? 'Feedback';
     const mailto = `mailto:${config.supportEmail}?subject=${encodeURIComponent(
-      `[AIShort ${typeLabel}] ${subject.trim()}`,
+      `[AIShort ${currentConfig.label}] ${subject.trim()}`,
     )}&body=${encodeURIComponent(
       `${message.trim()}\n\n---\nApp: AIShort ${Constants.expoConfig?.version ?? '1.0.0'}\nOS: ${Platform.OS} ${Platform.Version}`,
     )}`;
@@ -173,21 +221,21 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
         >
           {submitted ? (
             <View style={styles.successContainer}>
-              <View style={[styles.successIconBubble, { backgroundColor: `${theme.accent}15` }]}>
-                <Ionicons name="checkmark-circle" size={54} color={theme.accent} />
+              <View style={[styles.successIconBubble, { backgroundColor: `${theme.accent}18` }]}>
+                <Ionicons name="checkmark-circle" size={56} color={theme.accent} />
               </View>
               <Text style={[styles.successTitle, { color: theme.text }]}>Feedback Received!</Text>
               <Text style={[styles.successMessage, { color: theme.muted }]}>
                 Thank you for helping us improve AIShort. Your message was sent directly to our
-                team at <Text style={{ color: theme.accent }}>{config.supportEmail}</Text>.
+                team at <Text style={{ color: theme.accent, fontWeight: '600' }}>{config.supportEmail}</Text>.
               </Text>
               <Pressable
                 onPress={handleClose}
-                style={[styles.submitButton, { backgroundColor: theme.accent }]}
+                style={[styles.doneButton, { backgroundColor: theme.accent }]}
                 accessibilityRole="button"
-                accessibilityLabel="Close"
+                accessibilityLabel="Done"
               >
-                <Text style={[styles.submitButtonText, { color: theme.accentText }]}>Done</Text>
+                <Text style={[styles.doneButtonText, { color: theme.accentText }]}>Done</Text>
               </Pressable>
             </View>
           ) : (
@@ -241,13 +289,7 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
                     color: theme.text,
                   },
                 ]}
-                placeholder={
-                  type === 'source'
-                    ? 'e.g. Add MIT Tech Review AI'
-                    : type === 'bug'
-                      ? 'e.g. Feed failed to load'
-                      : 'Brief summary'
-                }
+                placeholder={currentConfig.subjectPlaceholder}
                 placeholderTextColor={theme.muted}
                 value={subject}
                 onChangeText={setSubject}
@@ -266,11 +308,7 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
                     color: theme.text,
                   },
                 ]}
-                placeholder={
-                  type === 'source'
-                    ? 'Provide the website or feed URL you would like us to include...'
-                    : 'Describe what you noticed or what you would like to see...'
-                }
+                placeholder={currentConfig.messagePlaceholder}
                 placeholderTextColor={theme.muted}
                 value={message}
                 onChangeText={setMessage}
@@ -307,12 +345,12 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
                   <Ionicons name="alert-circle" size={18} color="#dc2626" />
                   <Text style={styles.errorText}>{errorMessage}</Text>
                   <Pressable onPress={openMailFallback} style={styles.mailFallbackButton}>
-                    <Text style={styles.mailFallbackText}>Open in Mail app</Text>
+                    <Text style={styles.mailFallbackText}>Open in Mail app instead</Text>
                   </Pressable>
                 </View>
               ) : null}
 
-              {/* Submit button */}
+              {/* Dynamic Submit button */}
               <Pressable
                 onPress={handleSubmit}
                 disabled={submitting}
@@ -321,20 +359,20 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
                   { backgroundColor: theme.accent, opacity: submitting ? 0.7 : 1 },
                 ]}
                 accessibilityRole="button"
-                accessibilityLabel="Submit feedback"
+                accessibilityLabel={currentConfig.buttonLabel}
               >
                 {submitting ? (
                   <ActivityIndicator color={theme.accentText} />
                 ) : (
                   <>
                     <Ionicons
-                      name="paper-plane-outline"
+                      name={currentConfig.icon}
                       size={18}
                       color={theme.accentText}
                       style={{ marginRight: 8 }}
                     />
                     <Text style={[styles.submitButtonText, { color: theme.accentText }]}>
-                      Submit Feedback
+                      {currentConfig.buttonLabel}
                     </Text>
                   </>
                 )}
@@ -458,7 +496,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
-    borderRadius: 10,
+    borderRadius: 12,
     marginTop: 10,
   },
   submitButtonText: {
@@ -485,14 +523,14 @@ const styles = StyleSheet.create({
   },
   successContainer: {
     alignItems: 'center',
-    paddingVertical: 48,
+    paddingVertical: 40,
     paddingHorizontal: 20,
     gap: 16,
   },
   successIconBubble: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+    width: 92,
+    height: 92,
+    borderRadius: 46,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
@@ -502,10 +540,21 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   successMessage: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 22,
     textAlign: 'center',
     maxWidth: 320,
+    marginBottom: 16,
+  },
+  doneButton: {
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  doneButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
-
