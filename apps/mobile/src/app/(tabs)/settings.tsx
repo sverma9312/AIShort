@@ -10,6 +10,7 @@ import {
   registerForPushNotifications,
   unregisterFromPushNotifications,
 } from '@/lib/push';
+import { useReadHistory } from '@/lib/readHistory';
 import { useSettings, type Settings } from '@/lib/settings';
 import { track } from '@/lib/telemetry';
 import { useTheme } from '@/lib/theme';
@@ -87,6 +88,7 @@ function Link({
 export default function SettingsScreen() {
   const theme = useTheme();
   const { settings, update, toggleCategory } = useSettings();
+  const { resetReadHistory } = useReadHistory();
   const { checkedAt } = useFeed();
 
   const setNotifications = async (on: boolean) => {
@@ -194,6 +196,35 @@ export default function SettingsScreen() {
             accessibilityLabel="Analytics and crash reports"
             testID="analytics"
           />
+        </Row>
+        <Row
+          label="Clear read history"
+          borderBottomColor={theme.border}
+          textColor={theme.text}
+        >
+          <Pressable
+            onPress={() => {
+              Alert.alert(
+                'Reset reading history?',
+                'This will mark all stories as unread so you can read through them again.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Reset',
+                    style: 'destructive',
+                    onPress: () => {
+                      resetReadHistory();
+                      Alert.alert('Reset complete', 'All stories have been marked as unread.');
+                    },
+                  },
+                ],
+              );
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="Clear read history"
+          >
+            <Text style={{ color: theme.accent, fontWeight: '600', fontSize: 15 }}>Reset</Text>
+          </Pressable>
         </Row>
         <Link
           label="Privacy policy"

@@ -82,12 +82,21 @@ export default function FeedScreen() {
     });
   }, [visible]);
 
-  // If user tapped "Review today's stories" or "Review all past stories", show that subset; otherwise show unread
-  const displayCards = useMemo(() => {
-    if (reviewMode === 'today') return todayCards;
-    if (reviewMode === 'all') return visible;
-    return unreadCards;
-  }, [reviewMode, todayCards, visible, unreadCards]);
+  // Stable session deck: does NOT mutate or collapse under the user when a card is marked as read
+  const [sessionCards, setSessionCards] = useState<typeof visible>([]);
+
+  useEffect(() => {
+    if (!readHistoryLoaded) return;
+    if (reviewMode === 'today') {
+      setSessionCards(todayCards);
+    } else if (reviewMode === 'all') {
+      setSessionCards(visible);
+    } else {
+      setSessionCards(visible.filter((c) => !readCardIds.has(c.id)));
+    }
+  }, [pagerEpoch, filter, reviewMode, readHistoryLoaded, cards, settings.categories]);
+
+  const displayCards = sessionCards;
 
   // The user is caught up if read history has loaded, not reviewing past stories,
   // and all visible stories in this filter have been read.
@@ -132,21 +141,27 @@ export default function FeedScreen() {
       // Mark current card as read
       if (position < displayCards.length) {
         const currentCard = displayCards[position];
-        if (currentCard) markCardAsRead(currentCard.id);
+        if (currentCard && !readCardIds.has(currentCard.id)) {
+          markCardAsRead(currentCard.id);
+        }
       } else if (position === displayCards.length) {
         // Reached the caught-up screen at the end of the pager
         setCaughtUp(true);
       }
     },
-    [displayCards, markCardAsRead, setCaughtUp, settings.cardsViewed, update],
+    [displayCards, markCardAsRead, readCardIds, setCaughtUp, settings.cardsViewed, update],
   );
 
-  // Mark first card as read once displayed
+  // Mark currently active card as read (safe & idempotent)
   useEffect(() => {
-    if (displayCards.length > 0 && index === 0 && displayCards[0]) {
-      markCardAsRead(displayCards[0].id);
+    if (!readHistoryLoaded || displayCards.length === 0) return;
+    if (index >= 0 && index < displayCards.length) {
+      const card = displayCards[index];
+      if (card && !readCardIds.has(card.id)) {
+        markCardAsRead(card.id);
+      }
     }
-  }, [displayCards, index, markCardAsRead]);
+  }, [displayCards, index, readHistoryLoaded, readCardIds, markCardAsRead]);
 
   // Handle active "Check for updates" with transient toast feedback
   const handleCheckUpdates = useCallback(async () => {
@@ -414,6 +429,8 @@ export default function FeedScreen() {
   let body;
   if (!cards.length && status === 'loading') {
     body = <StateView kind="loading" message="Loading the latest AI news…" />;
+  } else if (!readHistoryLoaded) {
+    body = <StateView kind="loading" message="Loading your feed…" />;
   } else if (!cards.length && status === 'error') {
     body = (
       <StateView
