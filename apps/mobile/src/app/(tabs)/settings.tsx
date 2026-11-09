@@ -1,7 +1,9 @@
 import Constants from 'expo-constants';
 import * as WebBrowser from 'expo-web-browser';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { FeedbackModal } from '@/components/FeedbackModal';
 import { ALL_CATEGORIES, CATEGORY_LABELS } from '@/lib/categories';
 import { config } from '@/lib/config';
 import { useFeed } from '@/lib/feed';
@@ -90,6 +92,7 @@ export default function SettingsScreen() {
   const { settings, update, toggleCategory } = useSettings();
   const { resetReadHistory } = useReadHistory();
   const { checkedAt } = useFeed();
+  const [feedbackVisible, setFeedbackVisible] = useState(false);
 
   const setNotifications = async (on: boolean) => {
     if (!on) {
@@ -232,12 +235,15 @@ export default function SettingsScreen() {
           borderBottomColor={theme.border}
           accentColor={theme.accent}
         />
-        <Link
-          label="Support & feedback"
-          url={config.supportUrl}
-          borderBottomColor={theme.border}
-          accentColor={theme.accent}
-        />
+        <Pressable
+          onPress={() => setFeedbackVisible(true)}
+          style={[styles.row, { borderBottomColor: theme.border }]}
+          accessibilityRole="button"
+          accessibilityLabel="Support & feedback"
+        >
+          <Text style={[styles.label, { color: theme.accent }]}>Support & feedback</Text>
+          <Ionicons name="chatbubble-ellipses-outline" size={18} color={theme.accent} />
+        </Pressable>
       </Section>
 
       <Text style={[styles.footer, { color: theme.muted }]}>
@@ -245,6 +251,11 @@ export default function SettingsScreen() {
         {checkedAt ? ` · Feed checked ${relativeTime(checkedAt)}` : ''}
         {'\n'}Summaries are written by AI from the linked articles and may contain mistakes.
       </Text>
+
+      <FeedbackModal
+        visible={feedbackVisible}
+        onClose={() => setFeedbackVisible(false)}
+      />
     </ScrollView>
   );
 }

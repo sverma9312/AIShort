@@ -22,6 +22,10 @@ export const config = {
   feedBaseUrls: feedBaseUrls.length ? feedBaseUrls : [DEFAULT_FEED_BASE_URL],
   privacyUrl: feedUrl(primary, 'privacy/'),
   supportUrl: feedUrl(primary, 'support/'),
+  supportEmail: optional(process.env.EXPO_PUBLIC_SUPPORT_EMAIL) ?? 'aishort@nextai-apps.com',
+  supportFormEndpoint:
+    optional(process.env.EXPO_PUBLIC_SUPPORT_ENDPOINT) ??
+    'https://formsubmit.co/ajax/aishort@nextai-apps.com',
   metaPath: FEED_PATHS.meta,
   supabaseUrl: optional(process.env.EXPO_PUBLIC_SUPABASE_URL),
   supabaseAnonKey: optional(process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY),
