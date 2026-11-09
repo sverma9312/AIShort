@@ -24,8 +24,8 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "0.5.13",
-    "@electric-sql/pglite-socket": "0.2.16",
+    "@electric-sql/pglite": "0.5.15",
+    "@electric-sql/pglite-socket": "0.2.18",
     "@types/node": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:",
