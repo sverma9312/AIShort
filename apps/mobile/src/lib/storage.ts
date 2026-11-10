@@ -17,6 +17,7 @@ export const STORAGE_KEYS = {
   settings: 'settings:v1',
   readCards: 'feed:readCards:v1',
   isCaughtUp: 'feed:isCaughtUp:v1',
+  hasSeenWelcome: 'onboarding:welcome:v1',
 } as const;
 
 /** Reads and validates a JSON value; anything missing, corrupt or outdated yields undefined. */

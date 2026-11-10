@@ -18,14 +18,17 @@ import { CategoryChips, type CategoryFilter } from '@/components/CategoryChips';
 import { NewsCard } from '@/components/NewsCard';
 import { StateView } from '@/components/StateView';
 import { Toast } from '@/components/Toast';
+import { WelcomeOverlay } from '@/components/WelcomeOverlay';
 import { useBookmarks } from '@/lib/bookmarks';
 import { CATEGORY_LABELS } from '@/lib/categories';
 import { useFeed } from '@/lib/feed';
 import { isPushAvailable, PROMPT_AFTER_CARDS, registerForPushNotifications } from '@/lib/push';
 import { useReadHistory } from '@/lib/readHistory';
 import { useSettings } from '@/lib/settings';
+import { deviceStorage, readJson, STORAGE_KEYS, writeJson } from '@/lib/storage';
 import { track } from '@/lib/telemetry';
 import { useTheme } from '@/lib/theme';
+import { z } from 'zod';
 
 /** Only cards this close to the current one are rendered; the rest are empty pages. */
 const RENDER_WINDOW = 2;
@@ -54,6 +57,20 @@ export default function FeedScreen() {
   const [reviewMode, setReviewMode] = useState<ReviewMode>('none');
   const [pagerEpoch, setPagerEpoch] = useState(0);
   const pager = useRef<PagerView>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    void readJson(deviceStorage, STORAGE_KEYS.hasSeenWelcome, z.boolean()).then((seen) => {
+      if (!seen) {
+        setShowWelcome(true);
+      }
+    });
+  }, []);
+
+  const handleDismissWelcome = useCallback(() => {
+    setShowWelcome(false);
+    void writeJson(deviceStorage, STORAGE_KEYS.hasSeenWelcome, true);
+  }, []);
 
   const visible = useMemo(
     () =>
@@ -576,6 +593,7 @@ export default function FeedScreen() {
         )}
       </Animated.View>
       {body}
+      {showWelcome ? <WelcomeOverlay onDismiss={handleDismissWelcome} /> : null}
     </SafeAreaView>
   );
 }
