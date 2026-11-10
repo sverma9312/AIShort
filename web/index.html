@@ -376,23 +376,10 @@
         <div class="modal-header">
           <button id="info-modal-close" class="modal-close-btn" aria-label="Close info">✕</button>
         </div>
-        <div
-          class="modal-body"
-          style="
-            flex-direction: column;
-            max-width: 440px;
-            margin: 0 auto;
-            padding: 1.25rem 1.5rem 2rem;
-            text-align: center;
-            color: #fff;
-            justify-content: flex-start;
-          "
-        >
-          <div style="font-size: 2.2rem; margin-bottom: 0.25rem">📰</div>
-          <h2 style="font-size: 1.4rem; margin-bottom: 0.4rem; font-weight: 700">
-            AIShort Web App
-          </h2>
-          <p style="color: #a0a0ab; font-size: 0.9rem; margin-bottom: 1.2rem; line-height: 1.45">
+        <div class="info-modal-body">
+          <div class="info-header-icon">📰</div>
+          <h2 class="info-title">AIShort Web App</h2>
+          <p class="info-subtitle">
             Swipeable AI news summarized in 60 words or less. Refreshed automatically every hour.
           </p>
 
@@ -433,50 +420,14 @@
           </button>
 
           <!-- Android Early Access (APK Preview) -->
-          <div
-            style="
-              background: linear-gradient(
-                135deg,
-                rgba(99, 102, 241, 0.15),
-                rgba(168, 85, 247, 0.12)
-              );
-              border: 1px solid rgba(99, 102, 241, 0.35);
-              border-radius: 14px;
-              padding: 1rem 1.1rem;
-              text-align: left;
-              margin-bottom: 0.85rem;
-              font-size: 0.88rem;
-              line-height: 1.5;
-            "
-          >
-            <div
-              style="
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 0.4rem;
-              "
-            >
-              <strong style="color: #a5b4fc; display: flex; align-items: center; gap: 6px">
+          <div class="info-apk-card">
+            <div class="info-apk-header">
+              <strong class="info-apk-title">
                 <span>🧪</span> <span>Android Early Access (APK)</span>
               </strong>
-              <span
-                style="
-                  font-size: 0.72rem;
-                  font-weight: 700;
-                  padding: 2px 7px;
-                  border-radius: 999px;
-                  background: rgba(99, 102, 241, 0.25);
-                  color: #c7d2fe;
-                  border: 1px solid rgba(99, 102, 241, 0.4);
-                  text-transform: uppercase;
-                  letter-spacing: 0.05em;
-                "
-              >
-                Preview
-              </span>
+              <span class="info-apk-badge"> Preview </span>
             </div>
-            <p style="margin: 0 0 0.75rem; color: #e2e8f0; font-size: 0.84rem">
+            <p class="info-apk-desc">
               Test the standalone native mobile app with instant offline caching and gesture
               navigation.
             </p>
@@ -484,54 +435,18 @@
               href="https://expo.dev/accounts/sverma9312/projects/aishort/builds/0c5ff53c-f8af-4542-aef7-e988aae6da22"
               target="_blank"
               rel="noopener"
-              style="
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                gap: 6px;
-                width: 100%;
-                box-sizing: border-box;
-                background: #6366f1;
-                color: #ffffff;
-                text-decoration: none;
-                font-weight: 700;
-                font-size: 0.88rem;
-                padding: 0.65rem 1rem;
-                border-radius: 10px;
-                transition: background 0.2s;
-                text-align: center;
-                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
-              "
+              class="info-apk-btn"
             >
               <span>📥</span> Download Android APK
             </a>
           </div>
 
           <!-- Android Section -->
-          <div
-            style="
-              background: rgba(255, 255, 255, 0.08);
-              border: 1px solid rgba(255, 255, 255, 0.12);
-              border-radius: 14px;
-              padding: 1rem 1.1rem;
-              text-align: left;
-              margin-bottom: 0.85rem;
-              font-size: 0.88rem;
-              line-height: 1.55;
-            "
-          >
-            <strong
-              style="
-                color: #34d399;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                margin-bottom: 0.4rem;
-              "
-            >
+          <div class="info-tips-card">
+            <strong class="info-tips-title emerald">
               <span>🤖</span> <span>Android & Mobile Browser Tips:</span>
             </strong>
-            <ul style="margin: 0; padding-left: 1.2rem; color: #e2e8f0; font-size: 0.85rem">
+            <ul>
               <li style="margin-bottom: 0.35rem">
                 <strong>Swipe Up / Down:</strong> Swipe vertically to flip smoothly between stories
                 (cards snap into full view).
@@ -550,40 +465,20 @@
           </div>
 
           <!-- iPhone Section -->
-          <div
-            style="
-              background: rgba(255, 255, 255, 0.08);
-              border: 1px solid rgba(255, 255, 255, 0.12);
-              border-radius: 14px;
-              padding: 1rem 1.1rem;
-              text-align: left;
-              margin-bottom: 1.2rem;
-              font-size: 0.88rem;
-              line-height: 1.55;
-            "
-          >
-            <strong
-              style="
-                color: #818cf8;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                margin-bottom: 0.4rem;
-              "
-            >
+          <div class="info-tips-card">
+            <strong class="info-tips-title indigo">
               <span>📱</span> <span>iPhone Safari Tip:</span>
             </strong>
-            <p style="margin: 0; color: #e2e8f0; font-size: 0.85rem">
+            <p>
               Tap <strong>Share ⎋</strong> at the bottom of Safari and select
               <strong>"Add to Home Screen"</strong> to run AIShort full-screen without address bars,
               just like a native iOS app.
             </p>
           </div>
 
-          <div style="font-size: 0.82rem; color: #71717a">
-            <a href="privacy/" style="color: #818cf8; text-decoration: none">Privacy Policy</a> ·
-            <a href="support/" style="color: #818cf8; text-decoration: none">Support</a> ·
-            <a href="v1/feed/latest.json" style="color: #818cf8; text-decoration: none">Raw JSON</a>
+          <div class="info-footer-links">
+            <a href="privacy/">Privacy Policy</a> · <a href="support/">Support</a> ·
+            <a href="v1/feed/latest.json">Raw JSON</a>
           </div>
         </div>
       </div>

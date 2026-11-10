@@ -416,6 +416,315 @@ main.static-page footer {
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
 }
 
+/* ==========================================================================
+   About & Install Info Modal (Full Dark & Light Mode Theme Support)
+   ========================================================================== */
+#info-modal {
+  background: rgba(8, 9, 14, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition:
+    background 0.25s ease,
+    opacity 0.25s ease;
+}
+
+[data-theme='light'] #info-modal {
+  background: rgba(245, 246, 250, 0.96);
+}
+
+#info-modal .modal-header {
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  transition: border-color 0.25s ease;
+}
+
+[data-theme='light'] #info-modal .modal-header {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+#info-modal .modal-close-btn {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  transition: all 0.2s ease;
+}
+
+[data-theme='light'] #info-modal .modal-close-btn {
+  background: rgba(0, 0, 0, 0.06);
+  color: #111114;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='light'] #info-modal .modal-close-btn:hover {
+  background: rgba(0, 0, 0, 0.12);
+  color: #000000;
+}
+
+.info-modal-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 2.2rem;
+  text-align: center;
+  color: var(--text);
+  justify-content: flex-start;
+  box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.info-header-icon {
+  font-size: 2.2rem;
+  margin-bottom: 0.25rem;
+}
+
+.info-title {
+  font-size: 1.4rem;
+  margin-bottom: 0.35rem;
+  font-weight: 750;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  transition: color 0.2s ease;
+}
+
+[data-theme='light'] .info-title {
+  color: #0f172a;
+}
+
+.info-subtitle {
+  color: #94a3b8;
+  font-size: 0.88rem;
+  margin-bottom: 1.15rem;
+  line-height: 1.5;
+  transition: color 0.2s ease;
+}
+
+[data-theme='light'] .info-subtitle {
+  color: #64748b;
+}
+
+/* Appearance Card in Info Modal */
+[data-theme='light'] .settings-appearance-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='light'] .settings-theme-segmented {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='light'] .theme-segment:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* Android Early Access (APK) Card */
+.info-apk-card {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.14), rgba(168, 85, 247, 0.1));
+  border: 1px solid rgba(99, 102, 241, 0.32);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  text-align: left;
+  margin-bottom: 0.85rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  transition: all 0.25s ease;
+}
+
+[data-theme='light'] .info-apk-card {
+  background: #ffffff;
+  border: 1px solid rgba(79, 70, 229, 0.25);
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.08);
+}
+
+.info-apk-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.info-apk-title {
+  color: #a5b4fc;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s ease;
+}
+
+[data-theme='light'] .info-apk-title {
+  color: #4338ca;
+}
+
+.info-apk-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.25);
+  color: #c7d2fe;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+}
+
+[data-theme='light'] .info-apk-badge {
+  background: rgba(79, 70, 229, 0.12);
+  color: #3730a3;
+  border-color: rgba(79, 70, 229, 0.25);
+}
+
+.info-apk-desc {
+  margin: 0 0 0.75rem;
+  color: #e2e8f0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  transition: color 0.2s ease;
+}
+
+[data-theme='light'] .info-apk-desc {
+  color: #475569;
+}
+
+.info-apk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  background: #6366f1;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  transition:
+    background 0.2s,
+    transform 0.15s;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+}
+
+.info-apk-btn:hover {
+  background: #4f46e5;
+  transform: translateY(-1px);
+}
+
+[data-theme='light'] .info-apk-btn {
+  background: #4f46e5;
+}
+
+[data-theme='light'] .info-apk-btn:hover {
+  background: #4338ca;
+}
+
+/* Info Tips Cards (Android & iPhone) */
+.info-tips-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  text-align: left;
+  margin-bottom: 0.85rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  transition: all 0.25s ease;
+}
+
+[data-theme='light'] .info-tips-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.info-tips-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 0.4rem;
+  font-weight: 700;
+}
+
+.info-tips-title.emerald {
+  color: #34d399;
+}
+
+[data-theme='light'] .info-tips-title.emerald {
+  color: #059669;
+}
+
+.info-tips-title.indigo {
+  color: #818cf8;
+}
+
+[data-theme='light'] .info-tips-title.indigo {
+  color: #4f46e5;
+}
+
+.info-tips-card ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: #e2e8f0;
+  font-size: 0.84rem;
+  transition: color 0.2s ease;
+}
+
+[data-theme='light'] .info-tips-card ul {
+  color: #475569;
+}
+
+.info-tips-card p {
+  margin: 0;
+  color: #e2e8f0;
+  font-size: 0.84rem;
+  transition: color 0.2s ease;
+}
+
+[data-theme='light'] .info-tips-card p {
+  color: #475569;
+}
+
+.info-tips-card strong {
+  color: #ffffff;
+  transition: color 0.2s ease;
+}
+
+[data-theme='light'] .info-tips-card strong {
+  color: #0f172a;
+}
+
+.info-footer-links {
+  font-size: 0.82rem;
+  color: #71717a;
+  margin-top: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+[data-theme='light'] .info-footer-links {
+  color: #94a3b8;
+}
+
+.info-footer-links a {
+  color: #818cf8;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+[data-theme='light'] .info-footer-links a {
+  color: #4f46e5;
+}
+
+.info-footer-links a:hover {
+  text-decoration: underline;
+}
+
 .badge-count {
   position: absolute;
   top: 2px;
