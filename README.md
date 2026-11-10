@@ -2,7 +2,7 @@
 
 > **Working title** — the app will be renamed before publishing.
 
-Inshorts-style AI news: every story is a swipeable card with a summary of **at most 60 words**,
+Distilled AI news: every story is a swipeable card with a verified summary of **at most 60 words**,
 linking back to the original source. Available on iOS and Android.
 
 ## How it works
