@@ -65,14 +65,75 @@
             <span class="brand-edition desktop-only">Web Edition</span>
           </div>
           <div class="header-actions">
-            <button id="btn-theme" class="icon-btn" aria-label="Toggle theme" title="Toggle theme">
-              <svg id="theme-icon" viewBox="0 0 24 24">
-                <!-- Default: Moon (Dark mode active) -->
-                <path
-                  d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"
-                />
-              </svg>
-            </button>
+            <div class="theme-menu-wrapper">
+              <button
+                id="btn-theme"
+                class="icon-btn"
+                aria-label="Appearance settings"
+                title="Appearance settings"
+                aria-expanded="false"
+                aria-haspopup="true"
+              >
+                <svg id="theme-icon" viewBox="0 0 24 24">
+                  <!-- Default: Dynamic Sparkle -->
+                  <path
+                    d="M12 2.5l2.4 6.6 6.6 2.4-6.6 2.4-2.4 6.6-2.4-6.6-6.6-2.4 6.6-2.4 2.4-6.6zm7 13.5l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1 1-2.5z"
+                  />
+                </svg>
+              </button>
+              <div
+                id="theme-dropdown"
+                class="theme-dropdown"
+                role="menu"
+                aria-label="Appearance options"
+              >
+                <div class="theme-dropdown-header">Appearance</div>
+                <button
+                  type="button"
+                  class="theme-option"
+                  data-theme-value="dynamic"
+                  role="menuitem"
+                >
+                  <span class="theme-option-icon">✨</span>
+                  <div class="theme-option-text">
+                    <span class="theme-option-name"
+                      >Dynamic <span class="theme-option-pill">App</span></span
+                    >
+                    <span class="theme-option-desc">Adaptive story colors & blur</span>
+                  </div>
+                  <span class="theme-option-check">✓</span>
+                </button>
+                <button type="button" class="theme-option" data-theme-value="dark" role="menuitem">
+                  <span class="theme-option-icon">🌙</span>
+                  <div class="theme-option-text">
+                    <span class="theme-option-name">Dark</span>
+                    <span class="theme-option-desc">Midnight dark theme</span>
+                  </div>
+                  <span class="theme-option-check">✓</span>
+                </button>
+                <button type="button" class="theme-option" data-theme-value="light" role="menuitem">
+                  <span class="theme-option-icon">☀️</span>
+                  <div class="theme-option-text">
+                    <span class="theme-option-name">Light</span>
+                    <span class="theme-option-desc">Clean daylight theme</span>
+                  </div>
+                  <span class="theme-option-check">✓</span>
+                </button>
+                <button
+                  type="button"
+                  class="theme-option"
+                  data-theme-value="system"
+                  role="menuitem"
+                >
+                  <span class="theme-option-icon">💻</span>
+                  <div class="theme-option-text">
+                    <span class="theme-option-name">System</span>
+                    <span class="theme-option-desc">Follow device settings</span>
+                  </div>
+                  <span class="theme-option-check">✓</span>
+                </button>
+              </div>
+            </div>
             <button
               id="btn-bookmarks"
               class="icon-btn"
@@ -215,6 +276,21 @@
             Swipeable AI news summarized in 60 words or less. Refreshed automatically every hour.
           </p>
 
+          <!-- Appearance Settings (Matching Mobile App) -->
+          <div class="settings-appearance-card">
+            <div class="settings-appearance-title">APPEARANCE</div>
+            <div class="settings-theme-segmented">
+              <button type="button" class="theme-segment" data-theme-value="dynamic">
+                ✨ Dynamic
+              </button>
+              <button type="button" class="theme-segment" data-theme-value="dark">🌙 Dark</button>
+              <button type="button" class="theme-segment" data-theme-value="light">☀️ Light</button>
+              <button type="button" class="theme-segment" data-theme-value="system">
+                💻 System
+              </button>
+            </div>
+          </div>
+
           <!-- Dynamic PWA install button (shown if Chrome beforeinstallprompt fires) -->
           <button
             id="btn-pwa-install"
@@ -328,7 +404,7 @@
         var activeCategory = 'all';
         var showOnlyBookmarks = false;
         var bookmarkedIds = new Set(JSON.parse(localStorage.getItem('aishort_bookmarks') || '[]'));
-        var theme = localStorage.getItem('aishort_theme') || 'dark';
+        var theme = localStorage.getItem('aishort_theme') || 'dynamic';
 
         var CATEGORY_ICONS = {
           models: '🧠',
@@ -348,26 +424,168 @@
           'open-source': 'Open source',
         };
 
+        // Category color hues matching mobile app (@aishort/shared/palette)
+        var CATEGORY_HUES = {
+          models: 242, // Indigo
+          research: 158, // Emerald
+          products: 275, // Purple
+          business: 38, // Amber
+          policy: 345, // Rose
+          'open-source': 192, // Cyan
+        };
+
+        function hashString(str) {
+          var hash = 0;
+          for (var i = 0; i < str.length; i++) {
+            hash = (hash << 5) - hash + str.charCodeAt(i);
+            hash |= 0;
+          }
+          return Math.abs(hash);
+        }
+
+        function hslToHex(h, s, l) {
+          var normL = l / 100;
+          var a = (s * Math.min(normL, 1 - normL)) / 100;
+          var f = function (n) {
+            var k = (n + h / 30) % 12;
+            var color = normL - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+            return Math.round(255 * color)
+              .toString(16)
+              .padStart(2, '0');
+          };
+          return ('#' + f(0) + f(8) + f(4)).toUpperCase();
+        }
+
+        function getCardPalette(card) {
+          if (card.palette) return card.palette;
+          var baseHue = CATEGORY_HUES[card.category] || 240;
+          var hue = baseHue;
+          if (card.imageUrl) {
+            var shift = (hashString(card.imageUrl) % 50) - 25;
+            hue = (baseHue + shift + 360) % 360;
+          }
+          return {
+            primary: hslToHex(hue, 75, 62),
+            accent: hslToHex(hue, 80, 58),
+            accentText: '#FFFFFF',
+            chip: hslToHex(hue, 35, 18),
+            card: hslToHex(hue, 25, 9),
+            background: hslToHex(hue, 20, 6),
+          };
+        }
+
+        var THEME_ICONS = {
+          dynamic:
+            '<path d="M12 2.5l2.4 6.6 6.6 2.4-6.6 2.4-2.4 6.6-2.4-6.6-6.6-2.4 6.6-2.4 2.4-6.6zm7 13.5l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1 1-2.5z"/>',
+          dark: '<path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>',
+          light:
+            '<path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/>',
+          system:
+            '<path d="M20 18c1.1 0 1.99-.9 1.99-2L22 5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2H0c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2h-4zM4 5h16v11H4V5zm8 14c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/>',
+        };
+
+        function getEffectiveTheme(th) {
+          var t = th || theme;
+          if (t === 'dynamic' || t === 'system') {
+            return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
+              ? 'light'
+              : 'dark';
+          }
+          return t === 'light' ? 'light' : 'dark';
+        }
+
         // Theme management
         function applyTheme(newTheme) {
           theme = newTheme;
-          document.documentElement.setAttribute('data-theme', theme);
           localStorage.setItem('aishort_theme', theme);
+          var effective = getEffectiveTheme(theme);
+          document.documentElement.setAttribute('data-theme', effective);
+          document.documentElement.setAttribute('data-theme-setting', theme);
+
           var icon = document.getElementById('theme-icon');
-          if (theme === 'dark') {
-            // Moon icon
-            icon.innerHTML =
-              '<path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>';
-          } else {
-            // Sun icon
-            icon.innerHTML =
-              '<path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/>';
+          if (icon && THEME_ICONS[theme]) {
+            icon.innerHTML = THEME_ICONS[theme];
+          }
+
+          document.querySelectorAll('[data-theme-value]').forEach(function (el) {
+            if (el.getAttribute('data-theme-value') === theme) {
+              el.classList.add('active');
+            } else {
+              el.classList.remove('active');
+            }
+          });
+
+          if (allCards.length > 0) {
+            renderCards();
           }
         }
         applyTheme(theme);
 
-        document.getElementById('btn-theme').addEventListener('click', function () {
-          applyTheme(theme === 'dark' ? 'light' : 'dark');
+        // System theme change listener
+        if (window.matchMedia) {
+          window
+            .matchMedia('(prefers-color-scheme: light)')
+            .addEventListener('change', function () {
+              if (theme === 'system' || theme === 'dynamic') {
+                applyTheme(theme);
+              }
+            });
+        }
+
+        // Theme popover toggle
+        var btnTheme = document.getElementById('btn-theme');
+        var themeDropdown = document.getElementById('theme-dropdown');
+
+        if (btnTheme && themeDropdown) {
+          btnTheme.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var isOpen = themeDropdown.classList.contains('show');
+            if (isOpen) {
+              themeDropdown.classList.remove('show');
+              btnTheme.setAttribute('aria-expanded', 'false');
+            } else {
+              themeDropdown.classList.add('show');
+              btnTheme.setAttribute('aria-expanded', 'true');
+            }
+          });
+
+          document.addEventListener('click', function (e) {
+            if (
+              !themeDropdown.contains(e.target) &&
+              e.target !== btnTheme &&
+              !btnTheme.contains(e.target)
+            ) {
+              themeDropdown.classList.remove('show');
+              btnTheme.setAttribute('aria-expanded', 'false');
+            }
+          });
+
+          document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+              themeDropdown.classList.remove('show');
+              btnTheme.setAttribute('aria-expanded', 'false');
+            }
+          });
+        }
+
+        var THEME_LABELS = {
+          dynamic: 'Dynamic ✨',
+          dark: 'Dark 🌙',
+          light: 'Light ☀️',
+          system: 'System 💻',
+        };
+
+        // Theme option buttons in dropdown and settings modal
+        document.querySelectorAll('[data-theme-value]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var selected = this.getAttribute('data-theme-value');
+            applyTheme(selected);
+            if (themeDropdown) {
+              themeDropdown.classList.remove('show');
+              if (btnTheme) btnTheme.setAttribute('aria-expanded', 'false');
+            }
+            showToast('Appearance: ' + (THEME_LABELS[selected] || selected));
+          });
         });
 
         // Relative time helper
@@ -529,6 +747,10 @@
             return;
           }
 
+          var isDynamic = theme === 'dynamic';
+          var effectiveTheme = getEffectiveTheme(theme);
+          var isDark = effectiveTheme === 'dark';
+
           var html = '';
           for (var i = 0; i < filtered.length; i++) {
             var card = filtered[i];
@@ -536,10 +758,83 @@
             var isTop = (card.importance || 0) >= 8;
             var catLabel = CATEGORY_LABELS[card.category] || card.category;
             var catIcon = CATEGORY_ICONS[card.category] || '📰';
+            var palette = isDynamic ? getCardPalette(card) : null;
+
+            var cardStyle = '';
+            var categoryChipStyle = '';
+            var readMoreStyle = '';
+            var topChipStyle = '';
+            var noImageStyle = '';
+            var noImageIconStyle = '';
+
+            if (isDynamic && palette) {
+              if (card.imageUrl) {
+                cardStyle =
+                  'border-color: ' +
+                  (isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)') +
+                  ';';
+              } else {
+                cardStyle =
+                  'background-color: ' +
+                  (isDark ? palette.card : '#ffffff') +
+                  '; border-color: ' +
+                  (isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)') +
+                  ';';
+              }
+              categoryChipStyle =
+                'background: ' +
+                (isDark ? palette.chip : '#EEF0FF') +
+                '; color: ' +
+                (isDark ? '#FFFFFF' : palette.accent) +
+                '; border: 1px solid ' +
+                palette.accent +
+                '44;';
+              readMoreStyle =
+                'background: ' +
+                palette.accent +
+                '; color: ' +
+                (palette.accentText || '#FFFFFF') +
+                '; box-shadow: 0 4px 14px ' +
+                palette.accent +
+                '44;';
+              if (isTop) {
+                topChipStyle =
+                  'background: linear-gradient(135deg, ' +
+                  palette.accent +
+                  ', ' +
+                  palette.primary +
+                  '); color: #fff; box-shadow: 0 2px 10px ' +
+                  palette.accent +
+                  '55;';
+              }
+              noImageStyle =
+                'background: ' +
+                (isDark ? palette.card : palette.chip) +
+                '; border-color: ' +
+                (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)') +
+                ';';
+              noImageIconStyle =
+                'background: ' +
+                (isDark ? palette.chip : '#ffffff') +
+                '; color: ' +
+                palette.accent +
+                ';';
+            }
 
             html += `
               <div class="card-wrapper" data-index="${i}">
-                <article class="news-card">
+                <article class="news-card ${isDynamic ? 'is-dynamic' : ''}" style="${cardStyle}">
+                  ${
+                    isDynamic && card.imageUrl
+                      ? `
+                    <div class="card-dynamic-backdrop" aria-hidden="true">
+                      <img class="card-dynamic-bg-img" src="${card.imageUrl}" alt="" />
+                      <div class="card-dynamic-overlay"></div>
+                    </div>
+                  `
+                      : ''
+                  }
+
                   ${
                     card.imageUrl
                       ? `
@@ -550,9 +845,11 @@
                     </div>
                   `
                       : `
-                    <div class="card-no-image">
-                      <div class="no-image-icon">${catIcon}</div>
-                      <div class="no-image-text">${card.sourceName} · ${catLabel}</div>
+                    <div class="card-no-image" style="${noImageStyle}">
+                      <div class="no-image-icon-circle" style="${noImageIconStyle}">
+                        <span class="no-image-icon">${catIcon}</span>
+                      </div>
+                      <div class="no-image-text" style="${isDynamic ? (isDark ? 'color: #e2e8f0;' : `color: ${palette.card};`) : ''}">${card.sourceName} · ${catLabel}</div>
                     </div>
                   `
                   }
@@ -560,17 +857,17 @@
                   <div class="card-content">
                     <div class="card-body">
                       <div class="meta-row">
-                        <span class="chip chip-category">${catLabel}</span>
+                        <span class="chip chip-category" style="${categoryChipStyle}">${catLabel}</span>
                         <span class="chip chip-source">${card.sourceName}</span>
                         <span class="chip chip-time">${timeAgo(card.publishedAt)}</span>
-                        ${isTop ? '<span class="chip chip-top">★ Top story</span>' : ''}
+                        ${isTop ? `<span class="chip chip-top" style="${topChipStyle}">★ Top story</span>` : ''}
                       </div>
                       <h2 class="card-headline">${card.headline}</h2>
                       <p class="card-summary">${card.summary}</p>
                     </div>
 
                     <div class="card-actions">
-                      <a class="btn-read-more" href="${card.sourceUrl}" target="_blank" rel="noopener noreferrer">
+                      <a class="btn-read-more" href="${card.sourceUrl}" target="_blank" rel="noopener noreferrer" style="${readMoreStyle}">
                         Read more at ${card.sourceName} ↗
                       </a>
                       <button class="action-icon-btn" aria-label="Share story" onclick="window.shareCardIndex(${i})">

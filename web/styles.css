@@ -219,6 +219,199 @@ main.static-page footer {
   fill: currentColor;
 }
 
+/* Theme Popover & Dropdown */
+.theme-menu-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.theme-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: -75px;
+  width: 250px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.45),
+    0 0 0 1px var(--border);
+  padding: 0.5rem;
+  z-index: 200;
+  display: none;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  animation: themeMenuFade 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theme-dropdown.show {
+  display: block;
+}
+
+@keyframes themeMenuFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.theme-dropdown-header {
+  font-size: 0.7rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+  padding: 0.4rem 0.6rem 0.3rem;
+}
+
+.theme-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.88rem;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.theme-option:hover {
+  background: rgba(125, 125, 150, 0.14);
+}
+
+.theme-option.active {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: var(--accent);
+}
+
+.theme-option-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.theme-option-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.theme-option-name {
+  font-weight: 650;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.theme-option-pill {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--accent-text);
+  letter-spacing: 0.3px;
+}
+
+.theme-option-desc {
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.theme-option-check {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.theme-option.active .theme-option-check {
+  opacity: 1;
+}
+
+@media (max-width: 480px) {
+  .theme-dropdown {
+    right: -70px;
+    width: 236px;
+  }
+}
+
+/* Modal Settings Appearance Section */
+.settings-appearance-card {
+  background: rgba(125, 125, 150, 0.08);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.settings-appearance-title {
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+  margin-bottom: 0.55rem;
+  text-transform: uppercase;
+}
+
+.settings-theme-segmented {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+  background: rgba(125, 125, 150, 0.12);
+  padding: 4px;
+  border-radius: 12px;
+}
+
+.theme-segment {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.76rem;
+  font-weight: 650;
+  padding: 0.5rem 0.2rem;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.theme-segment:hover {
+  background: rgba(125, 125, 150, 0.18);
+}
+
+.theme-segment.active {
+  background: var(--accent);
+  color: var(--accent-text);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+}
+
 .badge-count {
   position: absolute;
   top: 2px;
@@ -272,6 +465,42 @@ main.static-page footer {
   border-color: var(--accent);
 }
 
+[data-theme-setting='dynamic'] .cat-pill.active[data-category='models'] {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: #fff;
+}
+
+[data-theme-setting='dynamic'] .cat-pill.active[data-category='research'] {
+  background: #10b981;
+  border-color: #10b981;
+  color: #fff;
+}
+
+[data-theme-setting='dynamic'] .cat-pill.active[data-category='products'] {
+  background: #a855f7;
+  border-color: #a855f7;
+  color: #fff;
+}
+
+[data-theme-setting='dynamic'] .cat-pill.active[data-category='business'] {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: #fff;
+}
+
+[data-theme-setting='dynamic'] .cat-pill.active[data-category='policy'] {
+  background: #f43f5e;
+  border-color: #f43f5e;
+  color: #fff;
+}
+
+[data-theme-setting='dynamic'] .cat-pill.active[data-category='open-source'] {
+  background: #06b6d4;
+  border-color: #06b6d4;
+  color: #fff;
+}
+
 .cat-pill.cat-pill-top {
   border-color: rgba(245, 158, 11, 0.45);
   background: rgba(245, 158, 11, 0.12);
@@ -321,6 +550,76 @@ main.static-page footer {
   overflow: hidden;
   position: relative;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Dynamic Card Layout & Backdrop (Matches Mobile App Dynamic Theme) */
+.news-card.is-dynamic {
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.card-dynamic-backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+.card-dynamic-bg-img {
+  position: absolute;
+  inset: -30px;
+  width: calc(100% + 60px);
+  height: calc(100% + 60px);
+  object-fit: cover;
+  filter: blur(48px) brightness(0.65);
+  transform: scale(1.18);
+  pointer-events: none;
+}
+
+.card-dynamic-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 11, 16, 0.82);
+}
+
+[data-theme='light'] .card-dynamic-overlay {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.news-card.is-dynamic .card-image-wrap {
+  background: transparent;
+  z-index: 1;
+}
+
+.news-card.is-dynamic .card-content {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+.news-card.is-dynamic .card-actions {
+  background: rgba(11, 11, 16, 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+[data-theme='light'] .news-card.is-dynamic .card-actions {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.no-image-icon-circle {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(125, 125, 150, 0.15);
+  margin-bottom: 0.35rem;
+  transition: background 0.2s ease;
 }
 
 /* Card Image Banner */
