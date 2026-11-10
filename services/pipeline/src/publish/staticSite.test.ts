@@ -13,6 +13,7 @@ describe('copyStaticSite', () => {
     await copyStaticSite(WEB_DIR, out);
     expect((await readdir(out)).sort()).toEqual([
       '.nojekyll',
+      'CNAME',
       'apple-touch-icon.png',
       'favicon.png',
       'icon.png',
