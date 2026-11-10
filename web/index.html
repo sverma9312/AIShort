@@ -183,7 +183,7 @@
         </div>
       </main>
 
-      <!-- First-Time Welcome Overlay (Semi-transparent Onboarding Card) -->
+      <!-- First-Time Welcome Overlay (Option A: Linear Minimalist) -->
       <div
         id="welcome-overlay"
         class="welcome-overlay"
@@ -193,39 +193,89 @@
       >
         <div class="welcome-card" id="welcome-card">
           <div class="welcome-badge">
-            <span class="welcome-badge-dot"></span>
-            <span>WELCOME TO AISHORT</span>
+            <svg width="13" height="13" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+              <rect width="64" height="64" rx="14" fill="#1C1D26" />
+              <path d="M12 50V14h9l13 21v15l-13-21v21z" fill="#94A3B8" />
+              <path d="M38 14 54 32 38 50V39l7-7-7-7z" fill="#FFFFFF" />
+            </svg>
+            <span>AIShort Intro</span>
           </div>
 
           <h2 class="welcome-title">
-            AI news in <span class="welcome-gradient">60 words</span> or less.
+            AI news, distilled.<br />
+            <span class="welcome-highlight">In 60 words or less.</span>
           </h2>
 
           <p class="welcome-subtitle">
-            Skip the hype and long essays. Get concise, verified AI breakthroughs delivered every
-            hour.
+            Skip long essays and promotional noise. Verified breakthroughs briefed every hour.
           </p>
 
           <div class="welcome-features">
             <div class="welcome-feature">
-              <div class="welcome-feature-icon">⏱️</div>
+              <div class="welcome-feature-icon-box">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+              </div>
               <div class="welcome-feature-text">
-                <strong>60 Words Max</strong>
-                <span>Clear takeaways, zero fluff or filler</span>
+                <strong>60-Word Briefs</strong>
+                <span>Every story stripped to its core takeaways</span>
               </div>
             </div>
+
             <div class="welcome-feature">
-              <div class="welcome-feature-icon">🔄</div>
+              <div class="welcome-feature-icon-box">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
               <div class="welcome-feature-text">
-                <strong>Updated Hourly</strong>
-                <span>Models, research, products & funding</span>
+                <strong>Hourly Updates</strong>
+                <span>Frontier models, papers, releases & funding</span>
               </div>
             </div>
+
             <div class="welcome-feature">
-              <div class="welcome-feature-icon">👆</div>
+              <div class="welcome-feature-icon-box">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <polyline points="17 11 12 6 7 11"></polyline>
+                  <polyline points="17 18 12 13 7 18"></polyline>
+                </svg>
+              </div>
               <div class="welcome-feature-text">
-                <strong>Swipe to Flip</strong>
-                <span>Swipe up for next story, tap to read source</span>
+                <strong>Vertical Swipe</strong>
+                <span>Swipe up for next story · Tap to view source</span>
               </div>
             </div>
           </div>
@@ -236,7 +286,18 @@
           </button>
 
           <div class="welcome-hint">
-            <span class="welcome-hint-chevron">↑</span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <line x1="12" y1="19" x2="12" y2="5"></line>
+              <polyline points="5 12 12 5 19 12"></polyline>
+            </svg>
             <span>or swipe up to begin</span>
           </div>
         </div>
@@ -1343,14 +1404,29 @@
         var btnDesktopDismiss = document.getElementById('btn-desktop-dismiss');
         var btnDesktopInstall = document.getElementById('btn-desktop-install');
 
-        if (sessionStorage.getItem('aishort_hide_desktop_banner') === '1') {
-          if (desktopBanner) desktopBanner.style.display = 'none';
-        }
+        try {
+          if (
+            localStorage.getItem('aishort_hide_desktop_banner') === '1' ||
+            sessionStorage.getItem('aishort_hide_desktop_banner') === '1'
+          ) {
+            if (desktopBanner) {
+              desktopBanner.classList.add('hidden');
+              desktopBanner.style.setProperty('display', 'none', 'important');
+            }
+          }
+        } catch (e) {}
 
         if (btnDesktopDismiss) {
-          btnDesktopDismiss.addEventListener('click', function () {
-            if (desktopBanner) desktopBanner.style.display = 'none';
-            sessionStorage.setItem('aishort_hide_desktop_banner', '1');
+          btnDesktopDismiss.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (desktopBanner) {
+              desktopBanner.classList.add('hidden');
+              desktopBanner.style.setProperty('display', 'none', 'important');
+            }
+            try {
+              localStorage.setItem('aishort_hide_desktop_banner', '1');
+              sessionStorage.setItem('aishort_hide_desktop_banner', '1');
+            } catch (e) {}
           });
         }
 

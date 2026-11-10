@@ -99,23 +99,35 @@ export function WelcomeOverlay({ onDismiss }: WelcomeOverlayProps) {
         style={[
           styles.card,
           {
-            backgroundColor: theme.dark ? 'rgba(18, 19, 29, 0.94)' : 'rgba(255, 255, 255, 0.96)',
-            borderColor: theme.dark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(0, 0, 0, 0.1)',
+            backgroundColor: theme.dark ? '#12131C' : '#FFFFFF',
+            borderColor: theme.dark ? 'rgba(255, 255, 255, 0.11)' : 'rgba(0, 0, 0, 0.09)',
           },
         ]}
       >
-        <View style={styles.badge}>
-          <View style={styles.badgeDot} />
-          <Text style={styles.badgeText}>WELCOME TO AISHORT</Text>
+        <View
+          style={[
+            styles.badge,
+            {
+              backgroundColor: theme.dark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+              borderColor: theme.dark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
+            },
+          ]}
+        >
+          <Ionicons name="newspaper-outline" size={12} color={theme.dark ? '#94A3B8' : '#64748B'} />
+          <Text style={[styles.badgeText, { color: theme.dark ? '#CBD5E1' : '#475569' }]}>
+            AISHORT INTRO
+          </Text>
         </View>
 
         <Text style={[styles.title, { color: theme.text }]}>
-          AI news in <Text style={styles.highlight}>60 words</Text> or less.
+          AI news, distilled.{'\n'}
+          <Text style={[styles.highlight, { color: theme.dark ? '#E2E8F0' : '#334155' }]}>
+            In 60 words or less.
+          </Text>
         </Text>
 
         <Text style={[styles.subtitle, { color: theme.muted }]}>
-          Skip the hype and long essays. Get concise, verified AI breakthroughs delivered every
-          hour.
+          Skip long essays and promotional noise. Verified breakthroughs briefed every hour.
         </Text>
 
         <View style={styles.features}>
@@ -123,16 +135,26 @@ export function WelcomeOverlay({ onDismiss }: WelcomeOverlayProps) {
             style={[
               styles.featureRow,
               {
-                backgroundColor: theme.dark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)',
-                borderColor: theme.dark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+                backgroundColor: theme.dark ? 'rgba(255, 255, 255, 0.032)' : 'rgba(0, 0, 0, 0.025)',
+                borderColor: theme.dark ? 'rgba(255, 255, 255, 0.065)' : 'rgba(0, 0, 0, 0.06)',
               },
             ]}
           >
-            <Text style={styles.featureIcon}>⏱️</Text>
+            <View
+              style={[
+                styles.featureIconBox,
+                {
+                  backgroundColor: theme.dark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+                  borderColor: theme.dark ? 'rgba(255, 255, 255, 0.09)' : 'rgba(0, 0, 0, 0.08)',
+                },
+              ]}
+            >
+              <Ionicons name="flash-outline" size={15} color={theme.dark ? '#E2E8F0' : '#1E293B'} />
+            </View>
             <View style={styles.featureTextWrap}>
-              <Text style={[styles.featureTitle, { color: theme.text }]}>60 Words Max</Text>
+              <Text style={[styles.featureTitle, { color: theme.text }]}>60-Word Briefs</Text>
               <Text style={[styles.featureDesc, { color: theme.muted }]}>
-                Clear takeaways, zero fluff or filler
+                Every story stripped to its core takeaways
               </Text>
             </View>
           </View>
@@ -141,16 +163,26 @@ export function WelcomeOverlay({ onDismiss }: WelcomeOverlayProps) {
             style={[
               styles.featureRow,
               {
-                backgroundColor: theme.dark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)',
-                borderColor: theme.dark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+                backgroundColor: theme.dark ? 'rgba(255, 255, 255, 0.032)' : 'rgba(0, 0, 0, 0.025)',
+                borderColor: theme.dark ? 'rgba(255, 255, 255, 0.065)' : 'rgba(0, 0, 0, 0.06)',
               },
             ]}
           >
-            <Text style={styles.featureIcon}>🔄</Text>
+            <View
+              style={[
+                styles.featureIconBox,
+                {
+                  backgroundColor: theme.dark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+                  borderColor: theme.dark ? 'rgba(255, 255, 255, 0.09)' : 'rgba(0, 0, 0, 0.08)',
+                },
+              ]}
+            >
+              <Ionicons name="time-outline" size={15} color={theme.dark ? '#E2E8F0' : '#1E293B'} />
+            </View>
             <View style={styles.featureTextWrap}>
-              <Text style={[styles.featureTitle, { color: theme.text }]}>Updated Hourly</Text>
+              <Text style={[styles.featureTitle, { color: theme.text }]}>Hourly Updates</Text>
               <Text style={[styles.featureDesc, { color: theme.muted }]}>
-                Models, research, products & funding
+                Frontier models, papers, releases & funding
               </Text>
             </View>
           </View>
@@ -159,16 +191,30 @@ export function WelcomeOverlay({ onDismiss }: WelcomeOverlayProps) {
             style={[
               styles.featureRow,
               {
-                backgroundColor: theme.dark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)',
-                borderColor: theme.dark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+                backgroundColor: theme.dark ? 'rgba(255, 255, 255, 0.032)' : 'rgba(0, 0, 0, 0.025)',
+                borderColor: theme.dark ? 'rgba(255, 255, 255, 0.065)' : 'rgba(0, 0, 0, 0.06)',
               },
             ]}
           >
-            <Text style={styles.featureIcon}>👆</Text>
+            <View
+              style={[
+                styles.featureIconBox,
+                {
+                  backgroundColor: theme.dark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+                  borderColor: theme.dark ? 'rgba(255, 255, 255, 0.09)' : 'rgba(0, 0, 0, 0.08)',
+                },
+              ]}
+            >
+              <Ionicons
+                name="chevron-up-outline"
+                size={15}
+                color={theme.dark ? '#E2E8F0' : '#1E293B'}
+              />
+            </View>
             <View style={styles.featureTextWrap}>
-              <Text style={[styles.featureTitle, { color: theme.text }]}>Swipe to Flip</Text>
+              <Text style={[styles.featureTitle, { color: theme.text }]}>Vertical Swipe</Text>
               <Text style={[styles.featureDesc, { color: theme.muted }]}>
-                Swipe up for next story, tap to read source
+                Swipe up for next story · Tap to view source
               </Text>
             </View>
           </View>
@@ -178,17 +224,22 @@ export function WelcomeOverlay({ onDismiss }: WelcomeOverlayProps) {
           onPress={dismiss}
           style={({ pressed }) => [
             styles.btn,
-            { backgroundColor: theme.accent, opacity: pressed ? 0.85 : 1 },
+            {
+              backgroundColor: theme.dark ? '#FFFFFF' : '#0F172A',
+              opacity: pressed ? 0.9 : 1,
+            },
           ]}
           accessibilityRole="button"
           accessibilityLabel="Start reading"
         >
-          <Text style={styles.btnText}>Start Reading</Text>
-          <Ionicons name="arrow-forward" size={17} color="#ffffff" />
+          <Text style={[styles.btnText, { color: theme.dark ? '#0A0B10' : '#FFFFFF' }]}>
+            Start Reading
+          </Text>
+          <Ionicons name="arrow-forward" size={16} color={theme.dark ? '#0A0B10' : '#FFFFFF'} />
         </Pressable>
 
         <Animated.View style={[styles.hintWrap, { transform: [{ translateY: bounceAnim }] }]}>
-          <Ionicons name="arrow-up" size={14} color="#818cf8" />
+          <Ionicons name="arrow-up" size={13} color={theme.dark ? '#94A3B8' : '#64748B'} />
           <Text style={[styles.hintText, { color: theme.muted }]}>or swipe up to begin</Text>
         </Animated.View>
       </View>
@@ -223,24 +274,15 @@ const styles = StyleSheet.create({
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(99, 102, 241, 0.15)',
     borderWidth: 1,
-    borderColor: 'rgba(99, 102, 241, 0.35)',
     borderRadius: 999,
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingVertical: 4.5,
     gap: 6,
-  },
-  badgeDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#34d399',
   },
   badgeText: {
     fontSize: 10.5,
     fontWeight: '700',
-    color: '#a5b4fc',
     letterSpacing: 0.8,
   },
   title: {
@@ -253,31 +295,36 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   highlight: {
-    color: '#818cf8',
+    fontWeight: '700',
   },
   subtitle: {
     fontSize: 12.5,
     textAlign: 'center',
     lineHeight: 18,
-    marginBottom: 14,
-    paddingHorizontal: 8,
+    marginBottom: 16,
+    paddingHorizontal: 6,
   },
   features: {
     width: '100%',
-    gap: 7,
-    marginBottom: 14,
+    gap: 8,
+    marginBottom: 18,
   },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
+    paddingHorizontal: 11,
+    paddingVertical: 9,
+    borderRadius: 13,
     borderWidth: 1,
     gap: 12,
   },
-  featureIcon: {
-    fontSize: 18,
+  featureIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   featureTextWrap: {
     flex: 1,
@@ -297,17 +344,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
+    paddingVertical: 13,
     borderRadius: 12,
     gap: 8,
-    shadowColor: '#4f46e5',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
     elevation: 4,
   },
   btnText: {
-    color: '#ffffff',
     fontSize: 14,
     fontWeight: '700',
   },
@@ -315,7 +361,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginTop: 8,
+    marginTop: 10,
   },
   hintText: {
     fontSize: 11,
