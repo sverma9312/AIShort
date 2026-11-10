@@ -1,5 +1,5 @@
 {
-  "name": "AIShort — AI news in 60 words",
+  "name": "AIShort — AI news in short",
   "short_name": "AIShort",
   "description": "Very short AI news summaries as swipeable cards.",
   "start_url": "./",
