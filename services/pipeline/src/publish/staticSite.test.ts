@@ -19,6 +19,7 @@ describe('copyStaticSite', () => {
       'icon.png',
       'index.html',
       'manifest.json',
+      'nextai-icon.png',
       'privacy',
       'styles.css',
       'support',
