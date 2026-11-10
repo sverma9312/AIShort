@@ -161,6 +161,17 @@ main.static-page footer {
   color: var(--text);
 }
 
+.brand-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
 .brand-badge {
   background: linear-gradient(135deg, #4f46e5, #818cf8);
   color: #fff;
