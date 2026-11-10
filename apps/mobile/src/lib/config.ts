@@ -1,6 +1,7 @@
 import { FEED_PATHS, feedUrl } from '@aishort/shared';
 
-const DEFAULT_FEED_BASE_URL = 'https://sverma9312.github.io/AIShort';
+const DEFAULT_FEED_BASE_URL = 'https://aishort.nextai-apps.com';
+const FALLBACK_FEED_BASE_URL = 'https://sverma9312.github.io/AIShort';
 
 function list(value: string | undefined): string[] {
   return (value ?? '')
@@ -19,7 +20,9 @@ const primary = feedBaseUrls[0] ?? DEFAULT_FEED_BASE_URL;
 
 export const config = {
   /** Built-in feed locations, primary first. meta.json can add more at runtime. */
-  feedBaseUrls: feedBaseUrls.length ? feedBaseUrls : [DEFAULT_FEED_BASE_URL],
+  feedBaseUrls: feedBaseUrls.length
+    ? feedBaseUrls
+    : [DEFAULT_FEED_BASE_URL, FALLBACK_FEED_BASE_URL],
   privacyUrl: feedUrl(primary, 'privacy/'),
   supportUrl: feedUrl(primary, 'support/'),
   supportEmail: optional(process.env.EXPO_PUBLIC_SUPPORT_EMAIL) ?? 'aishort@nextai-apps.com',

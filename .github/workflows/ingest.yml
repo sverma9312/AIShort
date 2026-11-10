@@ -43,8 +43,8 @@ jobs:
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.event.repository.name }}
         run: |
-          # Pages URLs are lowercase: https://<owner>.github.io/<repo>
-          echo "FEED_BASE_URLS=${FEED_BASE_URLS_OVERRIDE:-https://${OWNER,,}.github.io/${REPO}}" >> "$GITHUB_ENV"
+          # Custom domain primary, fallback to Pages URL
+          echo "FEED_BASE_URLS=${FEED_BASE_URLS_OVERRIDE:-https://aishort.nextai-apps.com,https://${OWNER,,}.github.io/${REPO}}" >> "$GITHUB_ENV"
 
       - name: Run pipeline
         env:

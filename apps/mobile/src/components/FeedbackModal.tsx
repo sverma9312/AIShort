@@ -141,8 +141,8 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
-          Origin: 'https://sverma9312.github.io',
-          Referer: 'https://sverma9312.github.io/AIShort/',
+          Origin: 'https://aishort.nextai-apps.com',
+          Referer: 'https://aishort.nextai-apps.com/',
         },
         body: JSON.stringify({
           _subject: `[AIShort ${typeLabel}] ${trimmedSubject}`,
