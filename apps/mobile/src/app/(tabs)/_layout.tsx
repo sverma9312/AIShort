@@ -11,6 +11,7 @@ import {
   StyleSheet,
   type ViewStyle,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/theme';
 
 interface TabBarButtonProps extends Omit<PressableProps, 'children' | 'style'> {
@@ -129,6 +130,9 @@ function TabBarButton(props: TabBarButtonProps) {
 
 export default function TabsLayout() {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const bottomInset = Math.max(insets.bottom, 0);
+
   return (
     <Tabs
       screenOptions={{
@@ -137,8 +141,8 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: theme.card,
           borderTopColor: theme.border,
-          height: 58,
-          paddingBottom: 6,
+          height: 58 + bottomInset,
+          paddingBottom: bottomInset > 0 ? bottomInset : 6,
           paddingTop: 6,
         },
         tabBarLabelStyle: {

@@ -127,7 +127,7 @@ export function WelcomeOverlay({ onDismiss }: WelcomeOverlayProps) {
         </Text>
 
         <Text style={[styles.subtitle, { color: theme.muted }]}>
-          Skip long essays and promotional noise. Verified breakthroughs briefed every hour.
+          Skip long essays and clickbait. Verified breakthroughs briefed every hour.
         </Text>
 
         <View style={styles.features}>

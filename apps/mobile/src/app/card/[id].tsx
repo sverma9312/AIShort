@@ -1,12 +1,15 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { NewsCard } from '@/components/NewsCard';
 import { StateView } from '@/components/StateView';
 import { useBookmarks } from '@/lib/bookmarks';
 import { useFeed } from '@/lib/feed';
 import { findCard } from '@/lib/feedRepository';
+import { useTheme } from '@/lib/theme';
 
 /** A single card: opened from a notification, a deep link (aishort://card/<id>) or a bookmark. */
 export default function CardScreen() {
+  const theme = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { cards, status } = useFeed();
   const { bookmarks, isBookmarked, toggle } = useBookmarks();
@@ -26,7 +29,9 @@ export default function CardScreen() {
   return (
     <>
       <Stack.Screen options={{ title: card.sourceName, headerBackTitle: 'Back' }} />
-      <NewsCard card={card} bookmarked={isBookmarked(card.id)} onToggleBookmark={toggle} />
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['bottom']}>
+        <NewsCard card={card} bookmarked={isBookmarked(card.id)} onToggleBookmark={toggle} />
+      </SafeAreaView>
     </>
   );
 }

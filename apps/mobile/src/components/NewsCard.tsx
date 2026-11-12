@@ -253,7 +253,7 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
           accessibilityLabel={`Read more at ${card.sourceName}`}
           testID="read-more"
         >
-          <Text style={[styles.readMoreText, { color: accentTextColor }]}>
+          <Text style={[styles.readMoreText, { color: accentTextColor }]} numberOfLines={2}>
             Read more at {card.sourceName}
           </Text>
         </Pressable>
