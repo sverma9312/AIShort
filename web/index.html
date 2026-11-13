@@ -59,7 +59,14 @@
       <!-- App Header -->
       <header class="app-header">
         <div class="app-header-inner">
-          <div class="brand">
+          <div
+            class="brand"
+            id="brand-home"
+            style="cursor: pointer"
+            role="button"
+            tabindex="0"
+            title="Back to Feed"
+          >
             <img src="icon.png" class="brand-logo" alt="AIShort" width="28" height="28" />
             <span class="brand-title">AIShort</span>
             <span class="brand-edition desktop-only">Web Edition</span>
@@ -182,6 +189,83 @@
           </div>
         </div>
       </main>
+
+      <!-- Saved Stories (Bookmarks) View (Matches mobile app compact tiles) -->
+      <section
+        class="saved-container"
+        id="saved-container"
+        style="display: none"
+        aria-label="Saved stories"
+      >
+        <div class="saved-inner">
+          <div class="saved-header">
+            <div class="saved-header-left">
+              <button
+                class="saved-back-btn"
+                id="btn-saved-to-feed"
+                type="button"
+                aria-label="Back to feed"
+                title="Back to Feed"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                <span>Feed</span>
+              </button>
+              <h1 class="saved-title">Saved</h1>
+            </div>
+            <span class="saved-count-pill" id="saved-count-pill">0 stories</span>
+          </div>
+          <div class="saved-list" id="saved-list">
+            <!-- Saved tiles rendered dynamically via JavaScript -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Single Saved Card Reader View -->
+      <section
+        class="saved-reader-container"
+        id="saved-reader-container"
+        style="display: none"
+        aria-label="Saved story reader"
+      >
+        <div class="saved-reader-header-bar">
+          <button
+            class="saved-back-btn"
+            id="btn-reader-back"
+            type="button"
+            aria-label="Back to saved list"
+            title="Back to Saved"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            <span>Saved</span>
+          </button>
+          <span class="saved-reader-source" id="saved-reader-source">Story</span>
+        </div>
+        <div class="saved-reader-card-wrapper" id="saved-reader-card-wrapper">
+          <!-- Single news card rendered here -->
+        </div>
+      </section>
 
       <!-- First-Time Welcome Overlay (Option A: Linear Minimalist) -->
       <div
@@ -493,9 +577,27 @@
         // State
         var allCards = [];
         var activeCategory = 'all';
-        var showOnlyBookmarks = false;
+        var currentView = 'feed'; // 'feed' | 'saved' | 'saved-card'
+        var activeSavedCardId = null;
         var bookmarkedIds = new Set(JSON.parse(localStorage.getItem('aishort_bookmarks') || '[]'));
+        var savedCards = [];
+        try {
+          savedCards = JSON.parse(localStorage.getItem('aishort_saved_cards') || '[]');
+          if (!Array.isArray(savedCards)) savedCards = [];
+        } catch (e) {
+          savedCards = [];
+        }
         var theme = localStorage.getItem('aishort_theme') || 'dynamic';
+
+        function escapeHtml(str) {
+          if (!str) return '';
+          return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+        }
 
         var CATEGORY_ICONS = {
           models: '🧠',
@@ -606,8 +708,12 @@
             }
           });
 
-          if (allCards.length > 0) {
-            renderCards();
+          if (currentView === 'feed') {
+            if (allCards.length > 0) renderCards();
+          } else if (currentView === 'saved') {
+            renderSavedList();
+          } else if (currentView === 'saved-card' && activeSavedCardId) {
+            window.openSavedCard(activeSavedCardId);
           }
         }
         applyTheme(theme);
@@ -706,27 +812,49 @@
         }
 
         // Bookmark toggle
-        function toggleBookmark(card, btnElement) {
+        function toggleBookmark(card) {
           if (bookmarkedIds.has(card.id)) {
             bookmarkedIds.delete(card.id);
+            savedCards = savedCards.filter(function (c) {
+              return c.id !== card.id;
+            });
             showToast('Bookmark removed');
           } else {
             bookmarkedIds.add(card.id);
+            savedCards = [card].concat(
+              savedCards.filter(function (c) {
+                return c.id !== card.id;
+              }),
+            );
             showToast('Saved to bookmarks');
           }
           localStorage.setItem('aishort_bookmarks', JSON.stringify(Array.from(bookmarkedIds)));
+          localStorage.setItem('aishort_saved_cards', JSON.stringify(savedCards));
           updateBookmarkCount();
-          renderCards();
+
+          if (currentView === 'saved') {
+            renderSavedList();
+          } else if (currentView === 'feed') {
+            renderCards();
+          } else if (currentView === 'saved-card') {
+            updateReaderBookmarkBtn(card.id);
+          }
         }
 
         function updateBookmarkCount() {
           var countEl = document.getElementById('bookmark-count');
           var size = bookmarkedIds.size;
-          if (size > 0) {
-            countEl.textContent = size;
-            countEl.style.display = 'block';
-          } else {
-            countEl.style.display = 'none';
+          if (countEl) {
+            if (size > 0) {
+              countEl.textContent = size;
+              countEl.style.display = 'block';
+            } else {
+              countEl.style.display = 'none';
+            }
+          }
+          var savedPill = document.getElementById('saved-count-pill');
+          if (savedPill) {
+            savedPill.textContent = size === 1 ? '1 story' : size + ' stories';
           }
         }
         updateBookmarkCount();
@@ -769,8 +897,14 @@
           }
         }
 
-        window.shareCardIndex = function (index) {
-          var card = currentFiltered[index];
+        window.shareCardById = function (id) {
+          var card =
+            allCards.find(function (c) {
+              return c.id === id;
+            }) ||
+            savedCards.find(function (c) {
+              return c.id === id;
+            });
           if (!card) return;
           var shareData = {
             title: card.headline,
@@ -794,17 +928,163 @@
           }
         };
 
+        window.shareCardIndex = function (index) {
+          var card = currentFiltered[index];
+          if (card) window.shareCardById(card.id);
+        };
+
         window.shareCard = function (headline, url) {
           copyShareLink(headline, url);
         };
 
         var currentFiltered = [];
 
-        // Render Cards
+        function buildCardHtml(card, index, options) {
+          options = options || {};
+          var isDynamic = theme === 'dynamic';
+          var effectiveTheme = getEffectiveTheme(theme);
+          var isDark = effectiveTheme === 'dark';
+          var isBookmarked = bookmarkedIds.has(card.id);
+          var isTop = (card.importance || 0) >= 8;
+          var catLabel = CATEGORY_LABELS[card.category] || card.category;
+          var catIcon = CATEGORY_ICONS[card.category] || '📰';
+          var palette = isDynamic ? getCardPalette(card) : null;
+
+          var cardStyle = '';
+          var categoryChipStyle = '';
+          var readMoreStyle = '';
+          var topChipStyle = '';
+          var noImageStyle = '';
+          var noImageIconStyle = '';
+
+          if (isDynamic && palette) {
+            if (card.imageUrl) {
+              cardStyle =
+                'border-color: ' +
+                (isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)') +
+                ';';
+            } else {
+              cardStyle =
+                'background-color: ' +
+                (isDark ? palette.card : '#ffffff') +
+                '; border-color: ' +
+                (isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)') +
+                ';';
+            }
+            categoryChipStyle =
+              'background: ' +
+              (isDark ? palette.chip : '#EEF0FF') +
+              '; color: ' +
+              (isDark ? '#FFFFFF' : palette.accent) +
+              '; border: 1px solid ' +
+              palette.accent +
+              '44;';
+            readMoreStyle =
+              'background: ' +
+              palette.accent +
+              '; color: ' +
+              (palette.accentText || '#FFFFFF') +
+              '; box-shadow: 0 4px 14px ' +
+              palette.accent +
+              '44;';
+            if (isTop) {
+              topChipStyle =
+                'background: linear-gradient(135deg, ' +
+                palette.accent +
+                ', ' +
+                palette.primary +
+                '); color: #fff; box-shadow: 0 2px 10px ' +
+                palette.accent +
+                '55;';
+            }
+            noImageStyle =
+              'background: ' +
+              (isDark ? palette.card : palette.chip) +
+              '; border-color: ' +
+              (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)') +
+              ';';
+            noImageIconStyle =
+              'background: ' +
+              (isDark ? palette.chip : '#ffffff') +
+              '; color: ' +
+              palette.accent +
+              ';';
+          }
+
+          var safeHeadline = escapeHtml(card.headline);
+          var safeSummary = escapeHtml(card.summary);
+          var safeSource = escapeHtml(card.sourceName);
+          var safeUrl = card.sourceUrl || '#';
+          var safeImg = card.imageUrl || '';
+
+          return `
+            <article class="news-card ${isDynamic ? 'is-dynamic' : ''}" style="${cardStyle}" data-card-id="${card.id}">
+              ${
+                isDynamic && safeImg
+                  ? `
+                <div class="card-dynamic-backdrop" aria-hidden="true">
+                  <img class="card-dynamic-bg-img" src="${safeImg}" alt="" />
+                  <div class="card-dynamic-overlay"></div>
+                </div>
+              `
+                  : ''
+              }
+
+              ${
+                safeImg
+                  ? `
+                <div class="card-image-wrap" onclick="window.openImage('${safeImg}', '${safeSource}')">
+                  <img class="card-image-blur" src="${safeImg}" alt="" aria-hidden="true" />
+                  <img class="card-image" src="${safeImg}" alt="${safeHeadline}" loading="${index === 0 ? 'eager' : 'lazy'}" />
+                  <div class="zoom-badge">🔍 Tap to zoom</div>
+                </div>
+              `
+                  : `
+                <div class="card-no-image" style="${noImageStyle}">
+                  <div class="no-image-icon-circle" style="${noImageIconStyle}">
+                    <span class="no-image-icon">${catIcon}</span>
+                  </div>
+                  <div class="no-image-text" style="${isDynamic ? (isDark ? 'color: #e2e8f0;' : `color: ${palette.card};`) : ''}">${safeSource} · ${catLabel}</div>
+                </div>
+              `
+              }
+
+              <div class="card-content">
+                <div class="card-body">
+                  <div class="meta-row">
+                    <span class="chip chip-category" style="${categoryChipStyle}">${catLabel}</span>
+                    <span class="chip chip-source">${safeSource}</span>
+                    <span class="chip chip-time">${timeAgo(card.publishedAt)}</span>
+                    ${isTop ? `<span class="chip chip-top" style="${topChipStyle}">★ Top story</span>` : ''}
+                  </div>
+                  <h2 class="card-headline">${safeHeadline}</h2>
+                  <p class="card-summary">${safeSummary}</p>
+                </div>
+
+                <div class="card-actions">
+                  <a class="btn-read-more" href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="${readMoreStyle}">
+                    <span class="btn-read-more-text">Read more at ${safeSource}&nbsp;↗</span>
+                  </a>
+                  <button class="action-icon-btn" aria-label="Share story" onclick="window.shareCardById('${card.id}')">
+                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;">
+                      <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/>
+                    </svg>
+                  </button>
+                  <button class="action-icon-btn ${isBookmarked ? 'bookmarked' : ''}" aria-label="Bookmark story" data-card-id="${card.id}" onclick="window.handleBookmarkClick('${card.id}')">
+                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;">
+                      <path d="${isBookmarked ? 'M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z' : 'M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z'}"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </article>
+          `;
+        }
+
+        // Render Cards in Swipe Deck
         function renderCards() {
           var container = document.getElementById('cards-wrapper');
           var filtered = allCards.filter(function (card) {
-            if (showOnlyBookmarks && !bookmarkedIds.has(card.id)) return false;
             if (activeCategory === 'top') {
               if ((card.importance || 0) < 8) return false;
             } else if (activeCategory !== 'all' && card.category !== activeCategory) {
@@ -818,162 +1098,24 @@
             container.innerHTML = `
               <div class="card-wrapper">
                 <div class="caught-up-card">
-                  <div class="caught-up-icon">${showOnlyBookmarks ? '🔖' : '🔍'}</div>
-                  <h3 class="caught-up-title">${showOnlyBookmarks ? 'No Bookmarks Yet' : 'No Stories Found'}</h3>
+                  <div class="caught-up-icon">🔍</div>
+                  <h3 class="caught-up-title">No Stories Found</h3>
                   <p class="caught-up-desc">
-                    ${showOnlyBookmarks ? 'Tap the bookmark icon on any card to save stories here.' : 'Try selecting "All Stories" or checking back in the next update.'}
+                    Try selecting "All Stories" or checking back in the next update.
                   </p>
-                  ${showOnlyBookmarks ? '<button class="caught-up-btn" id="btn-clear-bm-filter">View All Stories</button>' : ''}
+                  <button class="caught-up-btn" onclick="window.openFeedView('all')">View All Stories</button>
                 </div>
               </div>
             `;
-            if (showOnlyBookmarks) {
-              document.getElementById('btn-clear-bm-filter').addEventListener('click', function () {
-                showOnlyBookmarks = false;
-                document.getElementById('btn-bookmarks').style.color = '';
-                renderCards();
-              });
-            }
             updateDesktopNav();
             return;
           }
 
-          var isDynamic = theme === 'dynamic';
-          var effectiveTheme = getEffectiveTheme(theme);
-          var isDark = effectiveTheme === 'dark';
-
           var html = '';
           for (var i = 0; i < filtered.length; i++) {
-            var card = filtered[i];
-            var isBookmarked = bookmarkedIds.has(card.id);
-            var isTop = (card.importance || 0) >= 8;
-            var catLabel = CATEGORY_LABELS[card.category] || card.category;
-            var catIcon = CATEGORY_ICONS[card.category] || '📰';
-            var palette = isDynamic ? getCardPalette(card) : null;
-
-            var cardStyle = '';
-            var categoryChipStyle = '';
-            var readMoreStyle = '';
-            var topChipStyle = '';
-            var noImageStyle = '';
-            var noImageIconStyle = '';
-
-            if (isDynamic && palette) {
-              if (card.imageUrl) {
-                cardStyle =
-                  'border-color: ' +
-                  (isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)') +
-                  ';';
-              } else {
-                cardStyle =
-                  'background-color: ' +
-                  (isDark ? palette.card : '#ffffff') +
-                  '; border-color: ' +
-                  (isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)') +
-                  ';';
-              }
-              categoryChipStyle =
-                'background: ' +
-                (isDark ? palette.chip : '#EEF0FF') +
-                '; color: ' +
-                (isDark ? '#FFFFFF' : palette.accent) +
-                '; border: 1px solid ' +
-                palette.accent +
-                '44;';
-              readMoreStyle =
-                'background: ' +
-                palette.accent +
-                '; color: ' +
-                (palette.accentText || '#FFFFFF') +
-                '; box-shadow: 0 4px 14px ' +
-                palette.accent +
-                '44;';
-              if (isTop) {
-                topChipStyle =
-                  'background: linear-gradient(135deg, ' +
-                  palette.accent +
-                  ', ' +
-                  palette.primary +
-                  '); color: #fff; box-shadow: 0 2px 10px ' +
-                  palette.accent +
-                  '55;';
-              }
-              noImageStyle =
-                'background: ' +
-                (isDark ? palette.card : palette.chip) +
-                '; border-color: ' +
-                (isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)') +
-                ';';
-              noImageIconStyle =
-                'background: ' +
-                (isDark ? palette.chip : '#ffffff') +
-                '; color: ' +
-                palette.accent +
-                ';';
-            }
-
             html += `
               <div class="card-wrapper" data-index="${i}">
-                <article class="news-card ${isDynamic ? 'is-dynamic' : ''}" style="${cardStyle}">
-                  ${
-                    isDynamic && card.imageUrl
-                      ? `
-                    <div class="card-dynamic-backdrop" aria-hidden="true">
-                      <img class="card-dynamic-bg-img" src="${card.imageUrl}" alt="" />
-                      <div class="card-dynamic-overlay"></div>
-                    </div>
-                  `
-                      : ''
-                  }
-
-                  ${
-                    card.imageUrl
-                      ? `
-                    <div class="card-image-wrap" onclick="window.openCardImage(${i})">
-                      <img class="card-image-blur" src="${card.imageUrl}" alt="" aria-hidden="true" />
-                      <img class="card-image" src="${card.imageUrl}" alt="${card.headline}" loading="${i === 0 ? 'eager' : 'lazy'}" />
-                      <div class="zoom-badge">🔍 Tap to zoom</div>
-                    </div>
-                  `
-                      : `
-                    <div class="card-no-image" style="${noImageStyle}">
-                      <div class="no-image-icon-circle" style="${noImageIconStyle}">
-                        <span class="no-image-icon">${catIcon}</span>
-                      </div>
-                      <div class="no-image-text" style="${isDynamic ? (isDark ? 'color: #e2e8f0;' : `color: ${palette.card};`) : ''}">${card.sourceName} · ${catLabel}</div>
-                    </div>
-                  `
-                  }
-
-                  <div class="card-content">
-                    <div class="card-body">
-                      <div class="meta-row">
-                        <span class="chip chip-category" style="${categoryChipStyle}">${catLabel}</span>
-                        <span class="chip chip-source">${card.sourceName}</span>
-                        <span class="chip chip-time">${timeAgo(card.publishedAt)}</span>
-                        ${isTop ? `<span class="chip chip-top" style="${topChipStyle}">★ Top story</span>` : ''}
-                      </div>
-                      <h2 class="card-headline">${card.headline}</h2>
-                      <p class="card-summary">${card.summary}</p>
-                    </div>
-
-                    <div class="card-actions">
-                      <a class="btn-read-more" href="${card.sourceUrl}" target="_blank" rel="noopener noreferrer" style="${readMoreStyle}">
-                        <span class="btn-read-more-text">Read more at ${card.sourceName}&nbsp;↗</span>
-                      </a>
-                      <button class="action-icon-btn" aria-label="Share story" onclick="window.shareCardIndex(${i})">
-                        <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;">
-                          <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/>
-                        </svg>
-                      </button>
-                      <button class="action-icon-btn ${isBookmarked ? 'bookmarked' : ''}" aria-label="Bookmark story" data-card-id="${card.id}" onclick="window.handleBookmarkClick('${card.id}')">
-                        <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;">
-                          <path d="${isBookmarked ? 'M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z' : 'M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z'}"/>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </article>
+                ${buildCardHtml(filtered[i], i)}
               </div>
             `;
           }
@@ -998,6 +1140,208 @@
           updateDesktopNav();
         }
 
+        // Render Saved List (Matching Mobile App compact tiles)
+        function renderSavedList() {
+          var listEl = document.getElementById('saved-list');
+          var countEl = document.getElementById('saved-count-pill');
+          if (!listEl) return;
+
+          var count = savedCards.length;
+          if (countEl) {
+            countEl.textContent = count === 1 ? '1 story' : count + ' stories';
+          }
+
+          if (count === 0) {
+            listEl.innerHTML = `
+              <div class="saved-empty">
+                <div class="saved-empty-icon">🔖</div>
+                <h3 class="saved-empty-title">No saved stories</h3>
+                <p class="saved-empty-desc">Tap the bookmark on any card to read it later.</p>
+                <button class="saved-empty-btn" id="btn-empty-explore" type="button" onclick="window.openFeedView()">Explore Feed</button>
+              </div>
+            `;
+            return;
+          }
+
+          var html = '';
+          for (var i = 0; i < savedCards.length; i++) {
+            var card = savedCards[i];
+            var catLabel = CATEGORY_LABELS[card.category] || card.category;
+            html += `
+              <div class="saved-tile" data-id="${card.id}" onclick="window.openSavedCard('${card.id}')">
+                <div class="saved-tile-content">
+                  <h3 class="saved-tile-headline">${escapeHtml(card.headline)}</h3>
+                  <div class="saved-tile-meta">
+                    <span class="saved-tile-cat">${catLabel}</span>
+                    <span class="saved-tile-dot">·</span>
+                    <span class="saved-tile-source">${escapeHtml(card.sourceName)}</span>
+                    <span class="saved-tile-dot">·</span>
+                    <span class="saved-tile-time">${timeAgo(card.publishedAt)}</span>
+                  </div>
+                </div>
+                <button
+                  class="saved-tile-trash"
+                  type="button"
+                  aria-label="Remove bookmark"
+                  title="Remove bookmark"
+                  onclick="event.stopPropagation(); window.removeSavedBookmark('${card.id}')"
+                >
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                  </svg>
+                </button>
+              </div>
+            `;
+          }
+          listEl.innerHTML = html;
+        }
+
+        window.removeSavedBookmark = function (id) {
+          var tile = document.querySelector('.saved-tile[data-id="' + id + '"]');
+          var doRemove = function () {
+            bookmarkedIds.delete(id);
+            savedCards = savedCards.filter(function (c) {
+              return c.id !== id;
+            });
+            localStorage.setItem('aishort_bookmarks', JSON.stringify(Array.from(bookmarkedIds)));
+            localStorage.setItem('aishort_saved_cards', JSON.stringify(savedCards));
+            showToast('Bookmark removed');
+            updateBookmarkCount();
+            renderSavedList();
+          };
+
+          if (tile) {
+            tile.style.transition = 'all 0.2s ease';
+            tile.style.opacity = '0';
+            tile.style.transform = 'translateX(24px)';
+            setTimeout(function () {
+              tile.style.height = '0px';
+              tile.style.paddingTop = '0px';
+              tile.style.paddingBottom = '0px';
+              tile.style.borderBottomWidth = '0px';
+              setTimeout(doRemove, 160);
+            }, 180);
+          } else {
+            doRemove();
+          }
+        };
+
+        window.openSavedCard = function (id) {
+          var card =
+            savedCards.find(function (c) {
+              return c.id === id;
+            }) ||
+            allCards.find(function (c) {
+              return c.id === id;
+            });
+          if (!card) return;
+
+          currentView = 'saved-card';
+          activeSavedCardId = card.id;
+
+          document.getElementById('category-bar').style.display = 'none';
+          document.getElementById('deck-container').style.display = 'none';
+          document.getElementById('saved-container').style.display = 'none';
+          document.getElementById('saved-reader-container').style.display = 'flex';
+
+          var desktopNav = document.getElementById('desktop-nav');
+          if (desktopNav) desktopNav.style.display = 'none';
+
+          var sourceEl = document.getElementById('saved-reader-source');
+          if (sourceEl) sourceEl.textContent = card.sourceName || 'Saved Story';
+
+          var wrapper = document.getElementById('saved-reader-card-wrapper');
+          if (wrapper) {
+            wrapper.innerHTML = buildCardHtml(card, 0, { isReader: true });
+          }
+
+          document
+            .getElementById('saved-reader-container')
+            .scrollTo({ top: 0, behavior: 'instant' });
+        };
+
+        window.backToSavedList = function () {
+          openSavedView();
+        };
+
+        function updateReaderBookmarkBtn(id) {
+          var btn = document.querySelector(
+            '#saved-reader-card-wrapper .action-icon-btn[data-card-id="' + id + '"]',
+          );
+          if (btn) {
+            var isBm = bookmarkedIds.has(id);
+            if (isBm) {
+              btn.classList.add('bookmarked');
+              btn.innerHTML =
+                '<svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>';
+            } else {
+              btn.classList.remove('bookmarked');
+              btn.innerHTML =
+                '<svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z"/></svg>';
+            }
+          }
+        }
+
+        function openFeedView(category) {
+          currentView = 'feed';
+          activeSavedCardId = null;
+
+          if (category) {
+            activeCategory = category;
+            var pills = document.querySelectorAll('.cat-pill');
+            pills.forEach(function (p) {
+              if (p.getAttribute('data-category') === category) {
+                p.classList.add('active');
+              } else {
+                p.classList.remove('active');
+              }
+            });
+          }
+
+          document.getElementById('category-bar').style.display = '';
+          document.getElementById('deck-container').style.display = '';
+          document.getElementById('saved-container').style.display = 'none';
+          document.getElementById('saved-reader-container').style.display = 'none';
+
+          var btnBm = document.getElementById('btn-bookmarks');
+          if (btnBm) {
+            btnBm.classList.remove('active');
+            btnBm.style.color = '';
+          }
+
+          var desktopNav = document.getElementById('desktop-nav');
+          if (desktopNav) desktopNav.style.display = '';
+
+          renderCards();
+        }
+        window.openFeedView = openFeedView;
+
+        function openSavedView() {
+          currentView = 'saved';
+          activeSavedCardId = null;
+
+          document.getElementById('category-bar').style.display = 'none';
+          document.getElementById('deck-container').style.display = 'none';
+          document.getElementById('saved-reader-container').style.display = 'none';
+          document.getElementById('saved-container').style.display = 'flex';
+
+          var btnBm = document.getElementById('btn-bookmarks');
+          if (btnBm) {
+            btnBm.classList.add('active');
+            btnBm.style.color = 'var(--accent)';
+          }
+
+          var desktopNav = document.getElementById('desktop-nav');
+          if (desktopNav) desktopNav.style.display = 'none';
+
+          renderSavedList();
+          document.getElementById('saved-container').scrollTo({ top: 0, behavior: 'instant' });
+        }
+        window.openSavedView = openSavedView;
+
         window.openCardImage = function (index) {
           var card = currentFiltered[index];
           if (card && card.imageUrl) {
@@ -1006,9 +1350,13 @@
         };
 
         window.handleBookmarkClick = function (id) {
-          var card = allCards.find(function (c) {
-            return c.id === id;
-          });
+          var card =
+            allCards.find(function (c) {
+              return c.id === id;
+            }) ||
+            savedCards.find(function (c) {
+              return c.id === id;
+            });
           if (card) toggleBookmark(card);
         };
 
@@ -1205,20 +1553,44 @@
             });
             this.classList.add('active');
             activeCategory = this.getAttribute('data-category');
-            showOnlyBookmarks = false;
-            document.getElementById('btn-bookmarks').style.color = '';
-            renderCards();
+            openFeedView();
             document.getElementById('deck-container').scrollTo({ top: 0, behavior: 'instant' });
           });
         });
 
-        // Bookmark filter button
+        // Bookmark button in header: toggle between Saved view and Feed
         document.getElementById('btn-bookmarks').addEventListener('click', function () {
-          showOnlyBookmarks = !showOnlyBookmarks;
-          this.style.color = showOnlyBookmarks ? 'var(--accent)' : '';
-          renderCards();
-          document.getElementById('deck-container').scrollTo({ top: 0, behavior: 'instant' });
+          if (currentView === 'feed') {
+            openSavedView();
+          } else {
+            openFeedView();
+          }
         });
+
+        // Back to Feed button in Saved header
+        var btnSavedToFeed = document.getElementById('btn-saved-to-feed');
+        if (btnSavedToFeed) {
+          btnSavedToFeed.addEventListener('click', function () {
+            openFeedView();
+          });
+        }
+
+        // Back to Saved list button in Reader header
+        var btnReaderBack = document.getElementById('btn-reader-back');
+        if (btnReaderBack) {
+          btnReaderBack.addEventListener('click', function () {
+            openSavedView();
+          });
+        }
+
+        // Brand logo clicks return to Feed All Stories
+        var brandHome = document.getElementById('brand-home');
+        if (brandHome) {
+          brandHome.addEventListener('click', function () {
+            openFeedView('all');
+            document.getElementById('deck-container').scrollTo({ top: 0, behavior: 'smooth' });
+          });
+        }
 
         // Desktop "Best viewed on mobile" Banner
         var desktopBanner = document.getElementById('desktop-banner');
@@ -1262,6 +1634,13 @@
         var deck = document.getElementById('deck-container');
 
         function updateDesktopNav() {
+          var desktopNav = document.getElementById('desktop-nav');
+          if (currentView !== 'feed') {
+            if (desktopNav) desktopNav.style.display = 'none';
+            return;
+          }
+          if (desktopNav) desktopNav.style.display = '';
+
           var counter = document.getElementById('desktop-nav-counter');
           var prevBtn = document.getElementById('btn-deck-prev');
           var nextBtn = document.getElementById('btn-deck-next');
@@ -1402,6 +1781,7 @@
             }
           }
           if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+          if (currentView !== 'feed') return;
           var cardHeight = deck.clientHeight;
           if (e.key === 'ArrowDown' || e.key === 'j' || e.key === 'PageDown') {
             e.preventDefault();
@@ -1427,7 +1807,31 @@
           })
           .then(function (data) {
             allCards = data.cards || [];
-            renderCards();
+            // Cache any bookmarked cards from live feed into savedCards so they persist forever
+            var hasNewSaved = false;
+            for (var i = 0; i < allCards.length; i++) {
+              var card = allCards[i];
+              if (bookmarkedIds.has(card.id)) {
+                var existingIdx = savedCards.findIndex(function (s) {
+                  return s.id === card.id;
+                });
+                if (existingIdx === -1) {
+                  savedCards.push(card);
+                  hasNewSaved = true;
+                } else {
+                  savedCards[existingIdx] = card;
+                  hasNewSaved = true;
+                }
+              }
+            }
+            if (hasNewSaved) {
+              localStorage.setItem('aishort_saved_cards', JSON.stringify(savedCards));
+            }
+            if (currentView === 'feed') {
+              renderCards();
+            } else if (currentView === 'saved') {
+              renderSavedList();
+            }
           })
           .catch(function (err) {
             console.warn('Feed fetch failed, trying offline cache:', err);

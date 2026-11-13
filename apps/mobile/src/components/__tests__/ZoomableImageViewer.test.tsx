@@ -9,3 +9,4 @@ describe('ZoomableImageViewer', () => {
     expect(getByTestId('zoomable-image-container')).toBeTruthy();
   });
 });
+
