@@ -4,12 +4,13 @@ import { Image } from 'expo-image';
 import * as WebBrowser from 'expo-web-browser';
 import type { ComponentProps } from 'react';
 import { useState } from 'react';
-import { Modal, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Modal, Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CATEGORY_LABELS } from '@/lib/categories';
 import { track } from '@/lib/telemetry';
 import { useTheme } from '@/lib/theme';
 import { relativeTime } from '@/lib/time';
+import { ZoomableImageViewer } from './ZoomableImageViewer';
 
 const CATEGORY_ICONS: Record<Category, ComponentProps<typeof Ionicons>['name']> = {
   models: 'hardware-chip-outline',
@@ -152,23 +153,27 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
               </Pressable>
             </View>
 
-            <ScrollView
-              style={styles.modalScroll}
-              contentContainerStyle={styles.modalScrollContent}
-              maximumZoomScale={4}
-              minimumZoomScale={1}
-              showsHorizontalScrollIndicator={false}
-              showsVerticalScrollIndicator={false}
-              centerContent
-            >
-              <Image
-                source={{ uri: card.imageUrl }}
-                style={styles.fullImage}
-                contentFit="contain"
-                transition={200}
-                accessibilityIgnoresInvertColors
-              />
-            </ScrollView>
+            {Platform.OS === 'ios' ? (
+              <ScrollView
+                style={styles.modalScroll}
+                contentContainerStyle={styles.modalScrollContent}
+                maximumZoomScale={4}
+                minimumZoomScale={1}
+                showsHorizontalScrollIndicator={false}
+                showsVerticalScrollIndicator={false}
+                centerContent
+              >
+                <Image
+                  source={{ uri: card.imageUrl }}
+                  style={styles.fullImage}
+                  contentFit="contain"
+                  transition={200}
+                  accessibilityIgnoresInvertColors
+                />
+              </ScrollView>
+            ) : (
+              <ZoomableImageViewer imageUrl={card.imageUrl} />
+            )}
 
             <View style={[styles.modalFooter, { paddingBottom: Math.max(insets.bottom, 20) + 12 }]}>
               <Pressable
@@ -185,7 +190,7 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
                 />
                 <Text style={styles.modalClosePillText}>Close</Text>
               </Pressable>
-              <Text style={styles.modalFooterHint}>Pinch to zoom • Tap Close to exit</Text>
+              <Text style={styles.modalFooterHint}>Pinch or double-tap to zoom • Tap Close to exit</Text>
             </View>
           </View>
         </Modal>
