@@ -101,6 +101,7 @@ export default function FeedScreen() {
 
   // Stable session deck: does NOT mutate or collapse under the user when a card is marked as read
   const [sessionCards, setSessionCards] = useState<typeof visible>([]);
+  const hasInitializedRef = useRef(false);
 
   useEffect(() => {
     if (!readHistoryLoaded) return;
@@ -111,7 +112,22 @@ export default function FeedScreen() {
     } else {
       setSessionCards(visible.filter((c) => !readCardIds.has(c.id)));
     }
-  }, [pagerEpoch, filter, reviewMode, readHistoryLoaded, cards, settings.categories]);
+  }, [pagerEpoch, filter, reviewMode, readHistoryLoaded, settings.categories]);
+
+  // Initial populate when cards first load from cache/storage
+  useEffect(() => {
+    if (!readHistoryLoaded || cards.length === 0) return;
+    if (!hasInitializedRef.current) {
+      hasInitializedRef.current = true;
+      if (reviewMode === 'today') {
+        setSessionCards(todayCards);
+      } else if (reviewMode === 'all') {
+        setSessionCards(visible);
+      } else {
+        setSessionCards(visible.filter((c) => !readCardIds.has(c.id)));
+      }
+    }
+  }, [cards, readHistoryLoaded, reviewMode, todayCards, visible, readCardIds]);
 
   const displayCards = sessionCards;
 
@@ -151,34 +167,37 @@ export default function FeedScreen() {
 
   const onPageSelected = useCallback(
     (position: number) => {
+      const prevPosition = indexRef.current;
       indexRef.current = position;
       setIndex(position);
-      update({ cardsViewed: settings.cardsViewed + 1 });
 
-      // Mark current card as read
-      if (position < displayCards.length) {
-        const currentCard = displayCards[position];
-        if (currentCard && !readCardIds.has(currentCard.id)) {
-          markCardAsRead(currentCard.id);
+      if (position !== prevPosition) {
+        update({ cardsViewed: settings.cardsViewed + 1 });
+      }
+
+      // Mark cards as read on SWIPE ONLY (when user moves forward past a card)
+      if (position > prevPosition) {
+        for (let i = prevPosition; i < position && i < displayCards.length; i++) {
+          const card = displayCards[i];
+          if (card && !readCardIds.has(card.id)) {
+            markCardAsRead(card.id);
+          }
         }
-      } else if (position === displayCards.length) {
-        // Reached the caught-up screen at the end of the pager
+      }
+
+      // Reached the caught-up screen at the end of the pager
+      if (position === displayCards.length) {
+        if (displayCards.length > 0) {
+          const lastCard = displayCards[displayCards.length - 1];
+          if (lastCard && !readCardIds.has(lastCard.id)) {
+            markCardAsRead(lastCard.id);
+          }
+        }
         setCaughtUp(true);
       }
     },
     [displayCards, markCardAsRead, readCardIds, setCaughtUp, settings.cardsViewed, update],
   );
-
-  // Mark currently active card as read (safe & idempotent)
-  useEffect(() => {
-    if (!readHistoryLoaded || displayCards.length === 0) return;
-    if (index >= 0 && index < displayCards.length) {
-      const card = displayCards[index];
-      if (card && !readCardIds.has(card.id)) {
-        markCardAsRead(card.id);
-      }
-    }
-  }, [displayCards, index, readHistoryLoaded, readCardIds, markCardAsRead]);
 
   // Handle active "Check for updates" with transient toast feedback
   const handleCheckUpdates = useCallback(async () => {
