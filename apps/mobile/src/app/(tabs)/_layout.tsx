@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import {
   Animated,
   type ColorValue,
+  Platform,
   Pressable,
   type PressableProps,
   type StyleProp,
@@ -131,7 +132,13 @@ function TabBarButton(props: TabBarButtonProps) {
 export default function TabsLayout() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const bottomInset = Math.max(insets.bottom, 0);
+  // On Android devices with 3-button navigation (like Motorola Edge 60 Pro),
+  // insets.bottom often returns 0 because the OEM launcher treats the translucent
+  // system bar as an overlay. The Android Material specification for 3-button nav is 48dp.
+  // We guarantee at least 48dp on Android so system buttons (|||, O, <) never obscure the tabs.
+  const bottomInset = Platform.OS === 'android'
+    ? Math.max(insets.bottom, 48)
+    : Math.max(insets.bottom, 0);
 
   return (
     <Tabs

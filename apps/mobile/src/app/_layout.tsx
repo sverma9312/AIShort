@@ -2,7 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { router, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { registerBackgroundRefresh } from '@/lib/backgroundRefresh';
 import { BookmarksProvider } from '@/lib/bookmarks';
@@ -73,7 +73,7 @@ function AppShell() {
 function RootLayout() {
   return (
     <ErrorBoundary>
-      <SafeAreaProvider>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <SettingsProvider>
           <BookmarksProvider>
             <FeedProvider>

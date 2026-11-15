@@ -175,7 +175,17 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
               <ZoomableImageViewer imageUrl={card.imageUrl} />
             )}
 
-            <View style={[styles.modalFooter, { paddingBottom: Math.max(insets.bottom, 20) + 12 }]}>
+            <View
+              style={[
+                styles.modalFooter,
+                {
+                  paddingBottom:
+                    (Platform.OS === 'android'
+                      ? Math.max(insets.bottom, 48)
+                      : Math.max(insets.bottom, 20)) + 12,
+                },
+              ]}
+            >
               <Pressable
                 onPress={() => setIsImageViewerOpen(false)}
                 style={styles.modalClosePill}
