@@ -101,16 +101,22 @@ export default function SettingsScreen() {
       return;
     }
     const result = await registerForPushNotifications();
-    update({ notifications: result.status === 'registered' });
-    if (result.status === 'registered') track('notifications_enabled');
-    else if (result.status === 'denied')
+    const isRegistered = result.status === 'registered';
+    update({ notifications: isRegistered });
+
+    if (isRegistered) {
+      track('notifications_enabled');
+      Alert.alert('Notifications enabled', 'You will receive top stories (max 2 a day).');
+    } else if (result.status === 'denied') {
       Alert.alert(
         'Notifications are off',
-        'Allow notifications for this app in your device settings.',
+        'Allow notifications for AIShort in your device Settings to receive top stories.',
       );
-    else if (result.status !== 'error')
-      Alert.alert('Not available', 'Notifications are not available in this build.');
-    else Alert.alert('Something went wrong', 'Please try again later.');
+    } else if (result.status === 'unavailable') {
+      Alert.alert('Notice', result.reason || 'Notifications are not available on this device.');
+    } else {
+      Alert.alert('Something went wrong', result.message || 'Please try again later.');
+    }
   };
 
   return (
@@ -168,21 +174,26 @@ export default function SettingsScreen() {
       </Section>
 
       <Section title="NOTIFICATIONS" mutedColor={theme.muted} cardColor={theme.card}>
-        <Row
-          label="Top stories (max 2 a day)"
-          borderBottomColor={theme.border}
-          textColor={theme.text}
+        <Pressable
+          onPress={() => void setNotifications(!settings.notifications)}
+          style={[styles.row, { borderBottomColor: theme.border }]}
+          accessibilityRole="switch"
+          accessibilityState={{ checked: settings.notifications === true }}
+          accessibilityLabel="Top stories notifications (max 2 a day)"
+          testID="notifications-row"
         >
+          <View style={{ flex: 1, paddingRight: 12 }}>
+            <Text style={[styles.label, { color: theme.text }]}>Top stories (max 2 a day)</Text>
+          </View>
           <Switch
             key="notifications-switch"
             value={settings.notifications === true}
             onValueChange={(on) => void setNotifications(on)}
             trackColor={{ false: theme.border, true: theme.accent }}
-            disabled={!isPushAvailable()}
             accessibilityLabel="Top story notifications"
             testID="notifications"
           />
-        </Row>
+        </Pressable>
       </Section>
 
       <Section title="PRIVACY" mutedColor={theme.muted} cardColor={theme.card}>

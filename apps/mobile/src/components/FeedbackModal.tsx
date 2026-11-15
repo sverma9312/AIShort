@@ -134,54 +134,22 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
     const typeLabel = currentConfig.label;
     const appVersion = Constants.expoConfig?.version ?? '1.0.0';
     const platformInfo = `${Platform.OS} ${Platform.Version}`;
+    const userNote = userEmail.trim() ? `\nUser Contact: ${userEmail.trim()}` : '';
+
+    const bodyContent = `${trimmedMessage}\n\n---\nApp: AIShort ${appVersion}\nOS: ${platformInfo}${userNote}`;
+    const mailto = `mailto:${config.supportEmail}?subject=${encodeURIComponent(
+      `[AIShort ${typeLabel}] ${trimmedSubject}`,
+    )}&body=${encodeURIComponent(bodyContent)}`;
 
     try {
-      const response = await fetch(config.supportFormEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Origin: 'https://aishort.nextai-apps.com',
-          Referer: 'https://aishort.nextai-apps.com/',
-        },
-        body: JSON.stringify({
-          _subject: `[AIShort ${typeLabel}] ${trimmedSubject}`,
-          category: typeLabel,
-          subject: trimmedSubject,
-          message: trimmedMessage,
-          reply_to: userEmail.trim() || undefined,
-          app_version: appVersion,
-          device: platformInfo,
-        }),
-      });
-
-      interface FormSubmitResult {
-        success?: boolean | string;
-        message?: string;
-      }
-      const data: FormSubmitResult | null = (await response
-        .json()
-        .catch(() => null)) as FormSubmitResult | null;
-
-      if (response.ok && (data?.success === 'true' || data?.success === true)) {
-        setSubmitted(true);
-      } else if (data && data.success === 'false' && typeof data.message === 'string') {
-        // If form needs activation or specific error
-        setErrorMessage(data.message);
-      } else if (response.ok) {
-        // Fallback for endpoints returning 200 without success boolean
-        setSubmitted(true);
-      } else {
-        const detail: string =
-          typeof data?.message === 'string'
-            ? data.message
-            : 'Please check your connection or email us directly.';
-        setErrorMessage(detail);
-      }
+      await Linking.openURL(mailto);
+      setSubmitted(true);
     } catch {
-      setErrorMessage(
-        'Unable to send. Please check your internet connection or email us directly.',
+      Alert.alert(
+        'Email Support',
+        `Unable to open an email app automatically. Please email our team directly at: ${config.supportEmail}`,
       );
+      setErrorMessage(`Please send an email directly to ${config.supportEmail}`);
     } finally {
       setSubmitting(false);
     }
@@ -403,20 +371,12 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
                 )}
               </Pressable>
 
-              {/* Footnotes & GitHub alternative */}
+              {/* Email support footnote */}
               <View style={styles.footerLinks}>
+                <Ionicons name="mail-outline" size={15} color={theme.muted} />
                 <Text style={[styles.footerInfo, { color: theme.muted }]}>
-                  Sends directly to {config.supportEmail}.
+                  Sends directly to {config.supportEmail}
                 </Text>
-                <Pressable
-                  onPress={() => Linking.openURL('https://github.com/sverma9312/AIShort/issues')}
-                  style={styles.githubLink}
-                >
-                  <Ionicons name="logo-github" size={15} color={theme.muted} />
-                  <Text style={[styles.githubLinkText, { color: theme.muted }]}>
-                    Prefer GitHub? Open an issue
-                  </Text>
-                </Pressable>
               </View>
             </>
           )}
@@ -529,22 +489,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   footerLinks: {
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 12,
-  },
-  footerInfo: {
-    fontSize: 12,
-  },
-  githubLink: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 6,
-    paddingVertical: 4,
+    marginTop: 16,
   },
-  githubLinkText: {
-    fontSize: 12,
-    textDecorationLine: 'underline',
+  footerInfo: {
+    fontSize: 13,
   },
   successContainer: {
     alignItems: 'center',

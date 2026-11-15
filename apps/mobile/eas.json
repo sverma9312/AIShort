@@ -15,12 +15,26 @@
       "channel": "preview",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_FEED_BASE_URLS": "https://aishort.nextai-apps.com,https://sverma9312.github.io/AIShort",
+        "EXPO_PUBLIC_SUPPORT_EMAIL": "contact@nextai-apps.com",
+        "EAS_PROJECT_ID": "c89b079c-370a-49e7-b056-0fe77c6a0350",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://njfugubxpmpmhhcxmwmg.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qZnVndWJ4cG1wbWhoY3htd21nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1MTY0MTYsImV4cCI6MjEwOTA5MjQxNn0.E3ObRtMC-yUc4gMxFiaxHwl6Y7aUYBbB3crC6JDCF60"
       }
     },
     "production": {
       "autoIncrement": true,
       "pnpm": "12.16.1",
-      "channel": "production"
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_FEED_BASE_URLS": "https://aishort.nextai-apps.com,https://sverma9312.github.io/AIShort",
+        "EXPO_PUBLIC_SUPPORT_EMAIL": "contact@nextai-apps.com",
+        "EAS_PROJECT_ID": "c89b079c-370a-49e7-b056-0fe77c6a0350",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://njfugubxpmpmhhcxmwmg.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qZnVndWJ4cG1wbWhoY3htd21nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1MTY0MTYsImV4cCI6MjEwOTA5MjQxNn0.E3ObRtMC-yUc4gMxFiaxHwl6Y7aUYBbB3crC6JDCF60"
+      }
     }
   },
   "submit": {
