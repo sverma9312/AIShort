@@ -1,9 +1,12 @@
+import type { Card } from '@aishort/shared';
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import { z } from 'zod';
 import { config } from './config';
 import type { FetchFn } from './feedClient';
+import { deviceStorage, readJson, writeJson, STORAGE_KEYS, type KeyValueStore } from './storage';
 
 export const TOP_STORIES_CHANNEL = 'top-stories';
 
@@ -104,8 +107,130 @@ export async function registerForPushNotifications(): Promise<PushRegistration> 
 export async function unregisterFromPushNotifications(): Promise<void> {
   try {
     await Notifications.unregisterForNotificationsAsync();
+    await Notifications.cancelAllScheduledNotificationsAsync();
   } catch {
     // Nothing to do: the device simply keeps no registration.
+  }
+}
+
+/** Cancels all scheduled local alerts. */
+export async function cancelAllScheduledNotifications(): Promise<void> {
+  try {
+    await Notifications.cancelAllScheduledNotificationsAsync();
+  } catch {
+    // Best-effort
+  }
+}
+
+const DailyLogSchema = z.object({
+  date: z.string(),
+  count: z.number(),
+});
+const NotifiedCardsSchema = z.array(z.string());
+
+export interface SyncNotificationResult {
+  notified: boolean;
+  cardId?: string;
+  headline?: string;
+  reason?: string;
+}
+
+/**
+ * Checks for fresh, unread top stories and triggers a native notification
+ * strictly honoring the daily limit (max 2 a day) and suppressing duplicate/read stories.
+ */
+export async function syncTopStoryNotifications(
+  cards: Card[],
+  store: KeyValueStore = deviceStorage,
+  options?: { force?: boolean },
+): Promise<SyncNotificationResult> {
+  if (!isPushAvailable()) {
+    return { notified: false, reason: 'unsupported platform' };
+  }
+
+  // 1. Verify notifications are enabled in user settings
+  const settings = await readJson(
+    store,
+    STORAGE_KEYS.settings,
+    z.object({ notifications: z.boolean().optional() }).passthrough(),
+  );
+  if (settings?.notifications !== true && !options?.force) {
+    return { notified: false, reason: 'notifications disabled in settings' };
+  }
+
+  // 2. Check permissions on device
+  try {
+    const perm = await Notifications.getPermissionsAsync();
+    if (perm.status !== Notifications.PermissionStatus.GRANTED && !options?.force) {
+      return { notified: false, reason: 'notification permissions not granted' };
+    }
+  } catch {
+    // If checking permissions fails, proceed to attempt
+  }
+
+  // 3. Enforce strict daily cap (max 2 notifications per calendar day)
+  const today = new Date().toISOString().slice(0, 10);
+  const dailyLog = await readJson(store, STORAGE_KEYS.notificationDailyLog, DailyLogSchema);
+  const currentCount = dailyLog && dailyLog.date === today ? dailyLog.count : 0;
+  if (currentCount >= 2 && !options?.force) {
+    return { notified: false, reason: 'daily limit reached (max 2 a day)' };
+  }
+
+  // 4. Load read card IDs and previously notified cards to guarantee zero repeats
+  const [readCardIdsArr, notifiedIdsArr] = await Promise.all([
+    readJson(store, STORAGE_KEYS.readCards, z.array(z.string())),
+    readJson(store, STORAGE_KEYS.notifiedCards, NotifiedCardsSchema),
+  ]);
+  const readCardsSet = new Set(readCardIdsArr ?? []);
+  const notifiedSet = new Set(notifiedIdsArr ?? []);
+
+  // 5. Select candidate story:
+  // Must NOT be already read by user and NOT previously notified
+  const candidate = cards.find((c) => {
+    if (readCardsSet.has(c.id)) return false;
+    if (notifiedSet.has(c.id)) return false;
+    return Boolean(c.headline && c.summary);
+  });
+
+  if (!candidate) {
+    return { notified: false, reason: 'no new unread stories found' };
+  }
+
+  // 6. Dispatch native device notification
+  try {
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync(TOP_STORIES_CHANNEL, {
+        name: 'Top stories',
+        importance: Notifications.AndroidImportance.HIGH,
+      });
+    }
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: '⚡ AIShort · Top Story',
+        body: candidate.headline,
+        data: { cardId: candidate.id },
+        sound: true,
+      },
+      trigger:
+        Platform.OS === 'android'
+          ? ({ channelId: TOP_STORIES_CHANNEL } as Notifications.NotificationTriggerInput)
+          : null,
+    });
+
+    // 7. Persist notification state
+    notifiedSet.add(candidate.id);
+    await Promise.all([
+      writeJson(store, STORAGE_KEYS.notifiedCards, Array.from(notifiedSet)),
+      writeJson(store, STORAGE_KEYS.notificationDailyLog, {
+        date: today,
+        count: currentCount + 1,
+      }),
+    ]);
+
+    return { notified: true, cardId: candidate.id, headline: candidate.headline };
+  } catch (err) {
+    return { notified: false, reason: err instanceof Error ? err.message : String(err) };
   }
 }
 

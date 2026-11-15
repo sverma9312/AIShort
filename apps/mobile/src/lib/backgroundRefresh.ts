@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { config } from './config';
 import { mergeBaseUrls } from './feedClient';
 import { loadSnapshot, refreshSnapshot } from './feedRepository';
+import { syncTopStoryNotifications } from './push';
 import { deviceStorage, readJson, STORAGE_KEYS } from './storage';
 
 export const FEED_REFRESH_TASK = 'feed-refresh';
@@ -13,11 +14,17 @@ export async function runFeedRefreshTask(): Promise<BackgroundTask.BackgroundTas
   try {
     const savedUrls = await readJson(deviceStorage, STORAGE_KEYS.feedBaseUrls, z.array(z.string()));
     const previous = await loadSnapshot(deviceStorage);
-    await refreshSnapshot({
+    const result = await refreshSnapshot({
       store: deviceStorage,
       baseUrls: mergeBaseUrls(savedUrls, config.feedBaseUrls),
       ...(previous ? { previous } : {}),
     });
+
+    // If fresh cards are present, evaluate smart top story notification
+    if (result.snapshot.feed.cards.length > 0) {
+      await syncTopStoryNotifications(result.snapshot.feed.cards, deviceStorage);
+    }
+
     return BackgroundTask.BackgroundTaskResult.Success;
   } catch {
     return BackgroundTask.BackgroundTaskResult.Failed;

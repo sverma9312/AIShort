@@ -18,6 +18,8 @@ export const STORAGE_KEYS = {
   readCards: 'feed:readCards:v1',
   isCaughtUp: 'feed:isCaughtUp:v1',
   hasSeenWelcome: 'onboarding:welcome:v1',
+  notifiedCards: 'notifications:notifiedCardIds:v1',
+  notificationDailyLog: 'notifications:dailyLog:v1',
 } as const;
 
 /** Reads and validates a JSON value; anything missing, corrupt or outdated yields undefined. */

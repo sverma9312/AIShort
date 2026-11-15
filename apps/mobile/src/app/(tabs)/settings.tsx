@@ -10,6 +10,7 @@ import { useFeed } from '@/lib/feed';
 import {
   isPushAvailable,
   registerForPushNotifications,
+  syncTopStoryNotifications,
   unregisterFromPushNotifications,
 } from '@/lib/push';
 import { useReadHistory } from '@/lib/readHistory';
@@ -91,7 +92,7 @@ export default function SettingsScreen() {
   const theme = useTheme();
   const { settings, update, toggleCategory } = useSettings();
   const { resetReadHistory } = useReadHistory();
-  const { checkedAt } = useFeed();
+  const { cards, checkedAt } = useFeed();
   const [feedbackVisible, setFeedbackVisible] = useState(false);
 
   const setNotifications = async (on: boolean) => {
@@ -106,6 +107,7 @@ export default function SettingsScreen() {
 
     if (isRegistered) {
       track('notifications_enabled');
+      void syncTopStoryNotifications(cards);
       Alert.alert('Notifications enabled', 'You will receive top stories (max 2 a day).');
     } else if (result.status === 'denied') {
       Alert.alert(
