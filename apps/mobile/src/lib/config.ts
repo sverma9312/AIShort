@@ -30,6 +30,8 @@ export const config = {
   privacyUrl: feedUrl(primary, 'privacy/'),
   supportUrl: feedUrl(primary, 'support/'),
   supportEmail: optional(process.env.EXPO_PUBLIC_SUPPORT_EMAIL) ?? DEFAULT_SUPPORT_EMAIL,
+  feedbackApiUrl:
+    optional(process.env.EXPO_PUBLIC_FEEDBACK_API_URL) ?? 'https://nextai-apps.com/api/feedback',
   metaPath: FEED_PATHS.meta,
   supabaseUrl: optional(process.env.EXPO_PUBLIC_SUPABASE_URL) ?? DEFAULT_SUPABASE_URL,
   supabaseAnonKey: optional(process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY) ?? DEFAULT_SUPABASE_ANON_KEY,

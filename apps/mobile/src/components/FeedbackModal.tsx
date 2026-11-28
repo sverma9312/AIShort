@@ -134,22 +134,45 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
     const typeLabel = currentConfig.label;
     const appVersion = Constants.expoConfig?.version ?? '1.0.0';
     const platformInfo = `${Platform.OS} ${Platform.Version}`;
-    const userNote = userEmail.trim() ? `\nUser Contact: ${userEmail.trim()}` : '';
 
-    const bodyContent = `${trimmedMessage}\n\n---\nApp: AIShort ${appVersion}\nOS: ${platformInfo}${userNote}`;
-    const mailto = `mailto:${config.supportEmail}?subject=${encodeURIComponent(
-      `[AIShort ${typeLabel}] ${trimmedSubject}`,
-    )}&body=${encodeURIComponent(bodyContent)}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     try {
-      await Linking.openURL(mailto);
+      const response = await fetch(config.feedbackApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          type,
+          typeLabel,
+          subject: trimmedSubject,
+          message: trimmedMessage,
+          userEmail: userEmail.trim(),
+          appName: 'AIShort',
+          appVersion,
+          platform: platformInfo,
+        }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData?.error || `Server responded with ${response.status}`);
+      }
+
       setSubmitted(true);
-    } catch {
-      Alert.alert(
-        'Email Support',
-        `Unable to open an email app automatically. Please email our team directly at: ${config.supportEmail}`,
-      );
-      setErrorMessage(`Please send an email directly to ${config.supportEmail}`);
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      const isAbort = err?.name === 'AbortError';
+      const msg = isAbort
+        ? 'Submission timed out. Please check your internet connection or use email.'
+        : 'Unable to submit feedback online. You can try again or use email.';
+      setErrorMessage(msg);
     } finally {
       setSubmitting(false);
     }
@@ -211,7 +234,7 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
           keyboardShouldPersistTaps="handled"
         >
           {submitted ? (
-            <View style={styles.successContainer}>
+            <View testID="feedback-modal-success" style={styles.successContainer}>
               <View style={[styles.successIconBubble, { backgroundColor: `${theme.accent}18` }]}>
                 <Ionicons name="checkmark-circle" size={56} color={theme.accent} />
               </View>
@@ -226,6 +249,7 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
                 .
               </Text>
               <Pressable
+                testID="feedback-done-button"
                 onPress={handleClose}
                 style={[styles.doneButton, { backgroundColor: theme.accent }]}
                 accessibilityRole="button"
@@ -274,6 +298,7 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
               {/* Subject Input */}
               <Text style={[styles.fieldLabel, { color: theme.muted }]}>SUBJECT *</Text>
               <TextInput
+                testID="feedback-subject-input"
                 style={[
                   styles.input,
                   {
@@ -292,6 +317,7 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
               {/* Message Input */}
               <Text style={[styles.fieldLabel, { color: theme.muted }]}>MESSAGE *</Text>
               <TextInput
+                testID="feedback-message-input"
                 style={[
                   styles.input,
                   styles.textArea,
@@ -315,6 +341,7 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
                 YOUR EMAIL (OPTIONAL, FOR REPLIES)
               </Text>
               <TextInput
+                testID="feedback-email-input"
                 style={[
                   styles.input,
                   {
@@ -334,10 +361,10 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
 
               {/* Error Banner if sending fails */}
               {errorMessage ? (
-                <View style={[styles.errorBanner, { backgroundColor: '#fee2e2' }]}>
+                <View testID="feedback-error-banner" style={[styles.errorBanner, { backgroundColor: '#fee2e2' }]}>
                   <Ionicons name="alert-circle" size={18} color="#dc2626" />
                   <Text style={styles.errorText}>{errorMessage}</Text>
-                  <Pressable onPress={openMailFallback} style={styles.mailFallbackButton}>
+                  <Pressable testID="feedback-mail-fallback" onPress={openMailFallback} style={styles.mailFallbackButton}>
                     <Text style={styles.mailFallbackText}>Open in Mail app instead</Text>
                   </Pressable>
                 </View>
@@ -345,6 +372,7 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
 
               {/* Dynamic Submit button */}
               <Pressable
+                testID="feedback-submit-button"
                 onPress={handleSubmit}
                 disabled={submitting}
                 style={[
