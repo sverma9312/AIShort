@@ -154,6 +154,18 @@
               </svg>
             </button>
             <button
+              id="btn-refresh"
+              class="icon-btn"
+              aria-label="Refresh feed"
+              title="Check for new stories"
+            >
+              <svg id="refresh-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 4v6h-6"></path>
+                <path d="M1 20v-6h6"></path>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg>
+            </button>
+            <button
               id="btn-bookmarks"
               class="icon-btn"
               aria-label="View bookmarks"
@@ -185,13 +197,6 @@
         <button class="cat-pill" data-category="policy">Policy</button>
         <button class="cat-pill" data-category="open-source">Open source</button>
         <button class="cat-pill cat-pill-top" data-category="top">★ Top Story</button>
-        <button class="cat-pill cat-pill-search" id="btn-cat-search" type="button" aria-label="Search stories">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: -1px;">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          Search
-        </button>
       </nav>
 
       <!-- Vertical Swipe Deck Container -->
@@ -1862,15 +1867,44 @@
           });
         });
 
-        // Category search pill
-        var btnCatSearch = document.getElementById('btn-cat-search');
-        if (btnCatSearch) {
-          btnCatSearch.addEventListener('click', function () {
-            if (currentView === 'search') {
-              openFeedView();
-            } else {
-              openSearchView();
+        // Header refresh button: fetch latest stories and spin icon
+        var btnRefresh = document.getElementById('btn-refresh');
+        var refreshSvg = document.getElementById('refresh-icon-svg');
+        var isWebRefreshing = false;
+        if (btnRefresh) {
+          btnRefresh.addEventListener('click', function () {
+            if (isWebRefreshing) return;
+            isWebRefreshing = true;
+            if (refreshSvg) {
+              refreshSvg.style.transition = 'transform 0.65s ease';
+              refreshSvg.style.transform = 'rotate(360deg)';
             }
+            fetch('v1/feed/latest.json')
+              .then(function (res) {
+                if (!res.ok) throw new Error('Network error');
+                return res.json();
+              })
+              .then(function (data) {
+                allCards = data.cards || [];
+                if (currentView === 'feed') {
+                  renderCards();
+                } else if (currentView === 'search') {
+                  renderSearchResults();
+                }
+                showToast('Feed is up to date ✓');
+              })
+              .catch(function () {
+                showToast('Could not reach feed');
+              })
+              .finally(function () {
+                setTimeout(function () {
+                  if (refreshSvg) {
+                    refreshSvg.style.transition = 'none';
+                    refreshSvg.style.transform = 'none';
+                  }
+                  isWebRefreshing = false;
+                }, 700);
+              });
           });
         }
 

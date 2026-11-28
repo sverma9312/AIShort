@@ -223,6 +223,11 @@ main.static-page footer {
   fill: currentColor;
 }
 
+.icon-btn svg[fill='none'] {
+  fill: none;
+  stroke: currentColor;
+}
+
 /* Theme Popover & Dropdown */
 .theme-menu-wrapper {
   position: relative;
@@ -825,22 +830,6 @@ main.static-page footer {
   color: #ffffff;
   border-color: #f59e0b;
   box-shadow: 0 2px 10px rgba(245, 158, 11, 0.4);
-}
-
-.cat-pill.cat-pill-search {
-  display: inline-flex;
-  align-items: center;
-  border-color: rgba(34, 211, 238, 0.45);
-  background: rgba(34, 211, 238, 0.12);
-  color: #22d3ee;
-}
-
-.cat-pill.cat-pill-search:hover,
-.cat-pill.cat-pill-search.active {
-  background: #22d3ee;
-  color: #0b0b0e;
-  border-color: #22d3ee;
-  box-shadow: 0 2px 10px rgba(34, 211, 238, 0.4);
 }
 
 /* Deck Container (Vertical Swiping) */

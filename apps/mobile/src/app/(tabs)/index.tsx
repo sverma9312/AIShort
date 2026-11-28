@@ -568,34 +568,36 @@ export default function FeedScreen() {
             onSelect={selectFilter}
           />
         </View>
-        <Pressable
-          onPress={() => setSearchVisible(true)}
-          hitSlop={8}
-          style={[styles.searchButton, { borderColor: '#22d3ee' }]}
-          accessibilityRole="button"
-          accessibilityLabel="Search stories"
-          testID="search-button"
-        >
-          <Ionicons name="search" size={17} color="#22d3ee" />
-        </Pressable>
-        <Pressable
-          onPress={() => void handleCheckUpdates()}
-          hitSlop={12}
-          style={styles.refresh}
-          accessibilityRole="button"
-          accessibilityLabel="Refresh"
-          testID="refresh"
-        >
-          {isCheckingUpdates ? (
-            <ActivityIndicator size="small" color={theme.text} />
-          ) : (
-            <Ionicons
-              name={status === 'refreshing' ? 'hourglass-outline' : 'refresh'}
-              size={22}
-              color={theme.text}
-            />
-          )}
-        </Pressable>
+        <View style={styles.headerRightActions}>
+          <Pressable
+            onPress={() => setSearchVisible(true)}
+            hitSlop={10}
+            style={styles.headerActionBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Search stories"
+            testID="search-button"
+          >
+            <Ionicons name="search-outline" size={22} color={theme.text} />
+          </Pressable>
+          <Pressable
+            onPress={() => void handleCheckUpdates()}
+            hitSlop={10}
+            style={styles.headerActionBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Refresh"
+            testID="refresh"
+          >
+            {isCheckingUpdates ? (
+              <ActivityIndicator size="small" color={theme.text} />
+            ) : (
+              <Ionicons
+                name={status === 'refreshing' ? 'hourglass-outline' : 'refresh'}
+                size={22}
+                color={theme.text}
+              />
+            )}
+          </Pressable>
+        </View>
       </View>
       {updateRequired ? (
         <Banner
@@ -693,16 +695,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   chips: { flex: 1 },
-  searchButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    borderWidth: 1.5,
+  headerRightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: 16,
+    paddingLeft: 8,
+    gap: 16,
+  },
+  headerActionBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 4,
   },
-  refresh: { paddingHorizontal: 16 },
   pager: { flex: 1 },
   page: { flex: 1 },
   caughtUpContainer: {
