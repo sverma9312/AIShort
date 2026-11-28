@@ -8,9 +8,9 @@ export const IMPORTANCE_MAX = 10;
 
 export const CATEGORIES = [
   'models',
-  'research',
+  'open-source',
   'products',
   'business',
   'policy',
-  'open-source',
+  'research',
 ] as const;

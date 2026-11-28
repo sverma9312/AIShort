@@ -53,7 +53,13 @@ export function SettingsProvider({
 
   useEffect(() => {
     void readJson(store, STORAGE_KEYS.settings, SettingsSchema).then((saved) => {
-      if (saved) setSettings(saved);
+      if (saved) {
+        const reordered = ALL_CATEGORIES.filter((c) => saved.categories.includes(c));
+        setSettings({
+          ...saved,
+          categories: reordered.length > 0 ? reordered : [...ALL_CATEGORIES],
+        });
+      }
       setLoaded(true);
     });
   }, [store]);

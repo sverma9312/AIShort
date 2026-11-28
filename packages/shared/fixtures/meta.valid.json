@@ -2,5 +2,5 @@
   "version": 1,
   "minAppVersion": "1.0.0",
   "feedBaseUrls": ["https://example.github.io/AIShort"],
-  "categories": ["models", "research", "products", "business", "policy", "open-source"]
+  "categories": ["models", "open-source", "products", "business", "policy", "research"]
 }
