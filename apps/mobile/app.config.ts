@@ -6,7 +6,7 @@ import type { ConfigContext, ExpoConfig } from 'expo/config';
 // ---------------------------------------------------------------------------------------------
 const APP_NAME = 'AIShort';
 const APP_SLUG = 'aishort';
-const APP_ID = 'io.github.sverma9312.aishort';
+const APP_ID = 'com.nextaiapps.aishort';
 const SCHEME = 'aishort';
 const VERSION = '1.0.0';
 const BRAND_COLOR = '#4F46E5';
