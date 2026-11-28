@@ -27,6 +27,8 @@ export function Toast({
   const opacity = useRef(new Animated.Value(0)).current;
   const startTranslate = position === 'top' ? -10 : 10;
   const translateY = useRef(new Animated.Value(startTranslate)).current;
+  const onDismissRef = useRef(onDismiss);
+  onDismissRef.current = onDismiss;
 
   useEffect(() => {
     if (!message) return;
@@ -62,12 +64,12 @@ export function Toast({
           useNativeDriver: true,
         }),
       ]).start(() => {
-        onDismiss();
+        onDismissRef.current();
       });
     }, durationMs);
 
     return () => clearTimeout(timer);
-  }, [message, durationMs, onDismiss, opacity, translateY, startTranslate]);
+  }, [message, durationMs, startTranslate, opacity, translateY]);
 
   if (!message) return null;
 

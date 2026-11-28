@@ -72,6 +72,10 @@ export default function FeedScreen() {
     void writeJson(deviceStorage, STORAGE_KEYS.hasSeenWelcome, true);
   }, []);
 
+  const handleDismissToast = useCallback(() => {
+    setToast(null);
+  }, []);
+
   const visible = useMemo(
     () =>
       cards.filter((c) => {
@@ -173,6 +177,8 @@ export default function FeedScreen() {
 
       if (position !== prevPosition) {
         update({ cardsViewed: settings.cardsViewed + 1 });
+        // Dismiss any active toast when swiping between cards
+        setToast(null);
       }
 
       // Mark cards as read on SWIPE ONLY (when user moves forward past a card)
@@ -574,7 +580,7 @@ export default function FeedScreen() {
           testID="banner-new"
         />
       ) : null}
-      <Toast message={toast?.message ?? null} icon={toast?.icon} onDismiss={() => setToast(null)} />
+      <Toast message={toast?.message ?? null} icon={toast?.icon} onDismiss={handleDismissToast} />
       <Animated.View
         pointerEvents="none"
         style={[
