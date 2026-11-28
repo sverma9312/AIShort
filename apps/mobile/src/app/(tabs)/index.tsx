@@ -1,3 +1,4 @@
+import type { Card } from '@aishort/shared';
 import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -16,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Banner } from '@/components/Banner';
 import { CategoryChips, type CategoryFilter } from '@/components/CategoryChips';
 import { NewsCard } from '@/components/NewsCard';
+import { SearchModal } from '@/components/SearchModal';
 import { StateView } from '@/components/StateView';
 import { Toast } from '@/components/Toast';
 import { WelcomeOverlay } from '@/components/WelcomeOverlay';
@@ -58,6 +60,7 @@ export default function FeedScreen() {
   const [pagerEpoch, setPagerEpoch] = useState(0);
   const pager = useRef<PagerView>(null);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [searchVisible, setSearchVisible] = useState(false);
 
   useEffect(() => {
     void readJson(deviceStorage, STORAGE_KEYS.hasSeenWelcome, z.boolean()).then((seen) => {
@@ -134,6 +137,29 @@ export default function FeedScreen() {
   }, [cards, readHistoryLoaded, reviewMode, todayCards, visible, readCardIds]);
 
   const displayCards = sessionCards;
+
+  const handleSelectSearchedCard = useCallback(
+    (card: Card) => {
+      // 1. If currently in a filtered category that doesn't contain this card, switch to all
+      if (filter !== 'all' && filter !== card.category) {
+        setFilter('all');
+      }
+      // 2. If story has already been read and we are in caught-up mode, open in review mode
+      if (readCardIds.has(card.id) && reviewMode === 'none') {
+        setReviewMode('all');
+      }
+
+      // 3. Jump directly to that card in the swipe deck
+      setTimeout(() => {
+        const targetIdx = sessionCards.findIndex((c) => c.id === card.id);
+        if (targetIdx >= 0) {
+          pager.current?.setPage(targetIdx);
+          setIndex(targetIdx);
+        }
+      }, 60);
+    },
+    [filter, readCardIds, reviewMode, sessionCards],
+  );
 
   // The user is caught up if read history has loaded, not reviewing past stories,
   // and all visible stories in this filter have been read.
@@ -543,6 +569,16 @@ export default function FeedScreen() {
           />
         </View>
         <Pressable
+          onPress={() => setSearchVisible(true)}
+          hitSlop={8}
+          style={[styles.searchButton, { borderColor: '#22d3ee' }]}
+          accessibilityRole="button"
+          accessibilityLabel="Search stories"
+          testID="search-button"
+        >
+          <Ionicons name="search" size={17} color="#22d3ee" />
+        </Pressable>
+        <Pressable
           onPress={() => void handleCheckUpdates()}
           hitSlop={12}
           style={styles.refresh}
@@ -619,6 +655,12 @@ export default function FeedScreen() {
       </Animated.View>
       {body}
       {showWelcome ? <WelcomeOverlay onDismiss={handleDismissWelcome} /> : null}
+      <SearchModal
+        visible={searchVisible}
+        onClose={() => setSearchVisible(false)}
+        cards={cards}
+        onSelectCard={handleSelectSearchedCard}
+      />
     </SafeAreaView>
   );
 }
@@ -651,6 +693,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   chips: { flex: 1 },
+  searchButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 4,
+  },
   refresh: { paddingHorizontal: 16 },
   pager: { flex: 1 },
   page: { flex: 1 },

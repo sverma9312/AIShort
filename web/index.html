@@ -143,6 +143,17 @@
               </div>
             </div>
             <button
+              id="btn-search"
+              class="icon-btn"
+              aria-label="Search stories"
+              title="Search stories (/ or Ctrl+K)"
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </button>
+            <button
               id="btn-bookmarks"
               class="icon-btn"
               aria-label="View bookmarks"
@@ -174,6 +185,13 @@
         <button class="cat-pill" data-category="policy">Policy</button>
         <button class="cat-pill" data-category="open-source">Open source</button>
         <button class="cat-pill cat-pill-top" data-category="top">★ Top Story</button>
+        <button class="cat-pill cat-pill-search" id="btn-cat-search" type="button" aria-label="Search stories">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: -1px;">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          Search
+        </button>
       </nav>
 
       <!-- Vertical Swipe Deck Container -->
@@ -265,6 +283,97 @@
         </div>
         <div class="saved-reader-card-wrapper" id="saved-reader-card-wrapper">
           <!-- Single news card rendered here -->
+        </div>
+      </section>
+
+      <!-- Search Stories View -->
+      <section
+        class="search-container"
+        id="search-container"
+        style="display: none"
+        aria-label="Search stories"
+      >
+        <div class="search-inner">
+          <div class="search-header-bar">
+            <button
+              class="search-back-btn"
+              id="btn-search-to-feed"
+              type="button"
+              aria-label="Back to feed"
+              title="Back to Feed"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="22"
+                height="22"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+
+            <div class="search-input-box">
+              <svg class="search-input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input
+                type="search"
+                id="search-input-field"
+                class="search-input-field"
+                placeholder="Search stories, topics, companies..."
+                autocomplete="off"
+                spellcheck="false"
+                aria-label="Search stories"
+              />
+              <button
+                id="btn-search-clear"
+                class="search-clear-btn"
+                type="button"
+                aria-label="Clear search"
+                style="display: none"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <div class="search-sub-bar">
+            <span class="search-subtitle">Searching the latest 100 stories</span>
+          </div>
+
+          <!-- Suggested Quick Chips -->
+          <div class="search-chips-row" id="search-chips-row">
+            <button type="button" class="search-chip" data-query="OpenAI">OpenAI</button>
+            <button type="button" class="search-chip" data-query="Google">Google</button>
+            <button type="button" class="search-chip" data-query="Nvidia">Nvidia</button>
+            <button type="button" class="search-chip" data-query="Robotics">Robotics</button>
+            <button type="button" class="search-chip" data-query="ChatGPT">ChatGPT</button>
+            <button type="button" class="search-chip" data-query="Anthropic">Anthropic</button>
+            <button type="button" class="search-chip" data-query="Apple">Apple</button>
+            <button type="button" class="search-chip" data-query="Bitcoin">Bitcoin</button>
+          </div>
+
+          <!-- Results Count -->
+          <div class="search-meta-row" id="search-meta-row" style="display: none">
+            <span class="search-results-meta" id="search-results-meta">0 results</span>
+          </div>
+
+          <!-- Results List -->
+          <div class="search-results-list" id="search-results-list"></div>
+
+          <!-- Bottom Disclaimer Notice (Matching mockup) -->
+          <div class="search-disclaimer-card" id="search-disclaimer-card">
+            <div class="search-disclaimer-text">
+              Not finding it? Only the latest 100 stories are kept, so older news may be gone. Try
+              <button type="button" class="search-quick-link" data-query="OpenAI">OpenAI</button> or
+              <button type="button" class="search-quick-link" data-query="security">security</button>.
+            </div>
+          </div>
         </div>
       </section>
 
@@ -577,7 +686,8 @@
         // State
         var allCards = [];
         var activeCategory = 'all';
-        var currentView = 'feed'; // 'feed' | 'saved' | 'saved-card'
+        var currentView = 'feed'; // 'feed' | 'saved' | 'saved-card' | 'search'
+        var searchQuery = '';
         var activeSavedCardId = null;
         var bookmarkedIds = new Set(JSON.parse(localStorage.getItem('aishort_bookmarks') || '[]'));
         var savedCards = [];
@@ -1285,6 +1395,29 @@
           }
         }
 
+        function highlightTextHtml(text, query) {
+          var safe = escapeHtml(text);
+          var q = (query || '').trim();
+          if (!q) return safe;
+          var tokens = q.split(/\s+/).filter(Boolean);
+          var patterns = [];
+          tokens.forEach(function (t) {
+            patterns.push(t);
+            if (t.endsWith('ics') && t.length > 4) patterns.push(t.slice(0, -3));
+            if (t.endsWith('ing') && t.length > 5) patterns.push(t.slice(0, -3));
+            if (t.endsWith('es') && t.length > 4) patterns.push(t.slice(0, -2));
+            if (t.endsWith('s') && t.length > 3) patterns.push(t.slice(0, -1));
+          });
+          var escaped = patterns
+            .map(function (p) {
+              return p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            })
+            .join('|');
+          if (!escaped) return safe;
+          var regex = new RegExp('(' + escaped + ')', 'gi');
+          return safe.replace(regex, '<span class="search-highlight">$1</span>');
+        }
+
         function openFeedView(category) {
           currentView = 'feed';
           activeSavedCardId = null;
@@ -1305,11 +1438,18 @@
           document.getElementById('deck-container').style.display = '';
           document.getElementById('saved-container').style.display = 'none';
           document.getElementById('saved-reader-container').style.display = 'none';
+          var searchContainer = document.getElementById('search-container');
+          if (searchContainer) searchContainer.style.display = 'none';
 
           var btnBm = document.getElementById('btn-bookmarks');
           if (btnBm) {
             btnBm.classList.remove('active');
             btnBm.style.color = '';
+          }
+          var btnSrch = document.getElementById('btn-search');
+          if (btnSrch) {
+            btnSrch.classList.remove('active');
+            btnSrch.style.color = '';
           }
 
           var desktopNav = document.getElementById('desktop-nav');
@@ -1326,12 +1466,19 @@
           document.getElementById('category-bar').style.display = 'none';
           document.getElementById('deck-container').style.display = 'none';
           document.getElementById('saved-reader-container').style.display = 'none';
+          var searchContainer = document.getElementById('search-container');
+          if (searchContainer) searchContainer.style.display = 'none';
           document.getElementById('saved-container').style.display = 'flex';
 
           var btnBm = document.getElementById('btn-bookmarks');
           if (btnBm) {
             btnBm.classList.add('active');
             btnBm.style.color = 'var(--accent)';
+          }
+          var btnSrch = document.getElementById('btn-search');
+          if (btnSrch) {
+            btnSrch.classList.remove('active');
+            btnSrch.style.color = '';
           }
 
           var desktopNav = document.getElementById('desktop-nav');
@@ -1341,6 +1488,163 @@
           document.getElementById('saved-container').scrollTo({ top: 0, behavior: 'instant' });
         }
         window.openSavedView = openSavedView;
+
+        function openSearchView(initialQuery) {
+          currentView = 'search';
+          activeSavedCardId = null;
+
+          document.getElementById('category-bar').style.display = 'none';
+          document.getElementById('deck-container').style.display = 'none';
+          document.getElementById('saved-container').style.display = 'none';
+          document.getElementById('saved-reader-container').style.display = 'none';
+
+          var searchContainer = document.getElementById('search-container');
+          if (searchContainer) searchContainer.style.display = 'flex';
+
+          var btnSrch = document.getElementById('btn-search');
+          if (btnSrch) {
+            btnSrch.classList.add('active');
+            btnSrch.style.color = '#22d3ee';
+          }
+          var btnBm = document.getElementById('btn-bookmarks');
+          if (btnBm) {
+            btnBm.classList.remove('active');
+            btnBm.style.color = '';
+          }
+
+          var desktopNav = document.getElementById('desktop-nav');
+          if (desktopNav) desktopNav.style.display = 'none';
+
+          if (typeof initialQuery === 'string') {
+            searchQuery = initialQuery;
+          }
+          var input = document.getElementById('search-input-field');
+          if (input) {
+            input.value = searchQuery;
+            setTimeout(function () {
+              input.focus();
+            }, 60);
+          }
+
+          renderSearchResults();
+          if (searchContainer) searchContainer.scrollTo({ top: 0, behavior: 'instant' });
+        }
+        window.openSearchView = openSearchView;
+
+        function renderSearchResults() {
+          var clearBtn = document.getElementById('btn-search-clear');
+          var metaRow = document.getElementById('search-meta-row');
+          var metaCount = document.getElementById('search-results-meta');
+          var listEl = document.getElementById('search-results-list');
+          if (!listEl) return;
+
+          var q = searchQuery.trim().toLowerCase();
+          if (clearBtn) clearBtn.style.display = q ? 'flex' : 'none';
+
+          // Update active chip styling
+          document.querySelectorAll('.search-chip').forEach(function (btn) {
+            var chipVal = (btn.getAttribute('data-query') || '').toLowerCase();
+            if (q && chipVal === q) {
+              btn.classList.add('active');
+            } else {
+              btn.classList.remove('active');
+            }
+          });
+
+          if (!q) {
+            if (metaRow) metaRow.style.display = 'none';
+            listEl.innerHTML = `
+              <div class="search-empty">
+                <div class="search-empty-icon">🔍</div>
+                <h3 class="search-empty-title">Search 100 Latest Stories</h3>
+                <p class="search-empty-desc">Type any keywords, company, or topic above, or select a suggested topic.</p>
+              </div>
+            `;
+            return;
+          }
+
+          var tokens = q.split(/\s+/).filter(Boolean);
+          var stems = tokens.map(function (t) {
+            if (t.endsWith('ics') && t.length > 4) return t.slice(0, -3);
+            if (t.endsWith('ing') && t.length > 5) return t.slice(0, -3);
+            if (t.endsWith('es') && t.length > 4) return t.slice(0, -2);
+            if (t.endsWith('s') && t.length > 3) return t.slice(0, -1);
+            return t;
+          });
+
+          var matched = allCards.filter(function (card) {
+            var fullText = (
+              card.headline + ' ' +
+              card.summary + ' ' +
+              card.sourceName + ' ' +
+              (CATEGORY_LABELS[card.category] || card.category)
+            ).toLowerCase();
+            return (
+              fullText.includes(q) ||
+              tokens.every(function (t, i) {
+                return fullText.includes(t) || fullText.includes(stems[i]);
+              })
+            );
+          });
+
+          if (metaRow) {
+            metaRow.style.display = 'block';
+            if (metaCount) {
+              metaCount.textContent = matched.length + (matched.length === 1 ? ' result' : ' results');
+            }
+          }
+
+          if (matched.length === 0) {
+            listEl.innerHTML = `
+              <div class="search-empty">
+                <div class="search-empty-icon">🔎</div>
+                <h3 class="search-empty-title">No stories found</h3>
+                <p class="search-empty-desc">We couldn't find "${escapeHtml(searchQuery)}" in today's latest 100 stories. Try broader keywords like OpenAI, model, or chips.</p>
+              </div>
+            `;
+            return;
+          }
+
+          var html = '';
+          for (var i = 0; i < matched.length; i++) {
+            var c = matched[i];
+            var icon = CATEGORY_ICONS[c.category] || '📰';
+            var safeImg = c.imageUrl ? escapeHtml(c.imageUrl) : '';
+            var thumbHtml = safeImg
+              ? '<img class="search-thumb-img" src="' + safeImg + '" alt="" loading="lazy" />'
+              : '<span class="search-thumb-icon">' + icon + '</span>';
+
+            html += `
+              <div class="search-result-item" onclick="window.selectSearchedCard('${c.id}')" data-id="${c.id}">
+                <div class="search-thumb">
+                  ${thumbHtml}
+                </div>
+                <div class="search-item-info">
+                  <h3 class="search-item-headline">${highlightTextHtml(c.headline, searchQuery)}</h3>
+                  <div class="search-item-meta">
+                    <span class="search-item-source">${escapeHtml(c.sourceName)}</span>
+                    <span class="search-item-dot">·</span>
+                    <span class="search-item-time">${timeAgo(c.publishedAt)}</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          }
+          listEl.innerHTML = html;
+        }
+        window.renderSearchResults = renderSearchResults;
+
+        window.selectSearchedCard = function (id) {
+          openFeedView('all');
+          var cardIdx = currentFiltered.findIndex(function (c) {
+            return c.id === id;
+          });
+          if (cardIdx !== -1) {
+            var cardHeight = deck.clientHeight;
+            deck.scrollTo({ top: cardIdx * cardHeight, behavior: 'instant' });
+            updateDesktopNav();
+          }
+        };
 
         window.openCardImage = function (index) {
           var card = currentFiltered[index];
@@ -1545,7 +1849,7 @@
         });
 
         // Category filter buttons
-        var catPills = document.querySelectorAll('.cat-pill');
+        var catPills = document.querySelectorAll('.cat-pill[data-category]');
         catPills.forEach(function (pill) {
           pill.addEventListener('click', function () {
             catPills.forEach(function (p) {
@@ -1555,6 +1859,86 @@
             activeCategory = this.getAttribute('data-category');
             openFeedView();
             document.getElementById('deck-container').scrollTo({ top: 0, behavior: 'instant' });
+          });
+        });
+
+        // Category search pill
+        var btnCatSearch = document.getElementById('btn-cat-search');
+        if (btnCatSearch) {
+          btnCatSearch.addEventListener('click', function () {
+            if (currentView === 'search') {
+              openFeedView();
+            } else {
+              openSearchView();
+            }
+          });
+        }
+
+        // Header search button: toggle between Search view and Feed
+        var btnSearch = document.getElementById('btn-search');
+        if (btnSearch) {
+          btnSearch.addEventListener('click', function () {
+            if (currentView === 'search') {
+              openFeedView();
+            } else {
+              openSearchView();
+            }
+          });
+        }
+
+        // Back to Feed button in Search header
+        var btnSearchToFeed = document.getElementById('btn-search-to-feed');
+        if (btnSearchToFeed) {
+          btnSearchToFeed.addEventListener('click', function () {
+            openFeedView();
+          });
+        }
+
+        // Search input field
+        var searchInput = document.getElementById('search-input-field');
+        if (searchInput) {
+          searchInput.addEventListener('input', function (e) {
+            searchQuery = e.target.value;
+            renderSearchResults();
+          });
+        }
+
+        // Search clear button
+        var btnSearchClear = document.getElementById('btn-search-clear');
+        if (btnSearchClear) {
+          btnSearchClear.addEventListener('click', function () {
+            searchQuery = '';
+            if (searchInput) {
+              searchInput.value = '';
+              searchInput.focus();
+            }
+            renderSearchResults();
+          });
+        }
+
+        // Suggested topic chips click handler
+        document.querySelectorAll('.search-chip').forEach(function (chip) {
+          chip.addEventListener('click', function () {
+            var val = this.getAttribute('data-query') || '';
+            searchQuery = val;
+            if (searchInput) {
+              searchInput.value = val;
+              searchInput.focus();
+            }
+            renderSearchResults();
+          });
+        });
+
+        // Bottom disclaimer suggestion links
+        document.querySelectorAll('.search-quick-link').forEach(function (link) {
+          link.addEventListener('click', function () {
+            var val = this.getAttribute('data-query') || '';
+            searchQuery = val;
+            if (searchInput) {
+              searchInput.value = val;
+              searchInput.focus();
+            }
+            renderSearchResults();
           });
         });
 
@@ -1761,7 +2145,7 @@
           );
         }
 
-        // Keyboard navigation (Arrow Up/Down, J/K, Page Up/Down, Spacebar)
+        // Keyboard navigation (Arrow Up/Down, J/K, Page Up/Down, Spacebar, Search)
         document.addEventListener('keydown', function (e) {
           if (
             welcomeOverlay &&
@@ -1780,6 +2164,34 @@
               return;
             }
           }
+
+          // Search shortcuts: Ctrl+K / Cmd+K or "/"
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            if (currentView === 'search') {
+              openFeedView();
+            } else {
+              openSearchView();
+            }
+            return;
+          }
+
+          if (
+            e.key === '/' &&
+            e.target &&
+            e.target.tagName !== 'INPUT' &&
+            e.target.tagName !== 'TEXTAREA'
+          ) {
+            e.preventDefault();
+            openSearchView();
+            return;
+          }
+
+          if (e.key === 'Escape' && currentView === 'search') {
+            openFeedView();
+            return;
+          }
+
           if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
           if (currentView !== 'feed') return;
           var cardHeight = deck.clientHeight;
