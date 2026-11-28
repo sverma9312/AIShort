@@ -206,7 +206,10 @@ export default function SettingsScreen() {
           disabled={updatingNotifications}
           style={[styles.row, { borderBottomColor: theme.border }]}
           accessibilityRole="switch"
-          accessibilityState={{ checked: settings.notifications === true, disabled: updatingNotifications }}
+          accessibilityState={{
+            checked: settings.notifications === true,
+            disabled: updatingNotifications,
+          }}
           accessibilityLabel="Top stories notifications (max 2 a day)"
           testID="notifications-row"
         >

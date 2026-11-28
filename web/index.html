@@ -148,7 +148,16 @@
               aria-label="Search stories"
               title="Search stories (/ or Ctrl+K)"
             >
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
@@ -159,10 +168,22 @@
               aria-label="Refresh feed"
               title="Check for new stories"
             >
-              <svg id="refresh-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                id="refresh-icon-svg"
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M23 4v6h-6"></path>
                 <path d="M1 20v-6h6"></path>
-                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                <path
+                  d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+                ></path>
               </svg>
             </button>
             <button
@@ -322,7 +343,17 @@
             </button>
 
             <div class="search-input-box">
-              <svg class="search-input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                class="search-input-icon"
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
@@ -376,7 +407,8 @@
             <div class="search-disclaimer-text">
               Not finding it? Only the latest 100 stories are kept, so older news may be gone. Try
               <button type="button" class="search-quick-link" data-query="OpenAI">OpenAI</button> or
-              <button type="button" class="search-quick-link" data-query="security">security</button>.
+              <button type="button" class="search-quick-link" data-query="security">security</button
+              >.
             </div>
           </div>
         </div>
@@ -1579,9 +1611,12 @@
 
           var matched = allCards.filter(function (card) {
             var fullText = (
-              card.headline + ' ' +
-              card.summary + ' ' +
-              card.sourceName + ' ' +
+              card.headline +
+              ' ' +
+              card.summary +
+              ' ' +
+              card.sourceName +
+              ' ' +
               (CATEGORY_LABELS[card.category] || card.category)
             ).toLowerCase();
             return (
@@ -1595,7 +1630,8 @@
           if (metaRow) {
             metaRow.style.display = 'block';
             if (metaCount) {
-              metaCount.textContent = matched.length + (matched.length === 1 ? ' result' : ' results');
+              metaCount.textContent =
+                matched.length + (matched.length === 1 ? ' result' : ' results');
             }
           }
 

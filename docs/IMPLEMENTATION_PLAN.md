@@ -8,14 +8,14 @@
 
 **Summary (as of 2026-11-02): 3 of 6 milestones complete, 2 partially done (with on-device local testing track complete), 1 not started.**
 
-| Milestone                   | Scope                                                                       | Status                                                                                                                                                                                   |
-| --------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **0. Foundation**           | Monorepo, shared feed contract, CI                                          | ✅ Complete                                                                                                                                                                              |
-| **1. Pipeline core**        | Sources, normalize, extract, LLM layer, orchestrator, dry/live CLI          | ✅ Complete (live key pipeline validated)                                                                                                                                                |
-| **2. Persistence + deploy** | Supabase, scheduled GitHub Actions run, GitHub Pages deploy, alerts         | ✅ Complete (live feed deployed to GitHub Pages; scheduled ingestion active)                                                                                                             |
-| **3. Mobile app MVP**       | Expo app: swipe feed, offline cache, bookmarks, settings, on-device testing | 🟡 Near complete — app, local on-device testing track (Expo Go iOS + EAS Preview APK Android), gestures & UI polish done (`7c577c4`); missing component/screen tests & Maestro E2E smoke |
+| Milestone                   | Scope                                                                       | Status                                                                                                                                                                                                                      |
+| --------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **0. Foundation**           | Monorepo, shared feed contract, CI                                          | ✅ Complete                                                                                                                                                                                                                 |
+| **1. Pipeline core**        | Sources, normalize, extract, LLM layer, orchestrator, dry/live CLI          | ✅ Complete (live key pipeline validated)                                                                                                                                                                                   |
+| **2. Persistence + deploy** | Supabase, scheduled GitHub Actions run, GitHub Pages deploy, alerts         | ✅ Complete (live feed deployed to GitHub Pages; scheduled ingestion active)                                                                                                                                                |
+| **3. Mobile app MVP**       | Expo app: swipe feed, offline cache, bookmarks, settings, on-device testing | 🟡 Near complete — app, local on-device testing track (Expo Go iOS + EAS Preview APK Android), gestures & UI polish done (`7c577c4`); missing component/screen tests & Maestro E2E smoke                                    |
 | **4. Push + background**    | Push notifications, background refresh                                      | ✅ Complete — Smart device-native scheduled notifications (evaluates unread top stories on background refresh; ≤ 2 pushes/day; read-history deduplication; zero cloud FCM server dependency); deep links; tested on devices |
-| **5. Release**              | Final name, EAS builds, store listings, testing tracks                      | ❌ Not started (local device testing track completed in M3 prior to store release tracks)                                                                                                |
+| **5. Release**              | Final name, EAS builds, store listings, testing tracks                      | ❌ Not started (local device testing track completed in M3 prior to store release tracks)                                                                                                                                   |
 
 ## 1. Principles
 
@@ -142,11 +142,11 @@ To validate physical ergonomics, gesture interactions, and real-time feed consum
 
 Complete: App push, smart local notification scheduling, background refresh, and on-device testing.
 
-| Architecture / Feature | How It Works & Protection |
-| :--- | :--- |
-| **20. App Push & Permissions** | Requests native Android (`POST_NOTIFICATIONS`) and iOS permissions; configures high-importance `top-stories` Android channel; handles 1-tap deep links to `/card/[id]`. |
+| Architecture / Feature               | How It Works & Protection                                                                                                                                                                                                                                                                 |
+| :----------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **20. App Push & Permissions**       | Requests native Android (`POST_NOTIFICATIONS`) and iOS permissions; configures high-importance `top-stories` Android channel; handles 1-tap deep links to `/card/[id]`.                                                                                                                   |
 | **21. Smart Local Scheduled Alerts** | Evaluates new cards against `readHistory` and `notifiedCards` ledger. Pushes **only when fresh, unread stories exist**; strictly enforces the daily cap ($\le 2$ a day, morning + evening); zero duplicates; zero cloud server / Firebase FCM complexity ($0 infra, 100% reader privacy). |
-| **22. Background Feed Refresh** | `expo-background-task` executes periodically in the background (managed by the OS kernel) to pre-fetch `latest.json` and sync top-story alerts even when the app is completely closed. |
+| **22. Background Feed Refresh**      | `expo-background-task` executes periodically in the background (managed by the OS kernel) to pre-fetch `latest.json` and sync top-story alerts even when the app is completely closed.                                                                                                    |
 
 ### Milestone 5 — Release ❌
 

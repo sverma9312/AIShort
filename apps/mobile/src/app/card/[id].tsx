@@ -12,7 +12,8 @@ import { useTheme } from '@/lib/theme';
 export default function CardScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const bottomInset = Platform.OS === 'android' ? Math.max(insets.bottom, 48) : Math.max(insets.bottom, 0);
+  const bottomInset =
+    Platform.OS === 'android' ? Math.max(insets.bottom, 48) : Math.max(insets.bottom, 0);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { cards, status } = useFeed();
   const { bookmarks, isBookmarked, toggle } = useBookmarks();

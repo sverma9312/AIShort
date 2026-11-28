@@ -1,12 +1,6 @@
 import { Image } from 'expo-image';
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  PanResponder,
-  StyleSheet,
-  View,
-  type LayoutChangeEvent,
-} from 'react-native';
+import { Animated, PanResponder, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 
 interface ZoomableImageViewerProps {
   imageUrl: string;
@@ -14,7 +8,7 @@ interface ZoomableImageViewerProps {
 
 function getDistance(
   t0: { pageX: number; pageY: number },
-  t1: { pageX: number; pageY: number }
+  t1: { pageX: number; pageY: number },
 ): number {
   const dx = t1.pageX - t0.pageX;
   const dy = t1.pageY - t0.pageY;
@@ -209,7 +203,7 @@ export function ZoomableImageViewer({ imageUrl }: ZoomableImageViewerProps) {
         prevTouchCount.current = 0;
         initialDistance.current = 0;
       },
-    })
+    }),
   ).current;
 
   return (
@@ -223,11 +217,7 @@ export function ZoomableImageViewer({ imageUrl }: ZoomableImageViewerProps) {
         style={[
           styles.imageWrapper,
           {
-            transform: [
-              { translateX: pan.x },
-              { translateY: pan.y },
-              { scale },
-            ],
+            transform: [{ translateX: pan.x }, { translateY: pan.y }, { scale }],
           },
         ]}
       >

@@ -4,7 +4,17 @@ import { Image } from 'expo-image';
 import * as WebBrowser from 'expo-web-browser';
 import type { ComponentProps } from 'react';
 import { useState } from 'react';
-import { Modal, Platform, Pressable, ScrollView, Share, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import {
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CATEGORY_LABELS } from '@/lib/categories';
 import { track } from '@/lib/telemetry';
@@ -40,9 +50,7 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
   // would be excessively tall (~432px), so we clamp height to 34% of windowHeight (~302px).
   // Crucially, by setting explicit pixel height and width: '100%' without aspectRatio on imageContainer,
   // we prevent Yoga from collapsing the container width to (clampedHeight * 16 / 9) on wide/unfolded screens!
-  const imageHeight = Math.round(
-    Math.min(windowWidth * (9 / 16), windowHeight * 0.34)
-  );
+  const imageHeight = Math.round(Math.min(windowWidth * (9 / 16), windowHeight * 0.34));
 
   const palette = card.palette ?? generateCardPalette(card.category, card.imageUrl);
   const isDynamic = theme.isDynamic;
@@ -214,7 +222,9 @@ export function NewsCard({ card, bookmarked, onToggleBookmark, now }: NewsCardPr
                 />
                 <Text style={styles.modalClosePillText}>Close</Text>
               </Pressable>
-              <Text style={styles.modalFooterHint}>Pinch or double-tap to zoom • Tap Close to exit</Text>
+              <Text style={styles.modalFooterHint}>
+                Pinch or double-tap to zoom • Tap Close to exit
+              </Text>
             </View>
           </View>
         </Modal>

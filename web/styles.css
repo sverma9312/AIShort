@@ -1776,7 +1776,9 @@ main.static-page footer {
   padding: 0 14px;
   height: 42px;
   box-shadow: 0 2px 14px rgba(34, 211, 238, 0.16);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .search-input-icon {
@@ -1815,7 +1817,9 @@ main.static-page footer {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: color 0.15s ease, background 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
 }
 
 .search-clear-btn:hover {

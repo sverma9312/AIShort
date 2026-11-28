@@ -100,12 +100,7 @@ describe('SearchModal', () => {
 
   it('displays empty state when query matches no stories', async () => {
     const { getByTestId, getByText } = await render(
-      <SearchModal
-        visible={true}
-        onClose={jest.fn()}
-        cards={mockCards}
-        onSelectCard={jest.fn()}
-      />,
+      <SearchModal visible={true} onClose={jest.fn()} cards={mockCards} onSelectCard={jest.fn()} />,
     );
 
     const input = getByTestId('search-input');

@@ -29,9 +29,7 @@ describe('FeedbackModal', () => {
     global.fetch = mockFetch;
     const linkingSpy = jest.spyOn(Linking, 'openURL').mockResolvedValue(true as never);
 
-    const { getByTestId } = await render(
-      <FeedbackModal visible={true} onClose={jest.fn()} />,
-    );
+    const { getByTestId } = await render(<FeedbackModal visible={true} onClose={jest.fn()} />);
 
     const subjectInput = getByTestId('feedback-subject-input');
     const messageInput = getByTestId('feedback-message-input');
@@ -74,9 +72,7 @@ describe('FeedbackModal', () => {
     global.fetch = mockFetch;
     const linkingSpy = jest.spyOn(Linking, 'openURL').mockResolvedValue(true as never);
 
-    const { getByTestId } = await render(
-      <FeedbackModal visible={true} onClose={jest.fn()} />,
-    );
+    const { getByTestId } = await render(<FeedbackModal visible={true} onClose={jest.fn()} />);
 
     const subjectInput = getByTestId('feedback-subject-input');
     const messageInput = getByTestId('feedback-message-input');

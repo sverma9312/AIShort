@@ -128,7 +128,8 @@ export function SearchModal({ visible, onClose, cards, onSelectCard }: SearchMod
     });
 
     return cards.filter((card) => {
-      const fullText = `${card.headline} ${card.summary} ${card.sourceName} ${card.category}`.toLowerCase();
+      const fullText =
+        `${card.headline} ${card.summary} ${card.sourceName} ${card.category}`.toLowerCase();
       return (
         fullText.includes(q) ||
         tokens.every((t, i) => {
@@ -210,7 +211,9 @@ export function SearchModal({ visible, onClose, cards, onSelectCard }: SearchMod
         </View>
 
         {/* Subtitle */}
-        <Text style={[styles.subtitle, { color: theme.muted }]}>Searching the latest 100 stories</Text>
+        <Text style={[styles.subtitle, { color: theme.muted }]}>
+          Searching the latest 100 stories
+        </Text>
 
         {/* Suggested Topic Chips */}
         <View style={styles.chipsRowContainer}>
@@ -236,12 +239,7 @@ export function SearchModal({ visible, onClose, cards, onSelectCard }: SearchMod
                   accessibilityRole="button"
                   accessibilityLabel={`Search ${chip}`}
                 >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      { color: active ? '#22d3ee' : theme.text },
-                    ]}
-                  >
+                  <Text style={[styles.chipText, { color: active ? '#22d3ee' : theme.text }]}>
                     {chip}
                   </Text>
                 </Pressable>
@@ -275,7 +273,8 @@ export function SearchModal({ visible, onClose, cards, onSelectCard }: SearchMod
               </View>
               <Text style={[styles.emptyTitle, { color: theme.text }]}>No stories found</Text>
               <Text style={[styles.emptySubtitle, { color: theme.muted }]}>
-                We couldn&apos;t find &ldquo;{query}&rdquo; in today&apos;s latest 100 stories. Try broader keywords like OpenAI, model, or chips.
+                We couldn&apos;t find &ldquo;{query}&rdquo; in today&apos;s latest 100 stories. Try
+                broader keywords like OpenAI, model, or chips.
               </Text>
             </View>
           ) : (
@@ -334,7 +333,9 @@ export function SearchModal({ visible, onClose, cards, onSelectCard }: SearchMod
           )}
 
           {/* Bottom Disclaimer Notice (Matching Mockup) */}
-          <View style={[styles.noticeCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <View
+            style={[styles.noticeCard, { backgroundColor: theme.card, borderColor: theme.border }]}
+          >
             <Text style={[styles.noticeText, { color: theme.muted }]}>
               Not finding it? Only the latest 100 stories are kept, so older news may be gone. Try{' '}
               <Text

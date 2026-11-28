@@ -361,10 +361,17 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
 
               {/* Error Banner if sending fails */}
               {errorMessage ? (
-                <View testID="feedback-error-banner" style={[styles.errorBanner, { backgroundColor: '#fee2e2' }]}>
+                <View
+                  testID="feedback-error-banner"
+                  style={[styles.errorBanner, { backgroundColor: '#fee2e2' }]}
+                >
                   <Ionicons name="alert-circle" size={18} color="#dc2626" />
                   <Text style={styles.errorText}>{errorMessage}</Text>
-                  <Pressable testID="feedback-mail-fallback" onPress={openMailFallback} style={styles.mailFallbackButton}>
+                  <Pressable
+                    testID="feedback-mail-fallback"
+                    onPress={openMailFallback}
+                    style={styles.mailFallbackButton}
+                  >
                     <Text style={styles.mailFallbackText}>Open in Mail app instead</Text>
                   </Pressable>
                 </View>
