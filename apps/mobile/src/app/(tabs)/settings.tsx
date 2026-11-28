@@ -94,30 +94,55 @@ export default function SettingsScreen() {
   const { resetReadHistory } = useReadHistory();
   const { cards, checkedAt } = useFeed();
   const [feedbackVisible, setFeedbackVisible] = useState(false);
+  const [updatingNotifications, setUpdatingNotifications] = useState(false);
 
   const setNotifications = async (on: boolean) => {
+    if (updatingNotifications) return;
+
     if (!on) {
       update({ notifications: false });
-      await unregisterFromPushNotifications();
+      setUpdatingNotifications(true);
+      try {
+        await unregisterFromPushNotifications();
+      } finally {
+        setUpdatingNotifications(false);
+      }
       return;
     }
-    const result = await registerForPushNotifications();
-    const isRegistered = result.status === 'registered';
-    update({ notifications: isRegistered });
 
-    if (isRegistered) {
-      track('notifications_enabled');
-      void syncTopStoryNotifications(cards);
-      Alert.alert('Notifications enabled', 'You will receive top stories (max 2 a day).');
-    } else if (result.status === 'denied') {
-      Alert.alert(
-        'Notifications are off',
-        'Allow notifications for AIShort in your device Settings to receive top stories.',
-      );
-    } else if (result.status === 'unavailable') {
-      Alert.alert('Notice', result.reason || 'Notifications are not available on this device.');
-    } else {
-      Alert.alert('Something went wrong', result.message || 'Please try again later.');
+    // 1. Optimistic immediate UI update: flip switch instantly to ON (0ms delay)
+    update({ notifications: true });
+    setUpdatingNotifications(true);
+
+    try {
+      // 2. Perform native APNs / FCM + Expo + Supabase registration in background
+      const result = await registerForPushNotifications();
+      const isRegistered = result.status === 'registered';
+
+      if (isRegistered) {
+        track('notifications_enabled');
+        void syncTopStoryNotifications(cards);
+        Alert.alert('Notifications enabled', 'You will receive top stories (max 2 a day).');
+      } else {
+        // Roll back switch to OFF if permission denied or unavailable
+        update({ notifications: false });
+
+        if (result.status === 'denied') {
+          Alert.alert(
+            'Notifications are off',
+            'Allow notifications for AIShort in your device Settings to receive top stories.',
+          );
+        } else if (result.status === 'unavailable') {
+          Alert.alert('Notice', result.reason || 'Notifications are not available on this device.');
+        } else {
+          Alert.alert('Something went wrong', result.message || 'Please try again later.');
+        }
+      }
+    } catch {
+      update({ notifications: false });
+      Alert.alert('Something went wrong', 'Unable to enable notifications. Please try again.');
+    } finally {
+      setUpdatingNotifications(false);
     }
   };
 
@@ -178,9 +203,10 @@ export default function SettingsScreen() {
       <Section title="NOTIFICATIONS" mutedColor={theme.muted} cardColor={theme.card}>
         <Pressable
           onPress={() => void setNotifications(!settings.notifications)}
+          disabled={updatingNotifications}
           style={[styles.row, { borderBottomColor: theme.border }]}
           accessibilityRole="switch"
-          accessibilityState={{ checked: settings.notifications === true }}
+          accessibilityState={{ checked: settings.notifications === true, disabled: updatingNotifications }}
           accessibilityLabel="Top stories notifications (max 2 a day)"
           testID="notifications-row"
         >
@@ -190,6 +216,7 @@ export default function SettingsScreen() {
           <Switch
             key="notifications-switch"
             value={settings.notifications === true}
+            disabled={updatingNotifications}
             onValueChange={(on) => void setNotifications(on)}
             trackColor={{ false: theme.border, true: theme.accent }}
             accessibilityLabel="Top story notifications"
